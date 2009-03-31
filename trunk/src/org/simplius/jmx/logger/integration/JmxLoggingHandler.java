@@ -27,6 +27,7 @@ public class JmxLoggingHandler extends Handler{
     public JmxLoggingHandler(){
         logger = JmxEventLogger.createInstance();
         configure();
+        logger.start();
     }
 
     public JmxLoggingHandler(String objectName){
