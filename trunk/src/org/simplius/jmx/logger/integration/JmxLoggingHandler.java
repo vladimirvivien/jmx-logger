@@ -25,28 +25,26 @@ public class JmxLoggingHandler extends Handler{
     private boolean platformServerUsed = false;
 
     public JmxLoggingHandler(){
-        logger = JmxEventLogger.createInstance();
-        configure();
-        logger.start();
+        configureJmxLogger();
+        startJmxLogger();
     }
 
     public JmxLoggingHandler(String objectName){
-        this();
+        configureJmxLogger();
         setObjectName(objectName);
-        logger.start();
+        startJmxLogger();
     }
 
     public JmxLoggingHandler(MBeanServer server){
-        this();
+        configureJmxLogger();
         setMBeanServer(server);
-        logger.start();
+        startJmxLogger();
     }
 
     public JmxLoggingHandler(MBeanServer server, String objectName){
-        this();
-        setMBeanServer(server);
+        configureJmxLogger();
         setObjectName(objectName);
-        logger.start();
+        startJmxLogger();
     }
 
     public void setObjectName(String objName){
@@ -77,7 +75,6 @@ public class JmxLoggingHandler extends Handler{
         if (!isLoggable(record)) {
             return;
         }
-
         String msg;
         try {
             msg = getFormatter().format(record);
@@ -121,6 +118,12 @@ public class JmxLoggingHandler extends Handler{
             throw new RuntimeException(ex);
         }
         return objName;
+    }
+
+
+    private void configureJmxLogger() {
+        logger = (logger == null) ? JmxEventLogger.createInstance() : logger;
+        configure();
     }
 
     private void configure() {
@@ -175,7 +178,12 @@ public class JmxLoggingHandler extends Handler{
             setMBeanServer(ManagementFactory.getPlatformMBeanServer());
         }
     }
-    
+    private void startJmxLogger() {
+        if(logger != null & !logger.isStarted()){
+            logger.start();
+        }
+    }
+
     private LogEvent prepareLogEvent(String fmtMsg, LogRecord record){
         LogEvent<LogRecord> event = new LogEvent<LogRecord>();
         event.setLogRecord(record);

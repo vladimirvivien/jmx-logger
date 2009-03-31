@@ -65,7 +65,7 @@ public class JmxLoggingHandlerTest {
         JmxLoggingHandler h = new JmxLoggingHandler();
         assert h.getFormatter() != null : "JmxLoggingHandler not creating default formatter";
         assert h.getLevel() == Level.INFO : "JmxLoggingHandler not creating default Level";
-        assert h.getMBeanServer() != platformServer
+        assert h.getMBeanServer().equals(platformServer)
                 : "JmxLoggingHandler not creating default MBeanServer";
 
         h = new JmxLoggingHandler(javax.management.MBeanServerFactory.createMBeanServer("test"));
@@ -78,7 +78,7 @@ public class JmxLoggingHandlerTest {
             "JmxLoggingHandler constructor not passing in ObjectName";
         assert h.getFormatter() != null : "JmxLoggingHandler not creating default formatter";
         assert h.getLevel() == Level.INFO : "JmxLoggingHandler not creating default Level";
-        assert h.getMBeanServer() != platformServer
+        assert h.getMBeanServer().equals(platformServer)
                 : "JmxLoggingHandler not creating default MBeanServer";
 
     }
@@ -112,11 +112,11 @@ public class JmxLoggingHandlerTest {
     @Test
     public void testIsLoggable() {
         JmxLoggingHandler h = new JmxLoggingHandler();
-        h.setMBeanServer(null);
-        assert !h.isLoggable(new LogRecord(Level.INFO,"Test")) : "JmxLoggingHandler isLoggable is failing its test.";
+        assert h.isLoggable(new LogRecord(Level.INFO,"Test")) : "JmxLoggingHandler isLoggable is failing its test.";
 
         h = new JmxLoggingHandler();
-        assert h.isLoggable(new LogRecord(Level.INFO, "Test"));
+        h.setLevel(Level.SEVERE);
+        assert !h.isLoggable(new LogRecord(Level.INFO, "Test")) : "JmxLoggingHandler isLoggable is failing its test.";;
     }
 
     @Test
