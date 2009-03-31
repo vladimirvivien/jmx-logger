@@ -1,0 +1,162 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package org.simplius.jmx.logger.test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import junit.framework.Assert;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.simplius.jmx.logger.integration.JmxLoggingHandler;
+import static org.junit.Assert.*;
+
+/**
+ *
+ * @author VVivien
+ */
+public class JmxLoggingHandlerTest {
+    private MBeanServer platformServer;
+    private ObjectName objectName;
+    private LogListener lstnr;
+    public JmxLoggingHandlerTest() {
+        platformServer = ManagementFactory.getPlatformMBeanServer();
+        objectName = buildObjectName("test:type=ObjectName");
+        lstnr = new LogListener();
+    }
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
+
+    @Before
+    public void setUp() {
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    @Test
+    public void testConstructors(){
+        JmxLoggingHandler h = new JmxLoggingHandler();
+        assert h.getFormatter() != null : "JmxLoggingHandler not creating default formatter";
+        assert h.getLevel() == Level.INFO : "JmxLoggingHandler not creating default Level";
+        assert h.getMBeanServer() == platformServer
+                : "JmxLoggingHandler not creating default MBeanServer";
+
+        h = new JmxLoggingHandler(javax.management.MBeanServerFactory.createMBeanServer("test"));
+        assert h.getMBeanServer() != platformServer : "JmxLoggingHandler constructor not passing in MBeanServer";
+        assert h.getFormatter() != null : "JmxLoggingHandler not creating default formatter";
+        assert h.getLevel() == Level.INFO : "JmxLoggingHandler not creating default Level";
+
+        h = new JmxLoggingHandler("test:type=ObjectName");
+        assert h.getObjectName().equals(objectName.toString()) :
+            "JmxLoggingHandler constructor not passing in ObjectName";
+        assert h.getFormatter() != null : "JmxLoggingHandler not creating default formatter";
+        assert h.getLevel() == Level.INFO : "JmxLoggingHandler not creating default Level";
+        assert h.getMBeanServer() == platformServer
+                : "JmxLoggingHandler not creating default MBeanServer";
+
+    }
+
+    @Test
+    public void testObjectNameSetter() {
+        JmxLoggingHandler h = new JmxLoggingHandler();
+        h.setObjectName("test:type=ObjectName");
+        assert h.getObjectName().equals(objectName.toString());
+
+        try{
+            h.setObjectName("foo");
+            Assert.fail("JmxLoggingHandler is allowing bad ObjectName.");
+        }catch(Exception ex){}
+    }
+
+    @Test
+    public void testMBeanServer() {
+        JmxLoggingHandler h = new JmxLoggingHandler();
+        h.setMBeanServer(platformServer);
+        assert h.getMBeanServer().equals(ManagementFactory.getPlatformMBeanServer());
+    }
+
+    @Test
+    public void testIsServerPlatformUsed() {
+        JmxLoggingHandler h = new JmxLoggingHandler();
+        h.setPlatformServerUsed(true);
+        assert h.isPlatformServerUsed() : "JmxLoggingHandler not setting serverPlatformedUsed flag";
+    }
+
+    @Test
+    public void testIsLoggable() {
+        JmxLoggingHandler h = new JmxLoggingHandler();
+        h.setMBeanServer(null);
+        assert !h.isLoggable(new LogRecord(Level.INFO,"Test")) : "JmxLoggingHandler isLoggable is failing its test.";
+
+        h = new JmxLoggingHandler();
+        System.out.println ("JmxLoggingHandler Leve = " + h.getLevel().getName());
+        assert h.isLoggable(new LogRecord(Level.INFO, "Test"));
+    }
+
+    @Test
+    public void testWithProperties() throws IOException {
+        LogManager manager = LogManager.getLogManager();
+        manager.readConfiguration(new FileInputStream(new File("jmxlogger.properties")));
+        JmxLoggingHandler h = new JmxLoggingHandler();
+        assert h.getObjectName().equals("test:type=PropFile")
+                : "JmxLoggingHandler not loading objectName property from properties file.";
+        assert !h.isPlatformServerUsed()
+                : "JmxLoggingHandler not loading usePlatformServer property from properties file.";
+        assert h.getMBeanServer().getDefaultDomain().equals("testDomain")
+                : "JmxLoggingHandler not loading serverDomain property from properties file.";
+        assert h.getLevel().equals(Level.SEVERE)
+                : "JmxLoggingHandler not loading level property from properties file.";
+        assert h.getFormatter().getClass().getName().equals("java.util.logging.XMLFormatter")
+                : "JmxLoggingHandler not loading level property from properties file.";
+
+    }
+
+    @Test
+    public void testLog() throws Exception {
+        Logger log = Logger.getLogger(JmxLoggingHandlerTest.class.getName());
+        JmxLoggingHandler h = new JmxLoggingHandler();
+
+        h.setObjectName(objectName.toString());
+        platformServer.addNotificationListener(objectName, lstnr, null,null);
+        log.addHandler(h);
+
+        log.log(Level.INFO, "Hello!");
+
+        assert lstnr.getNoteCount() > 0 : "JmxLoggingHandler ! broadcasting log event";
+    }
+
+    private ObjectName buildObjectName(String name){
+        ObjectName on;
+        try {
+            on = new ObjectName(name);
+        } catch (MalformedObjectNameException ex) {
+            throw new RuntimeException(ex);
+        } catch (NullPointerException ex) {
+            throw new RuntimeException(ex);
+        }
+        return on;
+    }
+}
