@@ -23,55 +23,56 @@ import org.simplius.jmx.logger.LogEvent;
 public class JmxLoggingHandler extends Handler{
     private JmxEventLogger logger;
     private boolean platformServerUsed = false;
+    private boolean ready = false;
 
-    public JmxLoggingHandler(){
-        configureJmxLogger();
-        startJmxLogger();
-    }
+    private final static String KEY_LEVEL = "jmx.logger.LoggingHandler.level";
+    private final static String KEY_FILTER = "jmx.logger.LoggingHandler.filter";
+    private final static String KEY_FORMATTER = "jmx.logger.LoggingHandler.formatter";
+    private final static String KEY_OBJNAME = "jmx.logger.LoggingHandler.objectName";
+    private final static String KEY_SERVER = "jmx.logger.LoggingHandler.level";
 
-    public JmxLoggingHandler(String objectName){
-        configureJmxLogger();
+    public JmxLoggingHandler(){}
+
+    public JmxLoggingHandler(ObjectName objectName){
         setObjectName(objectName);
-        startJmxLogger();
     }
 
     public JmxLoggingHandler(MBeanServer server){
-        configureJmxLogger();
         setMBeanServer(server);
-        startJmxLogger();
     }
 
-    public JmxLoggingHandler(MBeanServer server, String objectName){
-        configureJmxLogger();
+    public JmxLoggingHandler(MBeanServer server, ObjectName objectName){
+        setMBeanServer(server);
         setObjectName(objectName);
-        startJmxLogger();
+    }
+
+    public void setObjectName(ObjectName objName){
+        ready = false;
+        logger.setObjectName(objName);
     }
 
     public void setObjectName(String objName){
+        ready = false;
         logger.setObjectName(buildObjectName(objName));
     }
 
-    public String getObjectName() {
-        return (logger.getObjectName() != null) ? logger.getObjectName().toString() : null;
+    public ObjectName getObjectName() {
+        return (logger.getObjectName() != null) ? logger.getObjectName() : null;
     }
 
     public void setMBeanServer(MBeanServer server){
+        ready = false;
         logger.setMBeanServer(server);
     }
     public MBeanServer getMBeanServer() {
         return logger.getMBeanServer();
     }
 
-    public void setPlatformServerUsed(boolean flag){
-        platformServerUsed = flag;
-    }
-
-    public boolean isPlatformServerUsed() {
-        return platformServerUsed;
-    }
-
     @Override
     public void publish(LogRecord record) {
+        if(!ready){
+            initializeLogger();
+        }
         if (!isLoggable(record)) {
             return;
         }
@@ -94,6 +95,7 @@ public class JmxLoggingHandler extends Handler{
 
     @Override
     public void close() throws SecurityException {
+        ready = false;
         logger.stop();
         logger = null;
     }
@@ -118,12 +120,6 @@ public class JmxLoggingHandler extends Handler{
             throw new RuntimeException(ex);
         }
         return objName;
-    }
-
-
-    private void configureJmxLogger() {
-        logger = (logger == null) ? JmxEventLogger.createInstance() : logger;
-        configure();
     }
 
     private void configure() {
@@ -178,11 +174,15 @@ public class JmxLoggingHandler extends Handler{
             setMBeanServer(ManagementFactory.getPlatformMBeanServer());
         }
     }
-    private void startJmxLogger() {
-        if(logger != null & !logger.isStarted()){
+
+    private void initializeLogger() {
+        logger = (logger == null) ? JmxEventLogger.createInstance() : logger;
+        if(!logger.isStarted()){
             logger.start();
         }
+        configure();
     }
+    
 
     private LogEvent prepareLogEvent(String fmtMsg, LogRecord record){
         LogEvent<LogRecord> event = new LogEvent<LogRecord>();
