@@ -3,6 +3,7 @@ package org.simplius.jmx.logger.integration;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.logging.ErrorManager;
+import java.util.logging.Filter;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -10,7 +11,6 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.simplius.jmx.logger.JmxEventLogger;
@@ -21,38 +21,44 @@ import org.simplius.jmx.logger.LogEvent;
  * @author VVivien
  */
 public class JmxLoggingHandler extends Handler{
+    LogManager manager = LogManager.getLogManager();
     private JmxEventLogger logger;
-    private boolean platformServerUsed = false;
-    private boolean ready = false;
 
-    private final static String KEY_LEVEL = "jmx.logger.LoggingHandler.level";
-    private final static String KEY_FILTER = "jmx.logger.LoggingHandler.filter";
-    private final static String KEY_FORMATTER = "jmx.logger.LoggingHandler.formatter";
-    private final static String KEY_OBJNAME = "jmx.logger.LoggingHandler.objectName";
-    private final static String KEY_SERVER = "jmx.logger.LoggingHandler.level";
+    private final static String KEY_LEVEL = "jmx.logger.Handler.level";
+    private final static String KEY_FILTER = "jmx.logger.Handler.filter";
+    private final static String KEY_FORMATTER = "jmx.logger.Handler.formatter";
+    private final static String KEY_OBJNAME = "jmx.logger.Handler.objectName";
+    private final static String KEY_SERVER = "jmx.logger.Handler.level";
 
-    public JmxLoggingHandler(){}
+    public JmxLoggingHandler(){
+        initializeLogger();
+        configure();
+    }
 
     public JmxLoggingHandler(ObjectName objectName){
+        initializeLogger();
+        configure();
         setObjectName(objectName);
     }
 
     public JmxLoggingHandler(MBeanServer server){
+        initializeLogger();
+        configure();
         setMBeanServer(server);
     }
 
     public JmxLoggingHandler(MBeanServer server, ObjectName objectName){
+        initializeLogger();
+        configure();
         setMBeanServer(server);
         setObjectName(objectName);
     }
 
     public void setObjectName(ObjectName objName){
-        ready = false;
         logger.setObjectName(objName);
     }
 
     public void setObjectName(String objName){
-        ready = false;
         logger.setObjectName(buildObjectName(objName));
     }
 
@@ -61,7 +67,6 @@ public class JmxLoggingHandler extends Handler{
     }
 
     public void setMBeanServer(MBeanServer server){
-        ready = false;
         logger.setMBeanServer(server);
     }
     public MBeanServer getMBeanServer() {
@@ -70,8 +75,8 @@ public class JmxLoggingHandler extends Handler{
 
     @Override
     public void publish(LogRecord record) {
-        if(!ready){
-            initializeLogger();
+        if(!logger.isStarted()){
+            startLogger();
         }
         if (!isLoggable(record)) {
             return;
@@ -85,7 +90,6 @@ public class JmxLoggingHandler extends Handler{
             reportError(null, ex, ErrorManager.FORMAT_FAILURE);
             return;
         }
-
     }
 
     @Override
@@ -95,9 +99,7 @@ public class JmxLoggingHandler extends Handler{
 
     @Override
     public void close() throws SecurityException {
-        ready = false;
-        logger.stop();
-        logger = null;
+        shutdownLogger();
     }
 
     @Override
@@ -123,66 +125,89 @@ public class JmxLoggingHandler extends Handler{
     }
 
     private void configure() {
-        LogManager manager = LogManager.getLogManager();
-        String cname = getClass().getName();
-
         // configure level (default INFO)
-        String value = manager.getProperty(cname +".level");
+        String value;
+        value = manager.getProperty(KEY_LEVEL);
         super.setLevel(value != null ? Level.parse(value) : Level.INFO);
 
+        // configure filter (default none)
+        value = manager.getProperty(KEY_FILTER);
+        if (value != null) {
+            if (value.startsWith("/") && value.endsWith("/")) {
+                // use regex filter
+                } else {
+                // assume it's a class and load it.
+                try {
+                    Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
+                    super.setFilter((Filter) cls.newInstance());
+                } catch (Exception ex) {
+                    // ignore it and load SimpleFormatter.
+                    super.setFilter(null);
+                }
+            }
+        } else {
+            super.setFilter(null);
+        }
+
         // configure formatter (default SimpleFormatter)
-        value = manager.getProperty(cname +".formatter");
-        if(value != null){
+        value = manager.getProperty(KEY_FORMATTER);
+        if (value != null) {
+            // assume it's a class and load it.
             try {
                 Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
-                super.setFormatter((Formatter)cls.newInstance());
+                super.setFormatter((Formatter) cls.newInstance());
             } catch (Exception ex) {
                 // ignore it and load SimpleFormatter.
                 super.setFormatter(new SimpleFormatter());
             }
-        }else{
+
+        } else {
             super.setFormatter(new SimpleFormatter());
         }
 
         // configure internal Jmx ObjectName (default provided by JmxEventLogger)
-        value = manager.getProperty(cname +".objectName");
+
+        value = manager.getProperty(KEY_OBJNAME);
         if(value != null){
-            setObjectName(value);
+            logger.setObjectName(buildObjectName(value));
         }
 
         // configure server used
-        value = manager.getProperty(cname +".usePlatformServer");
+        value = manager.getProperty(KEY_SERVER);
         if(value != null){
-            boolean platformUsed = Boolean.parseBoolean(value);
-            setPlatformServerUsed(platformUsed);
-            if(platformUsed){
-                setMBeanServer(ManagementFactory.getPlatformMBeanServer());
+            if(value.equalsIgnoreCase("platform")) {
+                // use existing platform server
+                logger.setMBeanServer(ManagementFactory.getPlatformMBeanServer());
             }else{
-                value = manager.getProperty(cname + ".serverDomain");
-                if(value != null){
-                    // 1. look for the server, otherwise create it.
-                    ArrayList<MBeanServer> servers = javax.management.MBeanServerFactory.findMBeanServer(value);
-                    if(servers.size() > 0){
-                        setMBeanServer(servers.get(0));
-                    }else{
-                        setMBeanServer(MBeanServerFactory.createMBeanServer(value));
-                    }
+                // use server with given domain name
+                ArrayList<MBeanServer> servers = javax.management.MBeanServerFactory.findMBeanServer(value);
+                if (servers.size() > 0) {
+                    logger.setMBeanServer(servers.get(0));
+                } else {
+                    setMBeanServer(ManagementFactory.getPlatformMBeanServer());
                 }
             }
         }else{
-            setPlatformServerUsed(true);
             setMBeanServer(ManagementFactory.getPlatformMBeanServer());
         }
     }
 
     private void initializeLogger() {
         logger = (logger == null) ? JmxEventLogger.createInstance() : logger;
-        if(!logger.isStarted()){
+    }
+
+    private void startLogger() {
+        if(logger != null && !logger.isStarted()){
             logger.start();
         }
-        configure();
     }
-    
+
+    private void shutdownLogger() {
+        if(logger != null && logger.isStarted()){
+            logger.stop();
+        }
+    }
+
 
     private LogEvent prepareLogEvent(String fmtMsg, LogRecord record){
         LogEvent<LogRecord> event = new LogEvent<LogRecord>();
