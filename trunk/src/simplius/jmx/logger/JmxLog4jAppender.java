@@ -55,7 +55,7 @@ public class JmxLog4jAppender extends AppenderSkeleton{
 
     @Override
     public void activateOptions() {
-
+        
     }
     
 
