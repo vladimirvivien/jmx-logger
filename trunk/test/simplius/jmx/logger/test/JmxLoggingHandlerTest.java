@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
@@ -25,7 +24,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import simplius.jmx.logger.JmxLoggingHandler;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -114,7 +112,7 @@ public class JmxLoggingHandlerTest {
         h = new JmxLoggingHandler();
         h.setLevel(Level.SEVERE);
         h.publish(rec);
-        assert !h.isLoggable(new LogRecord(Level.INFO, "Test")) : "JmxLoggingHandler isLoggable is failing its test.";;
+        assert !h.isLoggable(new LogRecord(Level.INFO, "Test")) : "JmxLoggingHandler isLoggable is failing its test";
     }
 
     @Test
@@ -143,7 +141,7 @@ public class JmxLoggingHandlerTest {
         platformServer.addNotificationListener(objectName, lstnr, null,null);
         log.addHandler(h);
 
-        log.log(Level.INFO, "Hello!");
+        log.log(Level.INFO, "Hello, Logging Test.");
 
         assert lstnr.getNoteCount() > 0 : "JmxLoggingHandler ! broadcasting log event";
     }
