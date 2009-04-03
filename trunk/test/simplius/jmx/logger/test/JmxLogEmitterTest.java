@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.simplius.jmx.logger.test;
+package simplius.jmx.logger.test;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -17,8 +17,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import simplius.jmx.logger.JmxLogEmitter;
-import simplius.jmx.logger.LogEvent;
+import simplius.jmx.logger.service.JmxLogEmitter;
+import simplius.jmx.logger.service.LogEvent;
 
 /**
  *

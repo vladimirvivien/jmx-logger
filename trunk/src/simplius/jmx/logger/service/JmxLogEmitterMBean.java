@@ -1,4 +1,4 @@
-package simplius.jmx.logger;
+package simplius.jmx.logger.service;
 
 /**
  *
