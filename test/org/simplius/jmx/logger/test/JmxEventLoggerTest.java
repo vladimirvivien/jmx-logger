@@ -11,8 +11,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.simplius.jmx.logger.JmxEventLogger;
-import org.simplius.jmx.logger.LogEvent;
+import simplius.jmx.logger.JmxEventLogger;
+import simplius.jmx.logger.LogEvent;
 import static org.junit.Assert.*;
 
 /**

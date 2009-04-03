@@ -1,4 +1,4 @@
-package org.simplius.jmx.logger.integration;
+package simplius.jmx.logger.integration;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -13,8 +13,8 @@ import java.util.logging.SimpleFormatter;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.simplius.jmx.logger.JmxEventLogger;
-import org.simplius.jmx.logger.LogEvent;
+import simplius.jmx.logger.JmxEventLogger;
+import simplius.jmx.logger.LogEvent;
 
 /**
  *
@@ -73,10 +73,22 @@ public class JmxLoggingHandler extends Handler{
         return logger.getMBeanServer();
     }
 
+    public void start() {
+        if(logger != null && !logger.isStarted()){
+            logger.start();
+        }
+    }
+
+    public void stop() {
+        if(logger != null && logger.isStarted()){
+            logger.stop();
+        }
+    }
+
     @Override
     public void publish(LogRecord record) {
         if(!logger.isStarted()){
-            startLogger();
+            start();
         }
         if (!isLoggable(record)) {
             return;
@@ -99,7 +111,7 @@ public class JmxLoggingHandler extends Handler{
 
     @Override
     public void close() throws SecurityException {
-        shutdownLogger();
+        stop();
     }
 
     @Override
@@ -194,18 +206,6 @@ public class JmxLoggingHandler extends Handler{
 
     private void initializeLogger() {
         logger = (logger == null) ? JmxEventLogger.createInstance() : logger;
-    }
-
-    private void startLogger() {
-        if(logger != null && !logger.isStarted()){
-            logger.start();
-        }
-    }
-
-    private void shutdownLogger() {
-        if(logger != null && logger.isStarted()){
-            logger.stop();
-        }
     }
 
 

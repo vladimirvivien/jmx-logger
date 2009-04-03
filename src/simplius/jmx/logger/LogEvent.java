@@ -1,4 +1,4 @@
-package org.simplius.jmx.logger;
+package simplius.jmx.logger;
 
 import java.io.Serializable;
 
