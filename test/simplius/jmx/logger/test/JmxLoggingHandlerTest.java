@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.simplius.jmx.logger.test;
+package simplius.jmx.logger.test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +24,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import simplius.jmx.logger.integration.JmxLoggingHandler;
+import simplius.jmx.logger.JmxLoggingHandler;
 import static org.junit.Assert.*;
 
 /**

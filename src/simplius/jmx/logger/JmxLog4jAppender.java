@@ -1,4 +1,4 @@
-package simplius.jmx.logger.integration;
+package simplius.jmx.logger;
 
 /**
  * @author vladimir.vivien
