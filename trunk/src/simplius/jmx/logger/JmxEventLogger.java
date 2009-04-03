@@ -1,4 +1,4 @@
-package org.simplius.jmx.logger;
+package simplius.jmx.logger;
 
 import java.lang.management.ManagementFactory;
 import java.util.logging.Level;

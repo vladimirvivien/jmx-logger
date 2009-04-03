@@ -24,7 +24,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.simplius.jmx.logger.integration.JmxLoggingHandler;
+import simplius.jmx.logger.integration.JmxLoggingHandler;
 import static org.junit.Assert.*;
 
 /**
@@ -65,17 +65,18 @@ public class JmxLoggingHandlerTest {
         JmxLoggingHandler h = new JmxLoggingHandler();
         assert h.getFormatter() != null : "JmxLoggingHandler default formatter not created.";
         assert h.getLevel() == Level.INFO : "JmxLoggingHandler not setting default level.";
-        assert h.getMBeanServer().equals(platformServer)
+        assert h.getMBeanServer() != null
                 : "JmxLoggingHandler not creating default MBeanServer";
 
         h = new JmxLoggingHandler(javax.management.MBeanServerFactory.createMBeanServer("test"));
-        assert h.getMBeanServer() != platformServer : "JmxLoggingHandler constructor not passing in MBeanServer";
+        assert !h.getMBeanServer().getDefaultDomain().equals(platformServer.getDefaultDomain()) : "JmxLoggingHandler constructor not passing in MBeanServer";
         assert h.getFormatter() != null : "JmxLoggingHandler not creating default formatter";
         assert h.getLevel() == Level.INFO : "JmxLoggingHandler not creating default Level";
 
         h = new JmxLoggingHandler(objectName);
         assert h.getObjectName().equals(objectName) :
             "JmxLoggingHandler constructor not passing in ObjectName";
+
         assert h.getFormatter() != null : "JmxLoggingHandler not creating default formatter";
         assert h.getLevel() == Level.INFO : "JmxLoggingHandler not creating default Level";
         assert h.getMBeanServer().equals(platformServer)
@@ -138,6 +139,7 @@ public class JmxLoggingHandlerTest {
         Logger log = Logger.getLogger(JmxLoggingHandlerTest.class.getName());
         JmxLoggingHandler h = new JmxLoggingHandler();
         h.setObjectName(objectName.toString());
+        h.start();
         platformServer.addNotificationListener(objectName, lstnr, null,null);
         log.addHandler(h);
 
