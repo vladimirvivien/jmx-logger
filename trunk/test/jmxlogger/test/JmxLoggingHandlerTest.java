@@ -23,7 +23,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import jmxlogger.integration.logutil.JmxLoggingHandler;
+import jmxlogger.integration.logutil.JmxLogHandler;
 
 /**
  *
@@ -60,18 +60,18 @@ public class JmxLoggingHandlerTest {
     @Test
     public void testConstructors(){
         LogManager manager = LogManager.getLogManager();
-        JmxLoggingHandler h = new JmxLoggingHandler();
+        JmxLogHandler h = new JmxLogHandler();
         assert h.getFormatter() != null : "JmxLoggingHandler default formatter not created.";
         assert h.getLevel() == Level.INFO : "JmxLoggingHandler not setting default level.";
         assert h.getMBeanServer() != null
                 : "JmxLoggingHandler not creating default MBeanServer";
 
-        h = new JmxLoggingHandler(javax.management.MBeanServerFactory.createMBeanServer("test"));
+        h = new JmxLogHandler(javax.management.MBeanServerFactory.createMBeanServer("test"));
         assert !h.getMBeanServer().getDefaultDomain().equals(platformServer.getDefaultDomain()) : "JmxLoggingHandler constructor not passing in MBeanServer";
         assert h.getFormatter() != null : "JmxLoggingHandler not creating default formatter";
         assert h.getLevel() == Level.INFO : "JmxLoggingHandler not creating default Level";
 
-        h = new JmxLoggingHandler(objectName);
+        h = new JmxLogHandler(objectName);
         assert h.getObjectName().equals(objectName) :
             "JmxLoggingHandler constructor not passing in ObjectName";
 
@@ -84,7 +84,7 @@ public class JmxLoggingHandlerTest {
 
     @Test
     public void testObjectNameSetter() {
-        JmxLoggingHandler h = new JmxLoggingHandler();
+        JmxLogHandler h = new JmxLogHandler();
         h.setObjectName("test:type=ObjectName");
         assert h.getObjectName().toString().equals("test:type=ObjectName");
 
@@ -96,7 +96,7 @@ public class JmxLoggingHandlerTest {
 
     @Test
     public void testMBeanServer() {
-        JmxLoggingHandler h = new JmxLoggingHandler();
+        JmxLogHandler h = new JmxLogHandler();
         h.setMBeanServer(platformServer);
         assert h.getMBeanServer().equals(ManagementFactory.getPlatformMBeanServer());
     }
@@ -104,12 +104,12 @@ public class JmxLoggingHandlerTest {
     @Test
     public void testIsLoggable() {
         LogRecord rec = new LogRecord(Level.INFO,"Test");
-        JmxLoggingHandler h = new JmxLoggingHandler();
+        JmxLogHandler h = new JmxLogHandler();
         // note: call publish to start internal jmx logger object.
         h.publish(rec);
         assert h.isLoggable(rec) : "JmxLoggingHandler isLoggable is failing its test.";
 
-        h = new JmxLoggingHandler();
+        h = new JmxLogHandler();
         h.setLevel(Level.SEVERE);
         h.publish(rec);
         assert !h.isLoggable(new LogRecord(Level.INFO, "Test")) : "JmxLoggingHandler isLoggable is failing its test";
@@ -120,7 +120,7 @@ public class JmxLoggingHandlerTest {
         LogManager manager = LogManager.getLogManager();
         manager.readConfiguration(new FileInputStream(new File("jmxlogger.properties")));
         MBeanServer server = MBeanServerFactory.createMBeanServer("testDomain");
-        JmxLoggingHandler h = new JmxLoggingHandler(server);
+        JmxLogHandler h = new JmxLogHandler(server);
         assert h.getObjectName().toString().equals("test:type=PropFile")
                 : "JmxLoggingHandler not loading objectName property from properties file.";
         assert h.getMBeanServer().getDefaultDomain().equals("testDomain")
@@ -135,7 +135,7 @@ public class JmxLoggingHandlerTest {
     @Test
     public void testLog() throws Exception {
         Logger log = Logger.getLogger(JmxLoggingHandlerTest.class.getName());
-        JmxLoggingHandler h = new JmxLoggingHandler();
+        JmxLogHandler h = new JmxLogHandler();
         h.setObjectName(objectName.toString());
         h.start();
         platformServer.addNotificationListener(objectName, lstnr, null,null);
