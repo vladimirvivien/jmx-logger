@@ -17,8 +17,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import simplius.jmx.logger.service.JmxLogEmitter;
-import simplius.jmx.logger.service.LogEvent;
+import jmxlogger.tools.JmxLogEmitter;
+import jmxlogger.tools.LogEvent;
 
 /**
  *
