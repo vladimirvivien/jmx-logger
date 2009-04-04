@@ -1,4 +1,4 @@
-package simplius.jmx.logger.test;
+package jmxlogger.test;
 
 import javax.management.Notification;
 import javax.management.NotificationListener;
