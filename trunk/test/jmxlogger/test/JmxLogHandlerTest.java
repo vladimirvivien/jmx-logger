@@ -29,11 +29,11 @@ import jmxlogger.integration.logutil.JmxLogHandler;
  *
  * @author VVivien
  */
-public class JmxLoggingHandlerTest {
+public class JmxLogHandlerTest {
     private MBeanServer platformServer;
     private ObjectName objectName;
     private LogListener lstnr;
-    public JmxLoggingHandlerTest() {
+    public JmxLogHandlerTest() {
         platformServer = ManagementFactory.getPlatformMBeanServer();
         objectName = buildObjectName("test:type=ObjectName");
         lstnr = new LogListener();
@@ -134,7 +134,7 @@ public class JmxLoggingHandlerTest {
 
     @Test
     public void testLog() throws Exception {
-        Logger log = Logger.getLogger(JmxLoggingHandlerTest.class.getName());
+        Logger log = Logger.getLogger(JmxLogHandlerTest.class.getName());
         JmxLogHandler h = new JmxLogHandler();
         h.setObjectName(objectName.toString());
         h.start();

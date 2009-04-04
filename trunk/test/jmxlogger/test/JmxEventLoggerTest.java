@@ -5,6 +5,8 @@
 
 package jmxlogger.test;
 
+import java.lang.management.ManagementFactory;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -13,7 +15,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import jmxlogger.tools.JmxEventLogger;
 import jmxlogger.tools.LogEvent;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -21,6 +22,8 @@ import static org.junit.Assert.*;
  */
 public class JmxEventLoggerTest {
     private ObjectName objName;
+    private MBeanServer server;
+
     public JmxEventLoggerTest() {
     }
 
@@ -35,6 +38,7 @@ public class JmxEventLoggerTest {
     @Before
     public void setUp() throws Exception{
         objName = new ObjectName("test:type=ObjectName");
+        server = ManagementFactory.getPlatformMBeanServer();
     }
 
     @After
@@ -51,8 +55,6 @@ public class JmxEventLoggerTest {
     @Test
     public void testSetMBeanServer() {
         JmxEventLogger l = JmxEventLogger.createInstance();
-        assert l.getMBeanServer().equals(java.lang.management.ManagementFactory.getPlatformMBeanServer())
-                : "JmxEventLogger not initializing default MBeanServer";
         l.setMBeanServer(javax.management.MBeanServerFactory.createMBeanServer());
         assert l.getMBeanServer() != null : "JmxEventLogger not setting isntance MBeanServer";
         assert ! l.getMBeanServer().equals(java.lang.management.ManagementFactory.getPlatformMBeanServer())
@@ -63,17 +65,15 @@ public class JmxEventLoggerTest {
     @Test
     public void testSetObjectName() throws Exception{
         JmxEventLogger l = JmxEventLogger.createInstance();
-        assert l.getObjectName() != null : "JmxEventLogger not setting default ObjectName";
-        assert l.getObjectName().toString().contains("jmx.logger:type=logging") : "JmxEventLogger not setting default ObjectName";
-        String objName = "test:type=ObjectName";
-        l.setObjectName(new ObjectName(objName));
-        assert objName.equals(l.getObjectName().toString()) : "JmxEventLogger not setting ObjectName properly.";
+        l.setObjectName(objName);
+        assert objName.equals(l.getObjectName()) : "JmxEventLogger not setting ObjectName properly.";
     }
 
     @Test
     public void testStart() throws Exception{
         JmxEventLogger l = JmxEventLogger.createInstance();
         l.setObjectName(objName);
+        l.setMBeanServer(server);
         l.start();
         assert l.isStarted() : "JmxEventLogger not starting";
         assert java.lang.management.ManagementFactory.getPlatformMBeanServer().isRegistered(objName)
@@ -83,6 +83,7 @@ public class JmxEventLoggerTest {
     @Test
     public void testStop() throws Exception{
         JmxEventLogger l = JmxEventLogger.createInstance();
+        l.setMBeanServer(server);
         l.setObjectName(objName);
         l.start();
         assert l.isStarted() : "JmxEventLogger not starting";
@@ -95,6 +96,7 @@ public class JmxEventLoggerTest {
     public void testLog() throws Exception{
         JmxEventLogger l = JmxEventLogger.createInstance();
         LogListener lstnr = new LogListener();
+        l.setMBeanServer(server);
         l.setObjectName(objName);
         l.start();
         l.getMBeanServer().addNotificationListener(objName, lstnr, null, null);
