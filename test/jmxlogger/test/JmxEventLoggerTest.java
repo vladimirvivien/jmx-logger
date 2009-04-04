@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package simplius.jmx.logger.test;
+package jmxlogger.test;
 
 import javax.management.ObjectName;
 import org.junit.After;
