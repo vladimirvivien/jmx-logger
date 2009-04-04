@@ -11,10 +11,10 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import jmxlogger.tools.JmxEventLogger;
 import jmxlogger.tools.LogEvent;
+import jmxlogger.tools.ToolBox;
 
 /**
  *
@@ -59,7 +59,7 @@ public class JmxLogHandler extends Handler{
     }
 
     public void setObjectName(String objName){
-        logger.setObjectName(buildObjectName(objName));
+        logger.setObjectName(ToolBox.buildObjectName(objName));
     }
 
     public ObjectName getObjectName() {
@@ -124,18 +124,6 @@ public class JmxLogHandler extends Handler{
                 );
     }
 
-    private ObjectName buildObjectName(String name){
-        ObjectName objName = null;
-        try {
-            objName = new ObjectName(name);
-        } catch (MalformedObjectNameException ex) {
-            throw new RuntimeException(ex);
-        } catch (NullPointerException ex) {
-            throw new RuntimeException(ex);
-        }
-        return objName;
-    }
-
     private void configure() {
         // configure level (default INFO)
         String value;
@@ -181,7 +169,7 @@ public class JmxLogHandler extends Handler{
 
         value = manager.getProperty(KEY_OBJNAME);
         if(value != null){
-            logger.setObjectName(buildObjectName(value));
+            logger.setObjectName(ToolBox.buildObjectName(value));
         }
 
         // configure server used
@@ -191,13 +179,7 @@ public class JmxLogHandler extends Handler{
                 // use existing platform server
                 logger.setMBeanServer(ManagementFactory.getPlatformMBeanServer());
             }else{
-                // use server with given domain name
-                ArrayList<MBeanServer> servers = javax.management.MBeanServerFactory.findMBeanServer(value);
-                if (servers.size() > 0) {
-                    logger.setMBeanServer(servers.get(0));
-                } else {
-                    setMBeanServer(ManagementFactory.getPlatformMBeanServer());
-                }
+                setMBeanServer(ToolBox.findMBeanServer(value));
             }
         }else{
             setMBeanServer(ManagementFactory.getPlatformMBeanServer());

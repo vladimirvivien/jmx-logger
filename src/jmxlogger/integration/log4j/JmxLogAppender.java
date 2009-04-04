@@ -1,36 +1,44 @@
 package jmxlogger.integration.log4j;
 
+import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import jmxlogger.tools.JmxEventLogger;
+import jmxlogger.tools.ToolBox;
+import org.apache.log4j.PatternLayout;
 
 /**
  * @author vladimir.vivien
  */
 public class JmxLogAppender extends AppenderSkeleton{
     private JmxEventLogger logger;
+    private String logPattern;
+    private String serverSelection="platform";
 
     public JmxLogAppender() {
         initializeLogger();
+        configure();
     }
 
     public JmxLogAppender(ObjectName name){
         initializeLogger();
         logger.setObjectName(name);
+        configure();
     }
 
     public JmxLogAppender(MBeanServer server){
         initializeLogger();
         logger.setMBeanServer(server);
+        configure();
     }
 
     public JmxLogAppender(MBeanServer server, ObjectName name){
         initializeLogger();
         logger.setMBeanServer(server);
         logger.setObjectName(name);
+        configure();
     }
 
     public void setObjectName(ObjectName objName){
@@ -38,7 +46,7 @@ public class JmxLogAppender extends AppenderSkeleton{
     }
 
     public void setObjectName(String objName){
-        logger.setObjectName(buildObjectName(objName));
+        logger.setObjectName(ToolBox.buildObjectName(objName));
     }
 
     public ObjectName getObjectName() {
@@ -52,10 +60,28 @@ public class JmxLogAppender extends AppenderSkeleton{
         return logger.getMBeanServer();
     }
 
+    public synchronized void setLogPattern(String pattern){
+        logPattern = pattern;
+    }
+    public synchronized String getLogPattern(){
+        return logPattern;
+    }
+
+    public synchronized void setServerSelection(String selection){
+        serverSelection = selection;
+    }
+
+    public synchronized String getServerSelection(){
+        return serverSelection;
+    }
+
 
     @Override
     public void activateOptions() {
-        
+        configure();
+        if(!logger.isStarted()){
+            logger.start();
+        }
     }
     
 
@@ -76,16 +102,20 @@ public class JmxLogAppender extends AppenderSkeleton{
       logger = (logger == null) ? JmxEventLogger.createInstance() : logger;
     }
 
-    private ObjectName buildObjectName(String name) {
-        ObjectName objName = null;
-        try {
-            objName = new ObjectName(name);
-        } catch (MalformedObjectNameException ex) {
-            throw new RuntimeException(ex);
-        } catch (NullPointerException ex) {
-            throw new RuntimeException(ex);
+    private void configure() {
+        if (super.getLayout() == null) {
+            super.setLayout(new PatternLayout("%-4r [%t] %-5p %c %x - %m%n"));
         }
-        return objName;
-    }
 
+        if (logger.getMBeanServer() == null) {
+            if (getServerSelection().equalsIgnoreCase("platform")) {
+                logger.setMBeanServer(ManagementFactory.getPlatformMBeanServer());
+            } else {
+                logger.setMBeanServer(ToolBox.findMBeanServer(getServerSelection()));
+            }
+        }
+        if(logger.getObjectName() == null){
+            logger.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
+        }
+    }
 }
