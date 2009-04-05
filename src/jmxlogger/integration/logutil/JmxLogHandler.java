@@ -201,7 +201,7 @@ public class JmxLogHandler extends Handler{
         event.setSequenceNumber(record.getSequenceNumber());
         event.setSourceClassName(record.getSourceClassName());
         event.setSourceMethodName(record.getSourceMethodName());
-        event.setSourceThreadId(record.getThreadID());
+        event.setSourceThreadId(Integer.toString(record.getThreadID()));
         event.setSourceThrowable(record.getThrown());
         event.setTimeStamp(record.getMillis());
 

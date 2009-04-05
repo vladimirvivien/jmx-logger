@@ -13,7 +13,7 @@ public class LogEvent<LOG_TYPE> implements Serializable{
     private String message;
     private String sourceClassName;
     private String sourceMethodName;
-    private int sourceThreadId;
+    private String sourceThreadId;
     private long timeStamp;
     private long seqNumber;
     private Throwable ex;
@@ -92,11 +92,11 @@ public class LogEvent<LOG_TYPE> implements Serializable{
         this.sourceMethodName = sourceMethodName;
     }
 
-    public int getSourceThreadId() {
+    public String getSourceThreadId() {
         return sourceThreadId;
     }
 
-    public void setSourceThreadId(int sourceThreadId) {
+    public void setSourceThreadId(String sourceThreadId) {
         this.sourceThreadId = sourceThreadId;
     }
 
