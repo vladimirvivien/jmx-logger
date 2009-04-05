@@ -15,6 +15,7 @@ public class LogListener implements NotificationListener {
     }
 
     public synchronized void handleNotification(Notification notification, Object handback) {
+        System.out.println ("Received notification: " + notification.getMessage());
         noteCount++;
     }
 }

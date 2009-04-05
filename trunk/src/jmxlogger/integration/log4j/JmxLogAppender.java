@@ -6,8 +6,11 @@ import javax.management.ObjectName;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import jmxlogger.tools.JmxEventLogger;
+import jmxlogger.tools.LogEvent;
 import jmxlogger.tools.ToolBox;
+import org.apache.log4j.Layout;
 import org.apache.log4j.PatternLayout;
+import org.apache.log4j.spi.ErrorCode;
 
 /**
  * @author vladimir.vivien
@@ -16,6 +19,7 @@ public class JmxLogAppender extends AppenderSkeleton{
     private JmxEventLogger logger;
     private String logPattern;
     private String serverSelection="platform";
+    private Layout logLayout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
 
     public JmxLogAppender() {
         initializeLogger();
@@ -41,16 +45,12 @@ public class JmxLogAppender extends AppenderSkeleton{
         configure();
     }
 
-    public void setObjectName(ObjectName objName){
-        logger.setObjectName(objName);
-    }
-
     public void setObjectName(String objName){
         logger.setObjectName(ToolBox.buildObjectName(objName));
     }
 
-    public ObjectName getObjectName() {
-        return (logger.getObjectName() != null) ? logger.getObjectName() : null;
+    public String getObjectName() {
+        return (logger.getObjectName() != null) ? logger.getObjectName().toString() : null;
     }
 
     public void setMBeanServer(MBeanServer server){
@@ -86,16 +86,42 @@ public class JmxLogAppender extends AppenderSkeleton{
     
 
     @Override
-    protected void append(LoggingEvent arg0) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    protected void append(LoggingEvent log4jEvent) {
+        if (!isLoggable()) {
+            errorHandler.error("Unable to log message, check configuration",
+                     null, ErrorCode.GENERIC_FAILURE);
+            return;
+        }
+
+        if(layout == null){
+             errorHandler.error("No layout found for JmxLoggerAppender",
+                     null, ErrorCode.MISSING_LAYOUT);
+             return;
+        }
+
+        String msg;
+        try {
+            msg = layout.format(log4jEvent);
+            LogEvent event = prepareLogEvent(msg,log4jEvent);
+            logger.log(event);
+        }catch(Exception ex){
+           errorHandler.error("Unable to send log to JMX.", ex, ErrorCode.GENERIC_FAILURE);
+        }
     }
 
     public void close() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        logger.stop();
     }
 
     public boolean requiresLayout() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
+    }
+
+    private boolean isLoggable(){
+        return logger != null &&
+                logger.isStarted() &&
+                logger.getMBeanServer() != null &&
+                logger.getObjectName() != null;
     }
 
     private void initializeLogger() {
@@ -104,7 +130,7 @@ public class JmxLogAppender extends AppenderSkeleton{
 
     private void configure() {
         if (super.getLayout() == null) {
-            super.setLayout(new PatternLayout("%-4r [%t] %-5p %c %x - %m%n"));
+            super.setLayout(logLayout);
         }
 
         if (logger.getMBeanServer() == null) {
@@ -118,4 +144,28 @@ public class JmxLogAppender extends AppenderSkeleton{
             logger.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
         }
     }
+
+    private LogEvent prepareLogEvent(String fmtMsg, LoggingEvent record){
+        LogEvent<LoggingEvent> event = new LogEvent<LoggingEvent>();
+        event.setLogRecord(record);
+        event.setSource(this);
+        event.setLevelName(record.getLevel().toString());
+        event.setLoggerName(record.getLoggerName());
+        event.setMessage(fmtMsg);
+        event.setSequenceNumber(record.getTimeStamp());
+        event.setSourceClassName((record.locationInformationExists())
+                ? record.getLocationInformation().getClassName()
+                : "Unavailable");
+        event.setSourceMethodName((record.locationInformationExists())
+                ? record.getLocationInformation().getMethodName()
+                : "Unavailable" );
+        event.setSourceThreadId(record.getThreadName());
+        event.setSourceThrowable((record.getThrowableInformation() != null) 
+                ? record.getThrowableInformation().getThrowable()
+                : null);
+        event.setTimeStamp(record.getTimeStamp());
+
+        return event;
+    }
+
 }
