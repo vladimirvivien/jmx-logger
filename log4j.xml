@@ -12,6 +12,7 @@
   <appender name="jmxlogger" class="jmxlogger.integration.log4j.JmxLogAppender">
     <param name="ObjectName" value="test:type=log4jAppender"/>
     <param name="ServerSelection" value="platform"/>
+    <param name="LogPattern" value="Exception"/>
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
     </layout>
