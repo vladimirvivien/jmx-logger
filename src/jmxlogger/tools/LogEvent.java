@@ -20,6 +20,13 @@ public class LogEvent<LOG_TYPE> implements Serializable{
 
     public LogEvent() {}
 
+    public LogEvent(Object source, String message, long timeStamp, long seqNumber) {
+        setSource(source);
+        setMessage(message);
+        setTimeStamp(timeStamp);
+        setSequenceNumber(seqNumber);
+    }
+    
     public synchronized void setSource(Object src){
         source = src;
     }

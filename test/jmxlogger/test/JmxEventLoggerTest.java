@@ -100,7 +100,7 @@ public class JmxEventLoggerTest {
         l.setObjectName(objName);
         l.start();
         l.getMBeanServer().addNotificationListener(objName, lstnr, null, null);
-        l.log(new LogEvent());
+        l.log(new LogEvent(l, "Hello, this is logged", System.currentTimeMillis(), System.currentTimeMillis()));
         assert lstnr.getNoteCount() > 0;
 
     }

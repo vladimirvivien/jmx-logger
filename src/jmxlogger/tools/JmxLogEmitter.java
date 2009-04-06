@@ -44,7 +44,13 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     }
 
     private Notification buildNotification(LogEvent event){
-        Notification note = new Notification("Hello", this, 12);
+        Notification note = new Notification(
+                ToolBox.getDefaultEventType(),
+                event.getSource(),
+                event.getSequenceNumber(),
+                event.getTimeStamp(),
+                event.getMessage());
+        note.setUserData(event);
         return note;
     }
 }
