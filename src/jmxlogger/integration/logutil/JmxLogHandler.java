@@ -24,11 +24,12 @@ public class JmxLogHandler extends Handler{
     LogManager manager = LogManager.getLogManager();
     private JmxEventLogger logger;
 
-    private final static String KEY_LEVEL = "jmx.logger.Handler.level";
-    private final static String KEY_FILTER = "jmx.logger.Handler.filter";
-    private final static String KEY_FORMATTER = "jmx.logger.Handler.formatter";
-    private final static String KEY_OBJNAME = "jmx.logger.Handler.objectName";
-    private final static String KEY_SERVER = "jmx.logger.Handler.level";
+    private final static String KEY_LEVEL = "jmxlogger.Handler.level";
+    private final static String KEY_FILTER = "jmxlogger.Handler.filter";
+    private final static String KEY_LOGPATTERN = "jmxlogger.Handler.logPattern";
+    private final static String KEY_FORMATTER = "jmxlogger.Handler.formatter";
+    private final static String KEY_OBJNAME = "jmxlogger.Handler.objectName";
+    private final static String KEY_SERVER = "jmxlogger.Handler.serverSelection";
 
     public JmxLogHandler(){
         initializeLogger();
@@ -133,20 +134,21 @@ public class JmxLogHandler extends Handler{
         // configure filter (default none)
         value = manager.getProperty(KEY_FILTER);
         if (value != null) {
-            if (value.startsWith("/") && value.endsWith("/")) {
-                // use regex filter
-                } else {
-                // assume it's a class and load it.
-                try {
-                    Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
-                    super.setFilter((Filter) cls.newInstance());
-                } catch (Exception ex) {
-                    // ignore it and load SimpleFormatter.
-                    super.setFilter(null);
-                }
+            // assume it's a class and load it.
+            try {
+                Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
+                super.setFilter((Filter) cls.newInstance());
+            } catch (Exception ex) {
+                // ignore it and load SimpleFormatter.
+                super.setFilter(null);
             }
         } else {
             super.setFilter(null);
+        }
+
+        value = manager.getProperty(KEY_LOGPATTERN);
+        if(value != null){
+            // logger.setLogPattern(value);
         }
 
         // configure formatter (default SimpleFormatter)
@@ -170,6 +172,8 @@ public class JmxLogHandler extends Handler{
         value = manager.getProperty(KEY_OBJNAME);
         if(value != null){
             logger.setObjectName(ToolBox.buildObjectName(value));
+        }else{
+            logger.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
         }
 
         // configure server used

@@ -42,7 +42,6 @@ public class JmxLogHandlerTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        System.out.println ("Make '-Djava.util.logging.config.file=jmxlogger.properties' is set.");
     }
 
     @AfterClass
@@ -121,15 +120,14 @@ public class JmxLogHandlerTest {
         manager.readConfiguration(new FileInputStream(new File("jmxlogger.properties")));
         MBeanServer server = MBeanServerFactory.createMBeanServer("testDomain");
         JmxLogHandler h = new JmxLogHandler(server);
-        assert h.getObjectName().toString().equals("test:type=PropFile")
+        assert h.getObjectName().toString().equals("test:type=UtilLogging")
                 : "JmxLoggingHandler not loading objectName property from properties file.";
         assert h.getMBeanServer().getDefaultDomain().equals("testDomain")
                 : "JmxLoggingHandler not loading serverDomain property from properties file.";
         assert h.getLevel().equals(Level.INFO)
                 : "JmxLoggingHandler not loading level property from properties file.";
-        assert h.getFormatter().getClass().getName().equals("java.util.logging.XMLFormatter")
-                : "JmxLoggingHandler not loading level property from properties file.";
-
+        assert h.getFormatter().getClass().getName().equals("java.util.logging.SimpleFormatter")
+                : "JmxLoggingHandler not loading formatter properly.";
     }
 
     @Test
