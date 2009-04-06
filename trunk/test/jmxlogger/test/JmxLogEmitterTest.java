@@ -94,7 +94,7 @@ public class JmxLogEmitterTest {
     @Test
     public void testLogCount() {
         JmxLogEmitter e = new JmxLogEmitter();
-        e.sendLog(new LogEvent());
+        e.sendLog(new LogEvent(e, "Hello, this is logged", System.currentTimeMillis(), System.currentTimeMillis()));
         assert e.getLogCount() > 0 : "Log count is not increasing";
     }
 
@@ -108,7 +108,7 @@ public class JmxLogEmitterTest {
         } catch (InstanceNotFoundException ex) {
             throw new RuntimeException(ex);
         }
-        e.sendLog(new LogEvent());
+        e.sendLog(new LogEvent(e, "Hello, this is logged", System.currentTimeMillis(), System.currentTimeMillis()));
         assert listener.getNoteCount() > 0 : "JmxLogEmitter MBean not emitting sendLog() event";
     }
 }

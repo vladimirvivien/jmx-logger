@@ -12,6 +12,15 @@ import javax.management.ObjectName;
 
 public class ToolBox {
     private static String DEFAULT_NAME = "jmxlogger:type=LogEmitter";
+    private static String JMX_LOG_TYPE = "jmxlogger.log.event";
+
+    /***
+     * Returns the default event type of jmxlogger.log.event
+     * @return jmxlogger.log.event
+     */
+    public static String getDefaultEventType() {
+        return JMX_LOG_TYPE;
+    }
 
     /**
      * Find an MBeanServer based on agentId.
