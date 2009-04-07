@@ -114,4 +114,25 @@ public class LogEvent<LOG_TYPE> implements Serializable{
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "[source=%s, " +
+                "loggerName=%s, " +
+                "levelName=%s, " +
+                "sourceClass=%s, " +
+                "sourceMethod=%s, " +
+                "threadId=%s, " +
+                "timeStapm=%s, " +
+                "seqNumber=%s]",
+                getSource().getClass().getName(),
+                getLoggerName(),
+                getLevelName(),
+                getSourceClassName(),
+                getSourceMethodName(),
+                getSourceThreadId(),
+                getTimeStamp(),
+                getSequenceNumber());
+    }
 }

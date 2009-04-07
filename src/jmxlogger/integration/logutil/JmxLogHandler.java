@@ -92,16 +92,26 @@ public class JmxLogHandler extends Handler{
             start();
         }
         if (!isLoggable(record)) {
+            reportError("Unable to log message, check configuration" ,
+                    null, ErrorManager.CLOSE_FAILURE);
             return;
         }
+
         String msg;
         try {
             msg = getFormatter().format(record);
+        } catch (Exception ex) {
+            reportError("Unable to format message properly.  " +
+                    "Ensure that a formatter is specified.",
+                    ex, ErrorManager.FORMAT_FAILURE);
+            return;
+        }
+        try{
             LogEvent event = prepareLogEvent(msg,record);
             logger.log(event);
-        } catch (Exception ex) {
-            reportError(null, ex, ErrorManager.FORMAT_FAILURE);
-            return;
+        }catch(Exception ex){
+            reportError("Unable to send log message to JMX event bus.",
+                    ex, ErrorManager.GENERIC_FAILURE);
         }
     }
 
@@ -139,6 +149,8 @@ public class JmxLogHandler extends Handler{
                 Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
                 super.setFilter((Filter) cls.newInstance());
             } catch (Exception ex) {
+                reportError("Unable to load filter class " + value + ". Filter will be set to null" ,
+                    ex, ErrorManager.CLOSE_FAILURE);
                 // ignore it and load SimpleFormatter.
                 super.setFilter(null);
             }
@@ -159,6 +171,8 @@ public class JmxLogHandler extends Handler{
                 Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
                 super.setFormatter((Formatter) cls.newInstance());
             } catch (Exception ex) {
+                reportError("Unable to load formatter class " + value + ". Will default to SimpleFormatter" ,
+                    ex, ErrorManager.CLOSE_FAILURE);
                 // ignore it and load SimpleFormatter.
                 super.setFormatter(new SimpleFormatter());
             }

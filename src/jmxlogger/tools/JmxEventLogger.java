@@ -1,6 +1,6 @@
 package jmxlogger.tools;
 
-import java.lang.management.ManagementFactory;
+import java.util.logging.Logger;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
@@ -8,11 +8,12 @@ import javax.management.ObjectName;
  * @author vladimir.vivien
  */
 public class JmxEventLogger {
-    private volatile boolean started;
     private MBeanServer server;
     private ObjectName objectName;
     private JmxLogEmitter logMBean;
     
+    private static Logger log = Logger.getLogger(JmxEventLogger.class.getName());
+
     private JmxEventLogger() {
         logMBean = new JmxLogEmitter();
     }
@@ -36,29 +37,28 @@ public class JmxEventLogger {
         return objectName;
     }
 
-    public synchronized void start(){
-        if(started) return;
+    public void start(){
+        log.info("JmxEventLoggerMBean starting...");
         ToolBox.registerMBean(getMBeanServer(), getObjectName(), logMBean);
         logMBean.start();
-        started = true;
     }
 
-    public synchronized void stop(){
-        if(!started) return;
+    public void stop(){
+        log.info("JmxEventLoggerMBean stopping...");
         ToolBox.unregisterMBean(getMBeanServer(), getObjectName());
         logMBean.stop();
-        started = false;
     }
 
-    public synchronized boolean isStarted(){
-        return started;
+    public boolean isStarted(){
+        return logMBean.isStarted();
     }
     
     public synchronized void log(LogEvent event){
-        if(!started){
+        if(!logMBean.isStarted()){
             throw new IllegalStateException("JmxEventLogger has not been started." +
                     "Call JmxEventLogger.start() before you log messages.");
         }
+        log.finest("Sending LogEvent " + event.toString());
         logMBean.sendLog(event);
     }
 }
