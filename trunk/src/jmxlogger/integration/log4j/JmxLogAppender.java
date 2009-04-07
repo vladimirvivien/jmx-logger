@@ -93,19 +93,14 @@ public class JmxLogAppender extends AppenderSkeleton{
             return;
         }
 
-        if(layout == null){
-             errorHandler.error("No layout found for JmxLoggerAppender",
-                     null, ErrorCode.MISSING_LAYOUT);
-             return;
-        }
-
         String msg;
         try {
             msg = layout.format(log4jEvent);
             LogEvent event = prepareLogEvent(msg,log4jEvent);
             logger.log(event);
         }catch(Exception ex){
-           errorHandler.error("Unable to send log to JMX.", ex, ErrorCode.GENERIC_FAILURE);
+           errorHandler.error("Unable to send log to JMX.",
+                   ex, ErrorCode.GENERIC_FAILURE);
         }
     }
 
@@ -121,7 +116,8 @@ public class JmxLogAppender extends AppenderSkeleton{
         return logger != null &&
                 logger.isStarted() &&
                 logger.getMBeanServer() != null &&
-                logger.getObjectName() != null;
+                logger.getObjectName() != null &&
+                layout != null;
     }
 
     private void initializeLogger() {

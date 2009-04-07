@@ -2,6 +2,7 @@ package jmxlogger.tools;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -11,6 +12,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 public class ToolBox {
+    private static Logger log = Logger.getLogger(ToolBox.class.getName());
     private static String DEFAULT_NAME = "jmxlogger:type=LogEmitter";
     private static String JMX_LOG_TYPE = "jmxlogger.log.event";
 
@@ -42,9 +44,17 @@ public class ToolBox {
                 server = ManagementFactory.getPlatformMBeanServer();
             }
         }
+        if(server != null){
+            log.info("Found MBeanServer with domain name [" + server.getDefaultDomain() + "]");
+        }
         return server;
     }
 
+    /**
+     * Util method to build a standard JMX ObjectName.  It wraps all of the exceptions into a RuntimeException.
+     * @param name - the string representation of ObjectName
+     * @return new instance of ObjectName
+     */
     public static ObjectName buildObjectName(String name){
         ObjectName objName = null;
         try {
@@ -69,6 +79,7 @@ public class ToolBox {
                 server.unregisterMBean(beanName);
             }
             server.registerMBean(object, beanName);
+            log.finest("Object " + beanName + " has been registered with MBeanServer");
         } catch (InstanceAlreadyExistsException ex) {
             throw new RuntimeException(ex);
         } catch (NotCompliantMBeanException ex) {
@@ -84,6 +95,7 @@ public class ToolBox {
         try {
             if(server.isRegistered(beanName)){
                 server.unregisterMBean(beanName);
+                log.finest("Object " + beanName + " has been unregistered from MBeanServer");
             }
         } catch (InstanceNotFoundException ex) {
             throw new RuntimeException(ex);

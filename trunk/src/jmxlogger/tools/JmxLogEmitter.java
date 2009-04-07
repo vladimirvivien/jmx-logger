@@ -2,6 +2,7 @@ package jmxlogger.tools;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Logger;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 
@@ -10,20 +11,23 @@ import javax.management.NotificationBroadcasterSupport;
  * @author vladimir.vivien
  */
 public class JmxLogEmitter extends NotificationBroadcasterSupport implements JmxLogEmitterMBean{
+    Logger log = Logger.getLogger(JmxLogEmitter.class.getName());
     private volatile boolean started;
     private volatile long count;
-    private volatile long seq;
 
     private Date startDate;
 
     public synchronized void start() {
         if(started) return;
         started = true;
+        startDate = new Date();
+        log.info("JMX Log Emitter component started on " + startDate);
     }
 
     public synchronized void stop() {
         if(!started) return;
         started = false;
+        log.info("JMX Log Emitter component stopped.");
     }
 
     public synchronized boolean isStarted() {
@@ -41,6 +45,7 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     public synchronized void sendLog(LogEvent event){
         super.sendNotification(buildNotification(event));
         count++;
+        log.finest("Log event sent to JMX event bus.");
     }
 
     private Notification buildNotification(LogEvent event){
@@ -51,6 +56,7 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
                 event.getTimeStamp(),
                 event.getMessage());
         note.setUserData(event);
+        log.finest("JMX notification to be sent [" + note.toString() + "]");
         return note;
     }
 }
