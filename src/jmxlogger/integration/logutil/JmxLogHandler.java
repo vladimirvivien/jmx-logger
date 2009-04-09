@@ -76,6 +76,9 @@ public class JmxLogHandler extends Handler{
     public void start() {
         if(logger != null && !logger.isStarted()){
             logger.start();
+            if(!logger.isStarted()){
+                reportError("Unable to start JMX Log Handler, you will not get logg messages.", null, ErrorManager.OPEN_FAILURE);
+            }
         }
     }
 

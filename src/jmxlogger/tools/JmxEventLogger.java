@@ -1,6 +1,5 @@
 package jmxlogger.tools;
 
-import java.util.logging.Logger;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
@@ -11,8 +10,6 @@ public class JmxEventLogger {
     private MBeanServer server;
     private ObjectName objectName;
     private JmxLogEmitter logMBean;
-    
-    private static Logger log = Logger.getLogger(JmxEventLogger.class.getName());
 
     private JmxEventLogger() {
         logMBean = new JmxLogEmitter();
@@ -38,13 +35,11 @@ public class JmxEventLogger {
     }
 
     public void start(){
-        log.info("JmxEventLoggerMBean starting...");
         ToolBox.registerMBean(getMBeanServer(), getObjectName(), logMBean);
         logMBean.start();
     }
 
     public void stop(){
-        log.info("JmxEventLoggerMBean stopping...");
         ToolBox.unregisterMBean(getMBeanServer(), getObjectName());
         logMBean.stop();
     }
@@ -58,7 +53,6 @@ public class JmxEventLogger {
             throw new IllegalStateException("JmxEventLogger has not been started." +
                     "Call JmxEventLogger.start() before you log messages.");
         }
-        log.finest("Sending LogEvent " + event.toString());
         logMBean.sendLog(event);
     }
 }
