@@ -33,19 +33,25 @@
             >
             <src path="${src.dir}"/>
     	    <classpath refid="build.path"/>
-            <!-- exclude  name="**/jmxlogger/integration/log4/*.java"/ -->
+            <exclude  name="jmxlogger/integration/log4j/**"/>
     	</javac>
     </target>
 
-    <!-- target name="compile-log4j" description="Compiles project.">
+    <target name="compile-log4j" description="Compiles project.">
     	<echo>Compiling project...</echo>
     	<mkdir dir="${build.classes.dir}"/>
-        <javac destdir="${build.classes.dir}" source="1.5" target="1.5"
-	    deprecation="false" optimize="false" failonerror="true">
-	    <src path="${src.dir}"/>
+        <javac
+            destdir="${build.classes.dir}"
+            source="1.5"
+            target="1.5"
+            deprecation="false"
+            optimize="false"
+            failonerror="true"
+            >
+            <src path="${src.dir}"/>
     	    <classpath refid="build.path"/>
     	</javac>
-    </target -->
+    </target>
 
 
     <target name="gen-docs" description="Generates the java docs for project.">
@@ -104,13 +110,13 @@
 	<target name="build-jar" depends="init,compile" description="Builds jar file for project in directory dist.">
 
 		<jar jarfile="${dist.dir}/${project-name}-${version}.jar">
-			<!-- fileset dir="${build.classes.dir}">
-				<include name="org/broadw/**"/>
-			</fileset-->
+			<fileset dir="${build.classes.dir}">
+				<include name="jmxbuilder/**"/>
+			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${project-titile}"/>
 				<attribute name="Implementation-Version" value="${version}"/>
-				<attribute name="Broadway-Version" value="${version}"/>
+				<attribute name="JmxBuilder-Version" value="${version}"/>
 			</manifest>
 		</jar>
 
