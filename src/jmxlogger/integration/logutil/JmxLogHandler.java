@@ -1,7 +1,6 @@
 package jmxlogger.integration.logutil;
 
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
 import java.util.logging.ErrorManager;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
