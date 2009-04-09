@@ -12,9 +12,9 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 public class ToolBox {
-    private static Logger log = Logger.getLogger(ToolBox.class.getName());
-    private static String DEFAULT_NAME = "jmxlogger:type=LogEmitter";
-    private static String JMX_LOG_TYPE = "jmxlogger.log.event";
+    private static final Logger log = Logger.getLogger(ToolBox.class.getName());
+    private static final String DEFAULT_NAME = "jmxlogger:type=LogEmitter";
+    private static final String JMX_LOG_TYPE = "jmxlogger.log.event";
 
     /***
      * Returns the default event type of jmxlogger.log.event
