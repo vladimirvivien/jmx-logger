@@ -145,7 +145,7 @@ public class JmxLogHandler extends Handler{
 
         // configure filter (default none)
         value = manager.getProperty(KEY_FILTER);
-        if (value != null && !value.isEmpty()) {
+        if (value != null && value.length() != 0) {
             // assume it's a class and load it.
             try {
                 Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
@@ -167,7 +167,7 @@ public class JmxLogHandler extends Handler{
 
         // configure formatter (default SimpleFormatter)
         value = manager.getProperty(KEY_FORMATTER);
-        if (value != null && !value.isEmpty()) {
+        if (value != null && value.length() != 0) {
             // assume it's a class and load it.
             try {
                 Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
@@ -186,7 +186,7 @@ public class JmxLogHandler extends Handler{
         // configure internal Jmx ObjectName (default provided by JmxEventLogger)
 
         value = manager.getProperty(KEY_OBJNAME);
-        if(value != null && !value.isEmpty()){
+        if(value != null && value.length() != 0){
             logger.setObjectName(ToolBox.buildObjectName(value));
         }else{
             logger.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
