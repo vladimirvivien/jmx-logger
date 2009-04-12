@@ -6,6 +6,8 @@
 package jmxlogger.test;
 
 import java.lang.management.ManagementFactory;
+import java.util.HashMap;
+import java.util.Map;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import org.junit.After;
@@ -14,7 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import jmxlogger.tools.JmxEventLogger;
-import jmxlogger.tools.LogEvent;
+import jmxlogger.tools.ToolBox;
 
 /**
  *
@@ -100,7 +102,11 @@ public class JmxEventLoggerTest {
         l.setObjectName(objName);
         l.start();
         l.getMBeanServer().addNotificationListener(objName, lstnr, null, null);
-        l.log(new LogEvent(l, "Hello, this is logged", System.currentTimeMillis(), System.currentTimeMillis()));
+        Map<String,Object> event = new HashMap<String,Object>();
+        event.put(ToolBox.KEY_EVENT_SOURCE, l.getClass().getName());
+        event.put(ToolBox.KEY_EVENT_MESSAGE, "Hello, this is a logged message.");
+  
+        l.log(event);
         assert lstnr.getNoteCount() > 0;
 
     }
