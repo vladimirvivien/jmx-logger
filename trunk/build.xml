@@ -62,12 +62,12 @@
 	<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="JmxLogger ${version}"
 	    source="1.5" access="package" author="true" version="true" use="true"
 	    defaultexcludes="true"
-	    header='&lt;a href=\"http://code.google.com/p/jmx-logger/\" target=\"_top\"&gt;JmxLogger&lt;/a&gt;'>
+	    header='&lt;a href="http://code.google.com/p/jmx-logger/" target="_top"&gt;JmxLogger&lt;/a&gt;'>
 	    <arg value="-breakiterator"/>
 	    <arg value="-J-Xmx128m"/>
 	    <arg value="-J-XX:MaxPermSize=128m"/>
 	    <doctitle><![CDATA[<h1>JmxLogger - A JMX Log Broadcaster</h1>]]></doctitle>
-	    <bottom><![CDATA[<i>Copyright &copy; 2006-2007 <a href="http://code.google.com/p/jmx-logger/" target="_top">JmxLogger</a>.</i>]]></bottom>
+	    <bottom><![CDATA[<i>Copyright &copy; 2009 <a href="http://code.google.com/p/jmx-logger/" target="_top">JmxLogger</a>.</i>]]></bottom>
 	    <classpath refid="build.path"/>
 	    <packageset dir="${src.dir}">
 	        <include name="jmxlogger/**"/>

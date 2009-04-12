@@ -5,6 +5,8 @@
 
 package jmxlogger.test;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -18,7 +20,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import jmxlogger.tools.JmxLogEmitter;
-import jmxlogger.tools.LogEvent;
+import jmxlogger.tools.ToolBox;
 
 /**
  *
@@ -94,7 +96,11 @@ public class JmxLogEmitterTest {
     @Test
     public void testLogCount() {
         JmxLogEmitter e = new JmxLogEmitter();
-        e.sendLog(new LogEvent(e, "Hello, this is logged", System.currentTimeMillis(), System.currentTimeMillis()));
+        Map<String,Object> event = new HashMap<String,Object>();
+        event.put(ToolBox.KEY_EVENT_SOURCE, e.getClass().getName());
+        event.put(ToolBox.KEY_EVENT_MESSAGE, "Hello, this is a logged message.");
+
+        e.sendLog(event);
         assert e.getLogCount() > 0 : "Log count is not increasing";
     }
 
@@ -108,7 +114,12 @@ public class JmxLogEmitterTest {
         } catch (InstanceNotFoundException ex) {
             throw new RuntimeException(ex);
         }
-        e.sendLog(new LogEvent(e, "Hello, this is logged", System.currentTimeMillis(), System.currentTimeMillis()));
+        Map<String,Object> event = new HashMap<String,Object>();
+        event.put(ToolBox.KEY_EVENT_SOURCE, e.getClass().getName());
+        event.put(ToolBox.KEY_EVENT_MESSAGE, "Hello, this is a logged message.");
+        event.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(System.currentTimeMillis()));
+        event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(System.currentTimeMillis()));
+        e.sendLog(event);
         assert listener.getNoteCount() > 0 : "JmxLogEmitter MBean not emitting sendLog() event";
     }
 }

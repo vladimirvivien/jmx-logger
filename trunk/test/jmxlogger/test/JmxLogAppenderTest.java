@@ -7,12 +7,10 @@ package jmxlogger.test;
 
 import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 import jmxlogger.integration.log4j.JmxLogAppender;
 import jmxlogger.tools.ToolBox;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -31,7 +29,7 @@ public class JmxLogAppenderTest {
 
     public JmxLogAppenderTest() {
         platformServer = ManagementFactory.getPlatformMBeanServer();
-        objectName = ToolBox.buildObjectName("test:type=log4jAppender");
+        objectName = ToolBox.buildObjectName("log4j.logging:type=Log4jAppender");
         lstnr = new LogListener();
     }
 
