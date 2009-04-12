@@ -17,7 +17,7 @@ public class Log4JAgent {
         logs.put(Level.INFO, "I am happy!");
         logs.put(Level.WARN, "I am concerned...");
         logs.put(Level.ERROR, "I am in trouble, something went wrong.");
-        logs.put(Level.DEBUG, "I am up, I am down, I am all araound!");
+        logs.put(Level.DEBUG, "I am up, I am down, I am all around!");
     }
 
     public static void main(String[] args) throws InterruptedException{

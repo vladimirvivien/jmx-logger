@@ -18,7 +18,7 @@ public class LoggingUtilAgent {
         logs.put(Level.INFO, "I am happy!");
         logs.put(Level.WARNING, "I am concerned...");
         logs.put(Level.SEVERE, "I am in trouble, something went wrong.");
-        logs.put(Level.FINE, "I am up, I am down, I am all araound!");
+        logs.put(Level.FINE, "I am up, I am down, I am all around!");
 
     }
     public static void main(String[] args) throws InterruptedException, IOException{
