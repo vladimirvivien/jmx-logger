@@ -62,7 +62,7 @@
 	<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="JmxLogger ${version}"
 	    source="1.5" access="package" author="true" version="true" use="true"
 	    defaultexcludes="true"
-	    header='&lt;a href="http://code.google.com/p/jmx-logger/" target="_top"&gt;JmxLogger&lt;/a&gt;'>
+	    header='&lt;a href="http://code.google.com/p/jmx-logger/" target="_top"&gt;sJmxLogger&lt;/a&gt;'>
 	    <arg value="-breakiterator"/>
 	    <arg value="-J-Xmx128m"/>
 	    <arg value="-J-XX:MaxPermSize=128m"/>
