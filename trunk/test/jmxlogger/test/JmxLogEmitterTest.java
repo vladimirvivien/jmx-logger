@@ -7,6 +7,8 @@ package jmxlogger.test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -96,12 +98,26 @@ public class JmxLogEmitterTest {
     @Test
     public void testLogCount() {
         JmxLogEmitter e = new JmxLogEmitter();
+        e.start();
         Map<String,Object> event = new HashMap<String,Object>();
         event.put(ToolBox.KEY_EVENT_SOURCE, e.getClass().getName());
         event.put(ToolBox.KEY_EVENT_MESSAGE, "Hello, this is a logged message.");
 
         e.sendLog(event);
+        // lets stall to give thread time to settle
+        int count = 0;
+        while(count < 10 && e.getLogCount() <= 0){
+            try {
+                Thread.currentThread().sleep(500);
+                System.out.println ("Waiting for notification ... " + count * 500 + " millis.");
+                count++;
+            } catch (InterruptedException ex) {
+                Logger.getLogger(JmxLogEmitterTest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
         assert e.getLogCount() > 0 : "Log count is not increasing";
+        e.stop();
     }
 
     @Test
@@ -119,7 +135,22 @@ public class JmxLogEmitterTest {
         event.put(ToolBox.KEY_EVENT_MESSAGE, "Hello, this is a logged message.");
         event.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(System.currentTimeMillis()));
         event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(System.currentTimeMillis()));
+        e.start();
         e.sendLog(event);
+
+        // lets stall to give thread time to settle
+        int count = 0;
+        while(count < 10 && listener.getNoteCount() <= 0){
+            try {
+                Thread.currentThread().sleep(500);
+                count++;
+                System.out.println ("Waiting for notification ... " + count * 500 + " millis.");
+            } catch (InterruptedException ex) {
+                Logger.getLogger(JmxLogEmitterTest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         assert listener.getNoteCount() > 0 : "JmxLogEmitter MBean not emitting sendLog() event";
+        e.stop();
     }
+
 }
