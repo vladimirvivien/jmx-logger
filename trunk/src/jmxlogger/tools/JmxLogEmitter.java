@@ -36,8 +36,8 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     private AtomicLong count = new AtomicLong(0);
     private Date startDate;
 
-    private final PriorityBlockingQueue<Notification> queue =
-            new PriorityBlockingQueue<Notification>(100);
+    private final PriorityBlockingQueue<JmxEventWrapper> queue =
+            new PriorityBlockingQueue<JmxEventWrapper>(100);
     private ExecutorService noteConsumer;
     private ExecutorService noteProducers;
     private int producerSize = 5;
@@ -89,7 +89,9 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
 
     /**
      * Calls the sendNotification() method to send the log information to the
-     * MBeanServer's event bus.
+     * MBeanServer's event bus.  The log event is queued on internaal priority
+     * by executor threads.  They are picked up by a consumer thread
+     * as they become available.
      * @param event
      */
     public void sendLog(final Map<String,Object> event){
@@ -97,10 +99,10 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
             throw new IllegalStateException("JmxLogEmitter must be started before" +
                     " you can invoke sendLog().");
         }
-        final Notification note = buildNotification(event);
+        final JmxEventWrapper noteWrapper = new JmxEventWrapper(buildNotification(event));
         noteProducers.execute(new Runnable(){
             public void run() {
-                queue.put(note);
+                queue.put(noteWrapper);
             }
         });
     }
@@ -138,14 +140,22 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
             public void run() {
                 try {
                     while (true) {
-                        Notification note = queue.take();
-                        submitNotification(note);
+                        JmxEventWrapper noteWrapper = queue.take();
+                        submitNotification(noteWrapper.unwrap());
                     }
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
             }
         });
+    }
+
+    public void setLogLevel(String leve) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public String getLogLevel() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

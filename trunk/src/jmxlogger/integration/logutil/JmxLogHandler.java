@@ -29,7 +29,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jmxlogger.tools.JmxEventLogger;
+import jmxlogger.tools.JmxLogService;
 import jmxlogger.tools.ToolBox;
 
 /**
@@ -41,7 +41,7 @@ import jmxlogger.tools.ToolBox;
  */
 public class JmxLogHandler extends Handler{
     LogManager manager = LogManager.getLogManager();
-    private JmxEventLogger logger;
+    private JmxLogService logger;
 
     private final static String KEY_LEVEL = "jmxlogger.Handler.level";
     private final static String KEY_FILTER = "jmxlogger.Handler.filter";
@@ -263,7 +263,7 @@ public class JmxLogHandler extends Handler{
             super.setFormatter(new SimpleFormatter());
         }
 
-        // configure internal Jmx ObjectName (default provided by JmxEventLogger)
+        // configure internal Jmx ObjectName (default provided by JmxLogService)
 
         value = manager.getProperty(KEY_OBJNAME);
         if(value != null && value.length() != 0){
@@ -290,7 +290,7 @@ public class JmxLogHandler extends Handler{
      * Initializes the MBean logger object.
      */
     private void initializeLogger() {
-        logger = (logger == null) ? JmxEventLogger.createInstance() : logger;
+        logger = (logger == null) ? JmxLogService.createInstance() : logger;
     }
 
     /**
@@ -302,7 +302,7 @@ public class JmxLogHandler extends Handler{
     private Map<String,Object> prepareLogEvent(String fmtMsg, LogRecord record){
         Map<String,Object> event = new HashMap<String,Object>();
         event.put(ToolBox.KEY_EVENT_SOURCE,this.getClass().getName());
-        event.put(ToolBox.KEY_EVENT_LEVEN,record.getLevel().getName());
+        event.put(ToolBox.KEY_EVENT_LEVEL,record.getLevel().getName());
         event.put(ToolBox.KEY_EVENT_LOGGER,record.getLoggerName());
         event.put(ToolBox.KEY_EVENT_MESSAGE,fmtMsg);
         event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(record.getSequenceNumber()));
