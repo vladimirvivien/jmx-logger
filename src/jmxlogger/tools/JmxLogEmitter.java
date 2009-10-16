@@ -19,6 +19,10 @@ package jmxlogger.tools;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 
@@ -29,15 +33,22 @@ import javax.management.NotificationBroadcasterSupport;
  */
 public class JmxLogEmitter extends NotificationBroadcasterSupport implements JmxLogEmitterMBean{
     private volatile boolean started = false;
-    private volatile long count;
-
+    private AtomicLong count = new AtomicLong(0);
     private Date startDate;
 
+    private final PriorityBlockingQueue<Notification> queue =
+            new PriorityBlockingQueue<Notification>(100);
+    private ExecutorService noteConsumer;
+    private ExecutorService noteProducers;
+    private int producerSize = 5;
+    
     /**
      * Life cycle method to start the MBean.
      */
     public synchronized void start() {
         if(started) return;
+        setupNoteConsumerTask();
+        setupNoteProducers();
         started = true;
         startDate = new Date();
     }
@@ -47,6 +58,8 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
      */
     public synchronized void stop() {
         if(!started) return;
+        noteProducers.shutdownNow();
+        noteConsumer.shutdownNow();
         started = false;
     }
 
@@ -70,8 +83,8 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
      * Returns the number events that have been emitted by the MBean.
      * @return
      */
-    public synchronized long getLogCount() {
-        return count;
+    public long getLogCount() {
+        return count.longValue();
     }
 
     /**
@@ -79,10 +92,22 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
      * MBeanServer's event bus.
      * @param event
      */
-    public synchronized void sendLog(Map<String,Object> event){
-        Notification note = buildNotification(event);
+    public void sendLog(final Map<String,Object> event){
+        if(!started) {
+            throw new IllegalStateException("JmxLogEmitter must be started before" +
+                    " you can invoke sendLog().");
+        }
+        final Notification note = buildNotification(event);
+        noteProducers.execute(new Runnable(){
+            public void run() {
+                queue.put(note);
+            }
+        });
+    }
+
+    private void submitNotification(final Notification note){
         sendNotification(note);
-        count++;
+        count.incrementAndGet();
     }
 
     /**
@@ -103,4 +128,24 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
         note.setUserData(event);
         return note;
     }
+
+    private void setupNoteProducers() {
+        noteProducers = Executors.newFixedThreadPool(producerSize);
+    }
+    private void setupNoteConsumerTask() {
+        noteConsumer = Executors.newSingleThreadExecutor();
+        noteConsumer.execute(new Runnable() {
+            public void run() {
+                try {
+                    while (true) {
+                        Notification note = queue.take();
+                        submitNotification(note);
+                    }
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+    }
+
 }
