@@ -35,7 +35,7 @@ public class ToolBox {
     public static final String KEY_EVENT_TYPE = "jmxlogger.log.event";
     public static final String KEY_EVENT_SOURCE = "source";
     public static final String KEY_EVENT_LOGGER = "loggerName";
-    public static final String KEY_EVENT_LEVEN = "levelName";
+    public static final String KEY_EVENT_LEVEL = "levelName";
     public static final String KEY_EVENT_SOURCE_CLASS = "sourceClassName";
     public static final String KEY_EVENT_SOURCE_METHOD = "sourceMethodName";
     public static final String KEY_EVENT_THREAD = "threadId";
