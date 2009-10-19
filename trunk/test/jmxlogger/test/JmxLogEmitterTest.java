@@ -17,6 +17,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import jmxlogger.integration.log4j.JmxLogAppender;
+import jmxlogger.integration.logutil.JmxLogHandler;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -156,7 +157,7 @@ public class JmxLogEmitterTest {
     }
 
     @Test
-    public void testGetLogLevel() {
+    public void testGetLog4jLevel() {
         JmxLogAppender a = new JmxLogAppender();
         JmxLogService  svc = JmxLogService.createInstance();
         svc.setLogger(a);
@@ -166,5 +167,17 @@ public class JmxLogEmitterTest {
         e.setLogLevel("WARN");
         assert e.getLogLevel().equals("WARN");
     }
-
+    @Test
+    public void testJavaLogLevel() {
+        JmxLogHandler a = new JmxLogHandler();
+        JmxLogService  svc = JmxLogService.createInstance();
+        svc.setLogger(a);
+        JmxLogEmitter e = new JmxLogEmitter();
+        e.setLogService(svc);
+        assert e.getLogLevel().equals("FINE");
+        e.setLogLevel("WARNING");
+        assert e.getLogLevel().equals("WARNING");
+        e.setLogLevel("CONFIG");
+        assert e.getLogLevel().equals("CONFIG");
+    }
 }

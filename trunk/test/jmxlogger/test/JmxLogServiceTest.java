@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.integration.log4j.JmxLogAppender;
+import jmxlogger.integration.logutil.JmxLogHandler;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -175,5 +176,33 @@ public class JmxLogServiceTest {
 
         svc.setLoggerLevel("FATAL");
         assert svc.getLoggerLevel().equals("FATAL");
+
+        svc.setLoggerLevel("OFF");
+        assert svc.getLoggerLevel().equals("OFF");
+    }
+
+    @Test
+    public void testGetJavaLoggerLevel(){
+        JmxLogHandler log4j = new JmxLogHandler();
+        JmxLogService svc = JmxLogService.createInstance();
+        svc.setLogger(log4j);
+        svc.setLoggerLevel("FINE");
+        assert svc.getLoggerLevel().equals("FINE");
+        assert !svc.getLoggerLevel().equals("FINEST");
+
+        svc.setLoggerLevel("INFO");
+        assert svc.getLoggerLevel().equals("INFO");
+
+        svc.setLoggerLevel("WARNING");
+        assert svc.getLoggerLevel().equals("WARNING");
+
+        svc.setLoggerLevel("CONFIG");
+        assert svc.getLoggerLevel().equals("CONFIG");
+
+        svc.setLoggerLevel("SEVERE");
+        assert svc.getLoggerLevel().equals("SEVERE");
+
+        svc.setLoggerLevel("OFF");
+        assert svc.getLoggerLevel().equals("OFF");
     }
 }
