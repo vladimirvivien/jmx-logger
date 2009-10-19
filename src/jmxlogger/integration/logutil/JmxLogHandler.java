@@ -40,7 +40,7 @@ import jmxlogger.tools.ToolBox;
  *
  * @author vladimir.vivien
  */
-public class JmxLogHandler extends Handler{
+public class JmxLogHandler extends Handler implements JmxLogger{
     LogManager manager = LogManager.getLogManager();
     private JmxLogService logService;
 
@@ -156,12 +156,18 @@ public class JmxLogHandler extends Handler{
      */
     @Override
     public void publish(LogRecord record) {
+        // validate configuration values
+        if (!isConfiguredOk()) {
+            reportError("Unable to log message, check your log configuration." ,
+                    null, ErrorManager.CLOSE_FAILURE);
+            return;
+        }
+
+        // start handler
         if(!logService.isStarted()){
             start();
         }
         if (!isLoggable(record)) {
-            reportError("Unable to log message, check configuration" ,
-                    null, ErrorManager.CLOSE_FAILURE);
             return;
         }
 
@@ -207,12 +213,16 @@ public class JmxLogHandler extends Handler{
      */
     @Override
     public boolean isLoggable(LogRecord record){
+        return (super.isLoggable(record));
+    }
+
+    private boolean isConfiguredOk() {
         return (logService != null &&
                 logService.isStarted() &&
                 logService.getMBeanServer() != null &&
                 logService.getObjectName() != null &&
-                super.isLoggable(record)
-                );
+                getFormatter() != null &&
+                this.getLevel() != null);
     }
 
     /**
@@ -222,12 +232,12 @@ public class JmxLogHandler extends Handler{
         // configure level (default INFO)
         String value;
         value = manager.getProperty(KEY_LEVEL);
-        super.setLevel(value != null ? Level.parse(value) : Level.INFO);
+        super.setLevel(value != null ? Level.parse(value) : Level.FINE);
 
         // configure filter (default none)
         value = manager.getProperty(KEY_FILTER);
         if (value != null && value.length() != 0) {
-            // assume it's a class and load it.
+            // assume it's a class name and load it.
             try {
                 Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
                 super.setFilter((Filter) cls.newInstance());
