@@ -35,20 +35,13 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     private volatile boolean started = false;
     private AtomicLong count = new AtomicLong(0);
     private Date startDate;
-
-    private final PriorityBlockingQueue<JmxEventWrapper> queue =
-            new PriorityBlockingQueue<JmxEventWrapper>(100);
-    private ExecutorService noteConsumer;
-    private ExecutorService noteProducers;
-    private int producerSize = 5;
+    private JmxLogService logService;
     
     /**
      * Life cycle method to start the MBean.
      */
     public synchronized void start() {
         if(started) return;
-        setupNoteConsumerTask();
-        setupNoteProducers();
         started = true;
         startDate = new Date();
     }
@@ -58,8 +51,6 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
      */
     public synchronized void stop() {
         if(!started) return;
-        noteProducers.shutdownNow();
-        noteConsumer.shutdownNow();
         started = false;
     }
 
@@ -99,18 +90,10 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
             throw new IllegalStateException("JmxLogEmitter must be started before" +
                     " you can invoke sendLog().");
         }
-        final JmxEventWrapper noteWrapper = new JmxEventWrapper(buildNotification(event));
-        noteProducers.execute(new Runnable(){
-            public void run() {
-                queue.put(noteWrapper);
-            }
-        });
-    }
-
-    private void submitNotification(final Notification note){
-        sendNotification(note);
+        sendNotification(buildNotification(event));
         count.incrementAndGet();
     }
+
 
     /**
      * Prepares event information as Notification object.
@@ -131,31 +114,16 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
         return note;
     }
 
-    private void setupNoteProducers() {
-        noteProducers = Executors.newFixedThreadPool(producerSize);
-    }
-    private void setupNoteConsumerTask() {
-        noteConsumer = Executors.newSingleThreadExecutor();
-        noteConsumer.execute(new Runnable() {
-            public void run() {
-                try {
-                    while (true) {
-                        JmxEventWrapper noteWrapper = queue.take();
-                        submitNotification(noteWrapper.unwrap());
-                    }
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        });
+    public void setLogService(JmxLogService ls){
+        this.logService = ls;
     }
 
-    public void setLogLevel(String leve) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setLogLevel(String level) {
+        logService.setLoggerLevel(level);
     }
 
     public String getLogLevel() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return logService.getLoggerLevel();
     }
 
 }

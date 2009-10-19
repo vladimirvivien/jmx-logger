@@ -9,7 +9,7 @@ package jmxlogger;
  *
  * @author vvivien
  */
-public interface JmxLogAssembler {
-    public void setLevel(String level);
-    public String getLevel();
+public interface JmxLogger {
+    public void setLogLevel(String level);
+    public String getLogLevel();
 }

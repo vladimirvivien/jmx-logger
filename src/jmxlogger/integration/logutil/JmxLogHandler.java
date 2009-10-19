@@ -29,6 +29,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import jmxlogger.JmxLogger;
 import jmxlogger.tools.JmxLogService;
 import jmxlogger.tools.ToolBox;
 
@@ -41,7 +42,7 @@ import jmxlogger.tools.ToolBox;
  */
 public class JmxLogHandler extends Handler{
     LogManager manager = LogManager.getLogManager();
-    private JmxLogService logger;
+    private JmxLogService logService;
 
     private final static String KEY_LEVEL = "jmxlogger.Handler.level";
     private final static String KEY_FILTER = "jmxlogger.Handler.filter";
@@ -100,7 +101,7 @@ public class JmxLogHandler extends Handler{
      * @param objName
      */
     public void setObjectName(ObjectName objName){
-        logger.setObjectName(objName);
+        logService.setObjectName(objName);
     }
 
     /**
@@ -108,7 +109,7 @@ public class JmxLogHandler extends Handler{
      * @return ObjectName instance
      */
     public ObjectName getObjectName() {
-        return (logger.getObjectName() != null) ? logger.getObjectName() : null;
+        return (logService.getObjectName() != null) ? logService.getObjectName() : null;
     }
 
     /**
@@ -116,7 +117,7 @@ public class JmxLogHandler extends Handler{
      * @param server
      */
     public void setMBeanServer(MBeanServer server){
-        logger.setMBeanServer(server);
+        logService.setMBeanServer(server);
     }
 
     /**
@@ -124,7 +125,7 @@ public class JmxLogHandler extends Handler{
      * @return MBeanServer
      */
     public MBeanServer getMBeanServer() {
-        return logger.getMBeanServer();
+        return logService.getMBeanServer();
     }
 
     /**
@@ -132,30 +133,30 @@ public class JmxLogHandler extends Handler{
      * because the util logging does not provide a built life cyle method.
      */
     public void start() {
-        if(logger != null && !logger.isStarted()){
-            logger.start();
-            if(!logger.isStarted()){
+        if(logService != null && !logService.isStarted()){
+            logService.start();
+            if(!logService.isStarted()){
                 reportError("Unable to start JMX Log Handler, you will not get logg messages.", null, ErrorManager.OPEN_FAILURE);
             }
         }
     }
 
     /**
-     * Life cycle method to call to stop logger.
+     * Life cycle method to call to stop logService.
      */
     public void stop() {
-        if(logger != null && logger.isStarted()){
-            logger.stop();
+        if(logService != null && logService.isStarted()){
+            logService.stop();
         }
     }
 
     /**
-     * Java Logging framework method called when a logger logs a message.
+     * Java Logging framework method called when a logService logs a message.
      * @param LogRecord record
      */
     @Override
     public void publish(LogRecord record) {
-        if(!logger.isStarted()){
+        if(!logService.isStarted()){
             start();
         }
         if (!isLoggable(record)) {
@@ -175,7 +176,7 @@ public class JmxLogHandler extends Handler{
         }
         try{
             Map<String,Object> event = prepareLogEvent(msg,record);
-            logger.log(event);
+            logService.log(event);
         }catch(Exception ex){
             reportError("Unable to send log message to JMX event bus.",
                     ex, ErrorManager.GENERIC_FAILURE);
@@ -206,10 +207,10 @@ public class JmxLogHandler extends Handler{
      */
     @Override
     public boolean isLoggable(LogRecord record){
-        return (logger != null &&
-                logger.isStarted() &&
-                logger.getMBeanServer() != null &&
-                logger.getObjectName() != null &&
+        return (logService != null &&
+                logService.isStarted() &&
+                logService.getMBeanServer() != null &&
+                logService.getObjectName() != null &&
                 super.isLoggable(record)
                 );
     }
@@ -242,7 +243,7 @@ public class JmxLogHandler extends Handler{
 
         value = manager.getProperty(KEY_LOGPATTERN);
         if(value != null){
-            // logger.setLogPattern(value);
+            // logService.setLogPattern(value);
         }
 
         // configure formatter (default SimpleFormatter)
@@ -267,9 +268,9 @@ public class JmxLogHandler extends Handler{
 
         value = manager.getProperty(KEY_OBJNAME);
         if(value != null && value.length() != 0){
-            logger.setObjectName(ToolBox.buildObjectName(value));
+            logService.setObjectName(ToolBox.buildObjectName(value));
         }else{
-            logger.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
+            logService.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
         }
 
         // configure server used
@@ -277,7 +278,7 @@ public class JmxLogHandler extends Handler{
         if(value != null && value.length() != 0){
             if(value.equalsIgnoreCase("platform")) {
                 // use existing platform server
-                logger.setMBeanServer(ManagementFactory.getPlatformMBeanServer());
+                logService.setMBeanServer(ManagementFactory.getPlatformMBeanServer());
             }else{
                 setMBeanServer(ToolBox.findMBeanServer(value));
             }
@@ -287,10 +288,10 @@ public class JmxLogHandler extends Handler{
     }
 
     /**
-     * Initializes the MBean logger object.
+     * Initializes the MBean logService object.
      */
     private void initializeLogger() {
-        logger = (logger == null) ? JmxLogService.createInstance() : logger;
+        logService = (logService == null) ? JmxLogService.createInstance() : logService;
     }
 
     /**
@@ -314,4 +315,21 @@ public class JmxLogHandler extends Handler{
 
         return event;
     }
+
+    /**
+     * This method abstracts out the log level.
+     * @param level
+     */
+    public void setLogLevel(String level) {
+        this.setLevel(Level.parse(level));
+    }
+
+    /**
+     * This method abstracts out the log level.
+     * @return
+     */
+    public String getLogLevel() {
+        return this.getLevel().getName();
+    }
+    
 }

@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jmxlogger.JmxLogAssembler;
+import jmxlogger.JmxLogger;
 
 /**
  * This service level class manages the creation of JMX emitter MBean facilitates
@@ -35,8 +35,8 @@ import jmxlogger.JmxLogAssembler;
 public class JmxLogService {
     private MBeanServer server;
     private ObjectName objectName;
-    private JmxLogEmitter logMBean;
-    private JmxLogAssembler logAssembler;
+    private JmxLogEmitterMBean logMBean;
+    private JmxLogger jmxLogger;
 
     private final PriorityBlockingQueue<JmxEventWrapper> queue =
             new PriorityBlockingQueue<JmxEventWrapper>(100);
@@ -50,6 +50,7 @@ public class JmxLogService {
      */
     private JmxLogService() {
         logMBean = new JmxLogEmitter();
+        ((JmxLogEmitter)logMBean).setLogService(this);
     }
 
     /**
@@ -92,11 +93,17 @@ public class JmxLogService {
         return objectName;
     }
 
+    public synchronized void setLogger(JmxLogger logger){
+        this.jmxLogger = logger;
+    }
+
     /**
      * Life cycle method that starts the logger.  It registers the emitter MBean
      * with the ObjectName to the specified MBeanServer.
      */
     public void start(){
+        this.setupNoteProducers();
+        this.setupNoteConsumerTask();
         ToolBox.registerMBean(getMBeanServer(), getObjectName(), logMBean);
         logMBean.start();
     }
@@ -105,6 +112,8 @@ public class JmxLogService {
      * Life cycle method that stops the JMX emitter and undergisters from the MBean.
      */
     public void stop(){
+        noteConsumer.shutdownNow();
+        noteProducers.shutdownNow();
         ToolBox.unregisterMBean(getMBeanServer(), getObjectName());
         logMBean.stop();
     }
@@ -134,12 +143,12 @@ public class JmxLogService {
         });
     }
 
-    public void setLogAssemblerLevel(String level){
-        logAssembler.setLevel(level);
+    public void setLoggerLevel(String level){
+        jmxLogger.setLogLevel(level);
     }
 
-    public String getLogAssemblerLevel(){
-        return logAssembler.getLevel();
+    public String getLoggerLevel(){
+        return jmxLogger.getLogLevel();
     }
 
     private void setupNoteProducers() {
@@ -153,7 +162,7 @@ public class JmxLogService {
                 try {
                     while (true) {
                         JmxEventWrapper eventWrapper = queue.take();
-                        logMBean.sendLog(eventWrapper.unwrap());
+                        ((JmxLogEmitter)logMBean).sendLog(eventWrapper.unwrap());
                     }
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
