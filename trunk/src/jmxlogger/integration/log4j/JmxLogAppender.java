@@ -21,15 +21,18 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jmxlogger.JmxLogAssembler;
+import jmxlogger.JmxLogger;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import jmxlogger.tools.JmxLogService;
 import jmxlogger.tools.ToolBox;
+import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.ErrorCode;
 
 /**
@@ -39,8 +42,8 @@ import org.apache.log4j.spi.ErrorCode;
  *
  * @author vladimir.vivien
  */
-public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
-    private JmxLogService jmxLogger;
+public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
+    private JmxLogService jmxLogService;
     private String logPattern;
     private String serverSelection="platform";
     private Layout logLayout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
@@ -61,7 +64,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
      */
     public JmxLogAppender(ObjectName name){
         initializeLogger();
-        jmxLogger.setObjectName(name);
+        jmxLogService.setObjectName(name);
         configure();
     }
 
@@ -71,7 +74,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
      */
     public JmxLogAppender(MBeanServer server){
         initializeLogger();
-        jmxLogger.setMBeanServer(server);
+        jmxLogService.setMBeanServer(server);
         configure();
         
     }
@@ -84,8 +87,8 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
      */
     public JmxLogAppender(MBeanServer server, ObjectName name){
         initializeLogger();
-        jmxLogger.setMBeanServer(server);
-        jmxLogger.setObjectName(name);
+        jmxLogService.setMBeanServer(server);
+        jmxLogService.setObjectName(name);
         configure();
     }
 
@@ -94,7 +97,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
      * @param objName - instance of ObjectName to use for JMX emitter MBean.
      */
     public void setObjectName(String objName){
-        jmxLogger.setObjectName(ToolBox.buildObjectName(objName));
+        jmxLogService.setObjectName(ToolBox.buildObjectName(objName));
     }
 
     /**
@@ -102,7 +105,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
      * @return
      */
     public String getObjectName() {
-        return (jmxLogger.getObjectName() != null) ? jmxLogger.getObjectName().toString() : null;
+        return (jmxLogService.getObjectName() != null) ? jmxLogService.getObjectName().toString() : null;
     }
 
     /**
@@ -110,7 +113,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
      * @param server - MBeanServer
      */
     public void setMBeanServer(MBeanServer server){
-        jmxLogger.setMBeanServer(server);
+        jmxLogService.setMBeanServer(server);
     }
 
     /**
@@ -118,7 +121,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
      * @return MBeanServer
      */
     public MBeanServer getMBeanServer() {
-        return jmxLogger.getMBeanServer();
+        return jmxLogService.getMBeanServer();
     }
 
     /**
@@ -160,23 +163,30 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
     @Override
     public void activateOptions() {
         configure();
-        if(!jmxLogger.isStarted()){
-            jmxLogger.start();
+        if(!jmxLogService.isStarted()){
+            jmxLogService.start();
         }
 
     }
     
 
     /**
-     * Log4J framework method, called when a jmxLogger logs an event.  Here, it
+     * Log4J framework method, called when a jmxLogService logs an event.  Here, it
      * sends the log message to the JMX event bus.
      * @param log4jEvent
      */
     @Override
     protected void append(LoggingEvent log4jEvent) {
-        if (!isLoggable()) {
-            errorHandler.error("Unable to log message, check configuration",
-                     null, ErrorCode.GENERIC_FAILURE);
+        // check configuration
+        if (!isConfiguredOk()) {
+            System.out.println ("Unable to log, misconfigured.");
+            errorHandler.error("Unable to log message, check configuration.");
+            return;
+        }
+
+        // determine if we can go forward with log
+        if(!isLoggable(log4jEvent)){
+            System.out.println ("IsLoggable? Appender.Level = " + this.getThreshold() + " Event.level = " + log4jEvent.getLevel());
             return;
         }
 
@@ -184,7 +194,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
         try {
             msg = layout.format(log4jEvent);
             Map<String,Object> event = prepareLogEvent(msg,log4jEvent);
-            jmxLogger.log(event);
+            jmxLogService.log(event);
         }catch(Exception ex){
            errorHandler.error("Unable to send log to JMX.",
                    ex, ErrorCode.GENERIC_FAILURE);
@@ -194,8 +204,9 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
     /**
      * Log4J life cycle method, stops the JMX MBean emitter.
      */
-    public void close() {
-        jmxLogger.stop();
+    public synchronized void close() {
+        jmxLogService.stop();
+        this.closed = true;
     }
 
     /**
@@ -207,42 +218,61 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
     }
 
     /**
-     * Determines whether the message can be logged using a number of criteria.
+     * Determines whether the Appender's configuration is OK.
      * @return boolean
      */
-    private boolean isLoggable(){
-        return jmxLogger != null &&
-                jmxLogger.isStarted() &&
-                jmxLogger.getMBeanServer() != null &&
-                jmxLogger.getObjectName() != null &&
-                layout != null;
+    private boolean isConfiguredOk(){
+        return jmxLogService != null &&
+                jmxLogService.isStarted() &&
+                jmxLogService.getMBeanServer() != null &&
+                jmxLogService.getObjectName() != null &&
+                layout != null &&
+                this.getThreshold() != null;
+    }
+
+    /**
+     * Figures out if appender can log event
+     * @return
+     */
+    private boolean isLoggable(LoggingEvent event) {
+        return (event.getLevel().isGreaterOrEqual(this.getThreshold()));
     }
 
     /**
      * Initialize the JMX Logger object.
      */
     private void initializeLogger() {
-      jmxLogger = (jmxLogger == null) ? JmxLogService.createInstance() : jmxLogger;
+      jmxLogService = (jmxLogService == null) ? JmxLogService.createInstance() : jmxLogService;
+      jmxLogService.setLogger(this);
     }
 
     /**
      * Configures the value objects for the appender.
      */
     private void configure() {
+        // config layout
         if (super.getLayout() == null) {
             super.setLayout(logLayout);
         }
+        // config level
+        if(super.getThreshold() == null){
+            super.setThreshold(Level.DEBUG);
+        }
 
-        if (jmxLogger.getMBeanServer() == null) {
+        // configure server
+        if (jmxLogService.getMBeanServer() == null) {
             if (getServerSelection().equalsIgnoreCase("platform")) {
-                jmxLogger.setMBeanServer(ManagementFactory.getPlatformMBeanServer());
+                jmxLogService.setMBeanServer(ManagementFactory.getPlatformMBeanServer());
             } else {
-                jmxLogger.setMBeanServer(ToolBox.findMBeanServer(getServerSelection()));
+                jmxLogService.setMBeanServer(ToolBox.findMBeanServer(getServerSelection()));
             }
         }
-        if(jmxLogger.getObjectName() == null){
-            jmxLogger.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
+
+        // configure internal object name
+        if(jmxLogService.getObjectName() == null){
+            jmxLogService.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
         }
+
     }
 
     /**
@@ -277,12 +307,12 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogAssembler{
         return event;
     }
 
-    public void setLevel(String l) {
+    public void setLogLevel(String l) {
         Level level = Level.toLevel(l);
         setThreshold(level);
     }
 
-    public String getLevel() {
+    public String getLogLevel() {
         return getThreshold().toString();
     }
 
