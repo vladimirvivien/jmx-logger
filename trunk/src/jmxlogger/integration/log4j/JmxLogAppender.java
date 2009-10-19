@@ -190,6 +190,8 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
             return;
         }
 
+        // look for filters
+        
         String msg;
         try {
             msg = layout.format(log4jEvent);
