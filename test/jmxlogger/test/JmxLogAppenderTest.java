@@ -6,6 +6,7 @@
 package jmxlogger.test;
 
 import java.lang.management.ManagementFactory;
+import java.util.logging.Level;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.integration.log4j.JmxLogAppender;
@@ -100,6 +101,31 @@ public class JmxLogAppenderTest {
         DOMConfigurator.configure("log4j.xml");
         platformServer.addNotificationListener(objectName, lstnr, null,null);
         logger.info("Hello!");
+
+        int count = 0;
+        while(count < 10 && lstnr.getNoteCount() <= 0){
+            try {
+                Thread.currentThread().sleep(500);
+                count++;
+                System.out.println ("Waiting for notification ... " + count * 500 + " millis.");
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
         assert lstnr.getNoteCount() > 0 : "JmxLoggingHandler ! broadcasting log event";
+    }
+
+    @Test
+    public void testSetLogLevel() {
+        JmxLogAppender l = new JmxLogAppender();
+        l.setLogLevel("INFO");
+        assert l.getLogLevel().equals("INFO");
+
+        l.setLogLevel("WARN");
+        assert l.getLogLevel().equals("WARN");
+
+        l.setLogLevel("ERROR");
+        assert l.getLogLevel().equals("ERROR");
     }
 }
