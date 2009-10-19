@@ -16,12 +16,14 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import jmxlogger.integration.log4j.JmxLogAppender;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import jmxlogger.tools.JmxLogEmitter;
+import jmxlogger.tools.JmxLogService;
 import jmxlogger.tools.ToolBox;
 
 /**
@@ -151,6 +153,18 @@ public class JmxLogEmitterTest {
         }
         assert listener.getNoteCount() > 0 : "JmxLogEmitter MBean not emitting sendLog() event";
         e.stop();
+    }
+
+    @Test
+    public void testGetLogLevel() {
+        JmxLogAppender a = new JmxLogAppender();
+        JmxLogService  svc = JmxLogService.createInstance();
+        svc.setLogger(a);
+        JmxLogEmitter e = new JmxLogEmitter();
+        e.setLogService(svc);
+        assert e.getLogLevel().equals("DEBUG");
+        e.setLogLevel("WARN");
+        assert e.getLogLevel().equals("WARN");
     }
 
 }
