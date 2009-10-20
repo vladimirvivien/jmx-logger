@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.JmxLogger;
@@ -37,6 +38,7 @@ public class JmxLogService {
     private ObjectName objectName;
     private JmxLogEmitterMBean logMBean;
     private JmxLogger jmxLogger;
+    private Pattern logPattern;
 
     private final PriorityBlockingQueue<JmxEventWrapper> queue =
             new PriorityBlockingQueue<JmxEventWrapper>(100);
@@ -95,6 +97,14 @@ public class JmxLogService {
 
     public synchronized void setLogger(JmxLogger logger){
         this.jmxLogger = logger;
+    }
+
+    public synchronized void setLogPattern(String pattern){
+        logPattern = Pattern.compile(pattern);
+    }
+
+    public synchronized String getLogPattern(String pattern){
+        return logPattern.toString();
     }
 
     /**
