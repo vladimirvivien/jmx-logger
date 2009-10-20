@@ -16,6 +16,17 @@
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
     </layout>
+
+    <filter class="jmxlogger.integration.log4j.LogFilter">
+        <param name="logPattern" value="..." />
+	<param name="sourceClass" value="..." />
+        <param name="sourceMethod" value="..." />
+        <param name="sourceThread" value="..." />
+        <param name="thrownClass" value="..." />
+        <!-- param name="timestampHi" value="..." / -->
+        <!-- param name="timestampLo" value="..." / -->
+    </filter>
+    
   </appender>
 
   <root>

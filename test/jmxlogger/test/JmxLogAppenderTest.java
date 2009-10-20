@@ -10,8 +10,11 @@ import java.util.logging.Level;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.integration.log4j.JmxLogAppender;
+import jmxlogger.integration.log4j.LogFilter;
 import jmxlogger.tools.ToolBox;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.log4j.spi.Filter;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -127,5 +130,26 @@ public class JmxLogAppenderTest {
 
         l.setLogLevel("ERROR");
         assert l.getLogLevel().equals("ERROR");
+    }
+
+    @Test
+    public void testFilterCreation() {
+        Logger logger = LogManager.getLogger(JmxLogAppenderTest.class.getName());
+        JmxLogAppender appender = new JmxLogAppender();
+        LogFilter filter = new LogFilter();
+        appender.addFilter(filter);
+        filter.setLogPattern("(.)(.)*Exception(.)(.)*");
+
+        Filter f = appender.getFilter();
+        LogFilter lf = null;
+        while (f != null){
+            if(f instanceof LogFilter){
+                lf = (LogFilter) f;
+                break;
+            }
+            f = f.getNext();
+        }
+
+        assert lf.getLogPattern().equals("(.)(.)*Exception(.)(.)*");
     }
 }

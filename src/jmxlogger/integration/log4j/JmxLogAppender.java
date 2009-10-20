@@ -19,6 +19,7 @@ package jmxlogger.integration.log4j;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.JmxLogger;
@@ -44,7 +45,7 @@ import org.apache.log4j.spi.ErrorCode;
  */
 public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
     private JmxLogService jmxLogService;
-    private String logPattern;
+    private String msgPattern;
     private String serverSelection="platform";
     private Layout logLayout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
 
@@ -129,14 +130,14 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
      * @param pattern
      */
     public synchronized void setLogPattern(String pattern){
-        logPattern = pattern;
+        msgPattern = pattern;
     }
     /**
      * To be implemented later.
      * @return String
      */
     public synchronized String getLogPattern(){
-        return logPattern;
+        return msgPattern.toString();
     }
 
     /**
