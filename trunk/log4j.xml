@@ -17,7 +17,7 @@
       <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
     </layout>
 
-    <filter class="jmxlogger.integration.log4j.LogFilter">
+    <filter class="jmxlogger.integration.log4j.DefaultLog4jFilter">
         <param name="logPattern" value="..." />
 	<param name="sourceClass" value="..." />
         <param name="sourceMethod" value="..." />

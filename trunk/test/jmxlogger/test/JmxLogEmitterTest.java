@@ -104,7 +104,7 @@ public class JmxLogEmitterTest {
         e.start();
         Map<String,Object> event = new HashMap<String,Object>();
         event.put(ToolBox.KEY_EVENT_SOURCE, e.getClass().getName());
-        event.put(ToolBox.KEY_EVENT_MESSAGE, "Hello, this is a logged message.");
+        event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, "Hello, this is a logged message.");
 
         e.sendLog(event);
         // lets stall to give thread time to settle
@@ -135,7 +135,7 @@ public class JmxLogEmitterTest {
         }
         Map<String,Object> event = new HashMap<String,Object>();
         event.put(ToolBox.KEY_EVENT_SOURCE, e.getClass().getName());
-        event.put(ToolBox.KEY_EVENT_MESSAGE, "Hello, this is a logged message.");
+        event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, "Hello, this is a logged message.");
         event.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(System.currentTimeMillis()));
         event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(System.currentTimeMillis()));
         e.start();

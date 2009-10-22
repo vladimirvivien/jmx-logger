@@ -38,10 +38,11 @@ public class ToolBox {
     public static final String KEY_EVENT_LEVEL = "levelName";
     public static final String KEY_EVENT_SOURCE_CLASS = "sourceClassName";
     public static final String KEY_EVENT_SOURCE_METHOD = "sourceMethodName";
-    public static final String KEY_EVENT_THREAD = "threadId";
+    public static final String KEY_EVENT_SOURCE_THREAD = "threadId";
     public static final String KEY_EVENT_SEQ_NUM = "sequenceNumber";
     public static final String KEY_EVENT_TIME_STAMP = "timeStamp";
-    public static final String KEY_EVENT_MESSAGE = "message";
+    public static final String KEY_EVENT_FORMATTED_MESSAGE = "formattedMsg";
+    public static final String KEY_EVENT_RAW_MESSAGE = "rawMsg";
     public static final String KEY_EVENT_THROWABLE = "throwable";
 
     private static final ErrorManager EM = new ErrorManager();

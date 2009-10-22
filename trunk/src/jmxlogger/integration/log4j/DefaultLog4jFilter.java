@@ -13,7 +13,7 @@ import org.apache.log4j.spi.LoggingEvent;
  *
  * @author vvivien
  */
-public class LogFilter extends Filter{
+public class DefaultLog4jFilter extends Filter{
     private Pattern logPattern;
     private String sourceClass;
     private String sourceMethod;
@@ -32,7 +32,7 @@ public class LogFilter extends Filter{
     }
 
     public void setLogPattern(String logPattern) {
-        this.logPattern = Pattern.compile(logPattern);
+        this.logPattern = Pattern.compile(logPattern != null ? logPattern : "");
     }
 
     public String getSourceClass() {

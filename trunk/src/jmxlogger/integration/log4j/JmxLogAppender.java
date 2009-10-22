@@ -23,18 +23,16 @@ import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.JmxLogger;
+import jmxlogger.tools.JmxLogFilter;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import jmxlogger.tools.JmxLogService;
 import jmxlogger.tools.ToolBox;
-import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.ErrorCode;
+import org.apache.log4j.spi.Filter;
 
 /**
  * This class implements the Log4J appender for JmxLogger.  It can be used to broadcast
@@ -48,7 +46,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
     private String msgPattern;
     private String serverSelection="platform";
     private Layout logLayout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
-
+    private JmxLogFilter logFilter;
     /**
      * Default constructor.  Creates a new JMX MBean emitter and registers that
      * emitter on the underlying Platform MBeanServer.
@@ -276,6 +274,18 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
             jmxLogService.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
         }
 
+        // grab default log filter (if any)
+        Filter filter = getFilter();
+        while (filter != null){
+            if(filter instanceof DefaultLog4jFilter){
+                break;
+            }
+            filter = filter.getNext();
+        }
+        
+        if(filter != null){
+            logFilter = prepareLogFilter((DefaultLog4jFilter)filter);
+        }
     }
 
     /**
@@ -289,7 +299,8 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
         event.put(ToolBox.KEY_EVENT_SOURCE,this.getClass().getName());
         event.put(ToolBox.KEY_EVENT_LEVEL,record.getLevel().toString());
         event.put(ToolBox.KEY_EVENT_LOGGER,record.getLoggerName());
-        event.put(ToolBox.KEY_EVENT_MESSAGE,fmtMsg);
+        event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE,fmtMsg);
+        event.put(ToolBox.KEY_EVENT_RAW_MESSAGE, record.getMessage());
         event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(record.getTimeStamp()));
         event.put(ToolBox.KEY_EVENT_SOURCE_CLASS,
                 (record.locationInformationExists())
@@ -299,7 +310,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
                 (record.locationInformationExists())
                 ? record.getLocationInformation().getMethodName()
                 : "Unavailable" );
-        event.put(ToolBox.KEY_EVENT_THREAD,
+        event.put(ToolBox.KEY_EVENT_SOURCE_THREAD,
                 record.getThreadName());
         event.put(ToolBox.KEY_EVENT_THROWABLE,
                 (record.getThrowableInformation() != null)
@@ -310,6 +321,19 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
         return event;
     }
 
+    private JmxLogFilter prepareLogFilter (DefaultLog4jFilter f) {
+        JmxLogFilter filter = new JmxLogFilter();
+        filter.setLogPattern((f.getLogPattern() != null) ?
+            Pattern.compile(f.getLogPattern()) : null);
+        filter.setSourceClass(f.getSourceClass());
+        filter.setSourceMethod(f.getSourceMethod());
+        filter.setSourceThread(f.getSourceThread());
+        filter.setThrownClass(f.getThrownClass());
+        filter.setTimestampHi(f.getTimestampHi());
+        filter.setTimestampLo(f.getTimestampLo());
+
+        return filter;
+    }
     public void setLogLevel(String l) {
         Level level = Level.toLevel(l);
         setThreshold(level);

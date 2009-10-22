@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.integration.log4j.JmxLogAppender;
-import jmxlogger.integration.log4j.LogFilter;
+import jmxlogger.integration.log4j.DefaultLog4jFilter;
 import jmxlogger.tools.ToolBox;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -136,15 +136,15 @@ public class JmxLogAppenderTest {
     public void testFilterCreation() {
         Logger logger = LogManager.getLogger(JmxLogAppenderTest.class.getName());
         JmxLogAppender appender = new JmxLogAppender();
-        LogFilter filter = new LogFilter();
+        DefaultLog4jFilter filter = new DefaultLog4jFilter();
         appender.addFilter(filter);
         filter.setLogPattern("(.)(.)*Exception(.)(.)*");
 
         Filter f = appender.getFilter();
-        LogFilter lf = null;
+        DefaultLog4jFilter lf = null;
         while (f != null){
-            if(f instanceof LogFilter){
-                lf = (LogFilter) f;
+            if(f instanceof DefaultLog4jFilter){
+                lf = (DefaultLog4jFilter) f;
                 break;
             }
             f = f.getNext();

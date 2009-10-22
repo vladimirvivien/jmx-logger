@@ -315,11 +315,11 @@ public class JmxLogHandler extends Handler implements JmxLogger{
         event.put(ToolBox.KEY_EVENT_SOURCE,this.getClass().getName());
         event.put(ToolBox.KEY_EVENT_LEVEL,record.getLevel().getName());
         event.put(ToolBox.KEY_EVENT_LOGGER,record.getLoggerName());
-        event.put(ToolBox.KEY_EVENT_MESSAGE,fmtMsg);
+        event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE,fmtMsg);
         event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(record.getSequenceNumber()));
         event.put(ToolBox.KEY_EVENT_SOURCE_CLASS,record.getSourceClassName());
         event.put(ToolBox.KEY_EVENT_SOURCE_METHOD,record.getSourceMethodName());
-        event.put(ToolBox.KEY_EVENT_THREAD,Integer.toString(record.getThreadID()));
+        event.put(ToolBox.KEY_EVENT_SOURCE_THREAD,Integer.toString(record.getThreadID()));
         event.put(ToolBox.KEY_EVENT_THROWABLE,record.getThrown());
         event.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(record.getMillis()));
 

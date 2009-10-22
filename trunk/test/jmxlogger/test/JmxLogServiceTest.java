@@ -108,7 +108,7 @@ public class JmxLogServiceTest {
         l.getMBeanServer().addNotificationListener(objName, lstnr, null, null);
         Map<String,Object> event = new HashMap<String,Object>();
         event.put(ToolBox.KEY_EVENT_SOURCE, l.getClass().getName());
-        event.put(ToolBox.KEY_EVENT_MESSAGE, "Hello, this is a logged message.");
+        event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, "Hello, this is a logged message.");
   
         l.log(event);
 
