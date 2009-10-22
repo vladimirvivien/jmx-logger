@@ -109,7 +109,7 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
                 (String)event.get(ToolBox.KEY_EVENT_SOURCE),
                 seqnum,
                 timestamp,
-                (String)event.get(ToolBox.KEY_EVENT_MESSAGE));
+                (String)event.get(ToolBox.KEY_EVENT_FORMATTED_MESSAGE));
         note.setUserData(event);
         return note;
     }
