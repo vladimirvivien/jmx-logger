@@ -19,10 +19,8 @@ package jmxlogger.tools;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 
@@ -126,4 +124,59 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
         return logService.getLoggerLevel();
     }
 
+    public void setFilteredPattern(String pattern) {
+        logService.getLogFilterConfig().setLogPattern(Pattern.compile(pattern));
+    }
+
+    public String getFilteredPattern() {
+        return logService.getLogFilterConfig().getLogPattern().toString();
+    }
+
+    public void setFilteredSourceClass(String name) {
+        logService.getLogFilterConfig().setSourceClass(name);
+    }
+
+    public String getFilteredSourceClass() {
+        return logService.getLogFilterConfig().getSourceClass();
+    }
+
+    public void setFilteredSourceMethod(String name) {
+        logService.getLogFilterConfig().setSourceMethod(name);
+    }
+
+    public String getFilteredSourceMethod() {
+        return logService.getLogFilterConfig().getSourceMethod();
+    }
+
+    public void setFilteredSourceThread(String name) {
+        logService.getLogFilterConfig().setSourceThread(name);
+    }
+
+    public String getFilteredSourceThread() {
+        return logService.getLogFilterConfig().getSourceThread();
+    }
+
+    public void setFilteredThrownClass(String name) {
+        logService.getLogFilterConfig().setThrownClass(name);
+    }
+
+    public String getFilteredThrownClass() {
+        return logService.getLogFilterConfig().getThrownClass();
+    }
+
+    public void setFilteredTimestampHi(long value) {
+        logService.getLogFilterConfig().getTimestampHi();
+    }
+
+    public long getFilteredTimestampHi() {
+        return logService.getLogFilterConfig().getTimestampHi();
+    }
+
+    public void setFilteredTimestampLo(long value) {
+        logService.getLogFilterConfig().getTimestampLo();
+    }
+
+    public long getFilteredTimestampLo() {
+        return logService.getLogFilterConfig().getTimestampLo();
+    }
 }

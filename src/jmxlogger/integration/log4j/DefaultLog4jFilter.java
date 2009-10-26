@@ -6,6 +6,7 @@
 package jmxlogger.integration.log4j;
 
 import java.util.regex.Pattern;
+import jmxlogger.tools.JmxLogConfig;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.spi.LoggingEvent;
 
@@ -14,13 +15,15 @@ import org.apache.log4j.spi.LoggingEvent;
  * @author vvivien
  */
 public class DefaultLog4jFilter extends Filter{
-    private Pattern logPattern;
-    private String sourceClass;
-    private String sourceMethod;
-    private String sourceThread;
-    private String thrownClass;
-    private long timestampHi;
-    private long timestampLo;
+    private JmxLogConfig config;
+
+    public DefaultLog4jFilter() {
+        config = new JmxLogConfig();
+    }
+
+    public JmxLogConfig getLogFilterConfig() {
+        return config;
+    }
 
     @Override
     public int decide(LoggingEvent e) {
@@ -28,59 +31,59 @@ public class DefaultLog4jFilter extends Filter{
     }
 
     public String getLogPattern() {
-        return logPattern.toString();
+        return config.getLogPattern().toString();
     }
 
     public void setLogPattern(String logPattern) {
-        this.logPattern = Pattern.compile(logPattern != null ? logPattern : "");
+        this.config.setLogPattern(Pattern.compile(logPattern != null ? logPattern : ""));
     }
 
     public String getSourceClass() {
-        return sourceClass;
+        return config.getSourceClass();
     }
 
     public void setSourceClass(String sourceClass) {
-        this.sourceClass = sourceClass;
+        config.setSourceClass(sourceClass);
     }
 
     public String getSourceMethod() {
-        return sourceMethod;
+        return config.getSourceMethod();
     }
 
     public void setSourceMethod(String sourceMethod) {
-        this.sourceMethod = sourceMethod;
+        config.setSourceMethod(sourceMethod);
     }
 
     public String getSourceThread() {
-        return sourceThread;
+        return config.getSourceThread();
     }
 
     public void setSourceThread(String sourceThread) {
-        this.sourceThread = sourceThread;
+        this.config.setSourceThread(sourceThread);
     }
 
     public String getThrownClass() {
-        return thrownClass;
+        return config.getThrownClass();
     }
 
     public void setThrownClass(String thrownClass) {
-        this.thrownClass = thrownClass;
+        this.config.setThrownClass(thrownClass);
     }
 
     public long getTimestampHi() {
-        return timestampHi;
+        return config.getTimestampHi();
     }
 
     public void setTimestampHi(long timestampHi) {
-        this.timestampHi = timestampHi;
+        this.config.setTimestampHi(timestampHi);
     }
 
     public long getTimestampLo() {
-        return timestampLo;
+        return config.getTimestampLo();
     }
 
     public void setTimestampLo(long timestampLo) {
-        this.timestampLo = timestampLo;
+        this.config.setTimestampLo(timestampLo);
     }
 
 }
