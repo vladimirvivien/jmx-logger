@@ -152,4 +152,5 @@ public class JmxLogAppenderTest {
 
         assert lf.getLogPattern().equals("(.)(.)*Exception(.)(.)*");
     }
+    
 }

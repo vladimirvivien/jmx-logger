@@ -24,6 +24,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.JmxLogger;
 import jmxlogger.tools.JmxLogFilter;
+import jmxlogger.tools.JmxLogConfig;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import jmxlogger.tools.JmxLogService;
@@ -178,19 +179,16 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
     protected void append(LoggingEvent log4jEvent) {
         // check configuration
         if (!isConfiguredOk()) {
-            System.out.println ("Unable to log, misconfigured.");
             errorHandler.error("Unable to log message, check configuration.");
             return;
         }
 
         // determine if we can go forward with log
         if(!isLoggable(log4jEvent)){
-            System.out.println ("IsLoggable? Appender.Level = " + this.getThreshold() + " Event.level = " + log4jEvent.getLevel());
             return;
         }
 
-        // look for filters
-        
+        // log message
         String msg;
         try {
             msg = layout.format(log4jEvent);
@@ -275,6 +273,9 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
         }
 
         // grab default log filter (if any)
+        // note that filter is userd as a dto and its rule not calculated.
+        // instead, filtering happens in the JmxLogFilter to take advantage of
+        // async
         Filter filter = getFilter();
         while (filter != null){
             if(filter instanceof DefaultLog4jFilter){
@@ -284,7 +285,9 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
         }
         
         if(filter != null){
-            logFilter = prepareLogFilter((DefaultLog4jFilter)filter);
+            JmxLogConfig cfg = ((DefaultLog4jFilter)filter).getLogFilterConfig();
+
+            jmxLogService.setLogFilterConfig(cfg);
         }
     }
 
@@ -321,19 +324,6 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
         return event;
     }
 
-    private JmxLogFilter prepareLogFilter (DefaultLog4jFilter f) {
-        JmxLogFilter filter = new JmxLogFilter();
-        filter.setLogPattern((f.getLogPattern() != null) ?
-            Pattern.compile(f.getLogPattern()) : null);
-        filter.setSourceClass(f.getSourceClass());
-        filter.setSourceMethod(f.getSourceMethod());
-        filter.setSourceThread(f.getSourceThread());
-        filter.setThrownClass(f.getThrownClass());
-        filter.setTimestampHi(f.getTimestampHi());
-        filter.setTimestampLo(f.getTimestampLo());
-
-        return filter;
-    }
     public void setLogLevel(String l) {
         Level level = Level.toLevel(l);
         setThreshold(level);

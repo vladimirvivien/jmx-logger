@@ -27,9 +27,11 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
+import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.JmxLogger;
+import jmxlogger.tools.JmxLogConfig;
 import jmxlogger.tools.JmxLogService;
 import jmxlogger.tools.ToolBox;
 
@@ -50,6 +52,13 @@ public class JmxLogHandler extends Handler implements JmxLogger{
     private final static String KEY_FORMATTER = "jmxlogger.Handler.formatter";
     private final static String KEY_OBJNAME = "jmxlogger.Handler.objectName";
     private final static String KEY_SERVER = "jmxlogger.Handler.serverSelection";
+    private final static String KEY_FILTER_PATTERN = "jmx.logger.filter.logPattern";
+    private final static String KEY_FILTER_SOURCE = "jmx.logger.filter.sourceClass";
+    private final static String KEY_FILTER_METHOD = "jmx.logger.filter.sourceMethod";
+    private final static String KEY_FILTER_THREAD = "jmx.logger.filter.sourceThread";
+    private final static String KEY_FILTER_THROWN = "jmx.logger.filter.thrownClass";
+    private final static String KEY_FILTER_TSLO = "jmx.logger.filter.timestampLo";
+    private final static String KEY_FILTER_TSHI = "jmx.logger.filter.timestampHi";
 
     /**
      * Default constructor.  Initializes a default MBeanServer (platform) and
@@ -251,11 +260,6 @@ public class JmxLogHandler extends Handler implements JmxLogger{
             super.setFilter(null);
         }
 
-        value = manager.getProperty(KEY_LOGPATTERN);
-        if(value != null){
-            // logService.setLogPattern(value);
-        }
-
         // configure formatter (default SimpleFormatter)
         value = manager.getProperty(KEY_FORMATTER);
         if (value != null && value.length() != 0) {
@@ -295,6 +299,9 @@ public class JmxLogHandler extends Handler implements JmxLogger{
         }else{
             setMBeanServer(ManagementFactory.getPlatformMBeanServer());
         }
+
+        // setup internal filter
+        logService.setLogFilterConfig(prepareFilterConfig());
     }
 
     /**
@@ -324,6 +331,29 @@ public class JmxLogHandler extends Handler implements JmxLogger{
         event.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(record.getMillis()));
 
         return event;
+    }
+
+    private JmxLogConfig prepareFilterConfig() {
+        // configure default filters
+        JmxLogConfig cfg = new JmxLogConfig();
+        cfg.setLogPattern(Pattern.compile(manager.getProperty(KEY_FILTER_PATTERN)));
+        cfg.setSourceClass(manager.getProperty(KEY_FILTER_SOURCE));
+        cfg.setSourceMethod(manager.getProperty(KEY_FILTER_METHOD));
+        cfg.setSourceThread(manager.getProperty(KEY_FILTER_THREAD));
+        cfg.setThrownClass(manager.getProperty(KEY_FILTER_THROWN));
+        long ts = 0;
+        try {
+            ts = Long.parseLong(manager.getProperty(KEY_FILTER_TSLO));
+        } catch (NumberFormatException ex) {
+        }
+        ts = 0;
+        cfg.setTimestampLo(ts);
+        try {
+            ts = Long.parseLong(manager.getProperty(KEY_FILTER_TSLO));
+        } catch (NumberFormatException ex) {
+        }
+        cfg.setTimestampHi(ts);
+        return cfg;
     }
 
     /**

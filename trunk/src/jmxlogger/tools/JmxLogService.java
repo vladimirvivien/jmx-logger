@@ -38,6 +38,7 @@ public class JmxLogService {
     private ObjectName objectName;
     private JmxLogEmitterMBean logMBean;
     private JmxLogger jmxLogger;
+    private JmxLogFilter logFilter;
     private Pattern logPattern;
 
     private final PriorityBlockingQueue<JmxEventWrapper> queue =
@@ -53,6 +54,7 @@ public class JmxLogService {
     private JmxLogService() {
         logMBean = new JmxLogEmitter();
         ((JmxLogEmitter)logMBean).setLogService(this);
+        logFilter = new JmxLogFilter();
     }
 
     /**
@@ -99,13 +101,14 @@ public class JmxLogService {
         this.jmxLogger = logger;
     }
 
-    public synchronized void setLogPattern(String pattern){
-        logPattern = Pattern.compile(pattern);
+    public synchronized void setLogFilterConfig(JmxLogConfig cfg){
+        logFilter.setLogFilterConfig(cfg);
     }
 
-    public synchronized String getLogPattern(String pattern){
-        return logPattern.toString();
+    public synchronized JmxLogConfig getLogFilterConfig() {
+        return logFilter.getLogFilterConfig();
     }
+
 
     /**
      * Life cycle method that starts the logger.  It registers the emitter MBean
@@ -148,7 +151,10 @@ public class JmxLogService {
         final JmxEventWrapper noteWrapper = new JmxEventWrapper(event);
         noteProducers.execute(new Runnable(){
             public void run() {
-                queue.put(noteWrapper);
+                // apply filter configuration then put event not on queue
+                if(logFilter.isLogAllowed(noteWrapper)){
+                    queue.put(noteWrapper);
+                }
             }
         });
     }
