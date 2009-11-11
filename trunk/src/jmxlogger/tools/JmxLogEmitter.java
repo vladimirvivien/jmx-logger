@@ -125,58 +125,58 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     }
 
     public void setFilteredPattern(String pattern) {
-        logService.getLogFilterConfig().setLogPattern(Pattern.compile(pattern));
+        logService.getJmxLogConfig().setLogPattern(Pattern.compile(pattern));
     }
 
     public String getFilteredPattern() {
-        return logService.getLogFilterConfig().getLogPattern().toString();
+        return logService.getJmxLogConfig().getLogPattern().toString();
     }
 
     public void setFilteredSourceClass(String name) {
-        logService.getLogFilterConfig().setSourceClass(name);
+        logService.getJmxLogConfig().setSourceClass(name);
     }
 
     public String getFilteredSourceClass() {
-        return logService.getLogFilterConfig().getSourceClass();
+        return logService.getJmxLogConfig().getSourceClass();
     }
 
     public void setFilteredSourceMethod(String name) {
-        logService.getLogFilterConfig().setSourceMethod(name);
+        logService.getJmxLogConfig().setSourceMethod(name);
     }
 
     public String getFilteredSourceMethod() {
-        return logService.getLogFilterConfig().getSourceMethod();
+        return logService.getJmxLogConfig().getSourceMethod();
     }
 
     public void setFilteredSourceThread(String name) {
-        logService.getLogFilterConfig().setSourceThread(name);
+        logService.getJmxLogConfig().setSourceThread(name);
     }
 
     public String getFilteredSourceThread() {
-        return logService.getLogFilterConfig().getSourceThread();
+        return logService.getJmxLogConfig().getSourceThread();
     }
 
     public void setFilteredThrownClass(String name) {
-        logService.getLogFilterConfig().setThrownClass(name);
+        logService.getJmxLogConfig().setThrownClass(name);
     }
 
     public String getFilteredThrownClass() {
-        return logService.getLogFilterConfig().getThrownClass();
+        return logService.getJmxLogConfig().getThrownClass();
     }
 
     public void setFilteredTimestampHi(long value) {
-        logService.getLogFilterConfig().getTimestampHi();
+        logService.getJmxLogConfig().getTimestampHi();
     }
 
     public long getFilteredTimestampHi() {
-        return logService.getLogFilterConfig().getTimestampHi();
+        return logService.getJmxLogConfig().getTimestampHi();
     }
 
     public void setFilteredTimestampLo(long value) {
-        logService.getLogFilterConfig().getTimestampLo();
+        logService.getJmxLogConfig().getTimestampLo();
     }
 
     public long getFilteredTimestampLo() {
-        return logService.getLogFilterConfig().getTimestampLo();
+        return logService.getJmxLogConfig().getTimestampLo();
     }
 }

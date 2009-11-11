@@ -287,7 +287,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
         if(filter != null){
             JmxLogConfig cfg = ((DefaultLog4jFilter)filter).getLogFilterConfig();
 
-            jmxLogService.setLogFilterConfig(cfg);
+            jmxLogService.setJmxLogConfig(cfg);
         }
     }
 
