@@ -34,12 +34,10 @@ import jmxlogger.JmxLogger;
  * @author vladimir.vivien
  */
 public class JmxLogService {
-    private MBeanServer server;
-    private ObjectName objectName;
     private JmxLogEmitterMBean logMBean;
     private JmxLogger jmxLogger;
     private JmxLogFilter logFilter;
-    private Pattern logPattern;
+    private JmxLogConfig logConfig;
 
     private final PriorityBlockingQueue<JmxEventWrapper> queue =
             new PriorityBlockingQueue<JmxEventWrapper>(100);
@@ -55,6 +53,7 @@ public class JmxLogService {
         logMBean = new JmxLogEmitter();
         ((JmxLogEmitter)logMBean).setLogService(this);
         logFilter = new JmxLogFilter();
+        logConfig = new JmxLogConfig();
     }
 
     /**
@@ -65,50 +64,21 @@ public class JmxLogService {
         return new JmxLogService();
     }
 
-    /**
-     * Setter for specifying the MBeanServer to use.
-     * @param server
-     */
-    public synchronized void setMBeanServer(MBeanServer server){
-        this.server = server;
+    public synchronized JmxLogConfig getJmxLogConfig() {
+        return logConfig;
     }
 
-    /**
-     * Getter for MBeanServer used.
-     * @return MBeanServer
-     */
-    public synchronized MBeanServer getMBeanServer() {
-        return server;
+    public synchronized void setJmxLogConfig(JmxLogConfig config){
+        logConfig = config;
     }
 
-    /**
-     * Setter for specifying ObjectName instance to use for emitter MBean.
-     * @param name
-     */
-    public synchronized void setObjectName(ObjectName name){
-        objectName = name;
+    public synchronized void setJmxLogFilter(JmxLogFilter filter){
+        logFilter = filter;
     }
 
-    /**
-     * Getter for ObjectName used.
-     * @return
-     */
-    public synchronized ObjectName getObjectName() {
-        return objectName;
+    public synchronized JmxLogFilter getJmxLogFilter(){
+        return logFilter;
     }
-
-    public synchronized void setLogger(JmxLogger logger){
-        this.jmxLogger = logger;
-    }
-
-    public synchronized void setLogFilterConfig(JmxLogConfig cfg){
-        logFilter.setLogFilterConfig(cfg);
-    }
-
-    public synchronized JmxLogConfig getLogFilterConfig() {
-        return logFilter.getLogFilterConfig();
-    }
-
 
     /**
      * Life cycle method that starts the logger.  It registers the emitter MBean
@@ -117,7 +87,14 @@ public class JmxLogService {
     public void start(){
         this.setupNoteProducers();
         this.setupNoteConsumerTask();
-        ToolBox.registerMBean(getMBeanServer(), getObjectName(), logMBean);
+        MBeanServer svr = (MBeanServer) logConfig.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
+        ObjectName objName = (ObjectName)logConfig.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        if(svr == null || objName == null){
+            throw new IllegalArgumentException("Unable to start log service - " +
+                    "instance of MBeanServer and ObjectName must be " +
+                    "provided.");
+        }
+        ToolBox.registerMBean(svr, objName, logMBean);
         logMBean.start();
     }
 
@@ -127,7 +104,9 @@ public class JmxLogService {
     public void stop(){
         noteConsumer.shutdownNow();
         noteProducers.shutdownNow();
-        ToolBox.unregisterMBean(getMBeanServer(), getObjectName());
+        MBeanServer svr = (MBeanServer) logConfig.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
+        ObjectName objName = (ObjectName)logConfig.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        ToolBox.unregisterMBean(svr, objName);
         logMBean.stop();
     }
 

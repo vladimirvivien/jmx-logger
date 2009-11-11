@@ -32,6 +32,17 @@ import javax.management.ObjectName;
  */
 
 public class ToolBox {
+    // configuration keys
+    public static final String KEY_CONFIG_LOG_LEVEL = "level";
+    public static final String KEY_CONFIG_FORMATTER_CLASS = "formatterClassName";
+    public static final String KEY_CONFIG_FORMATTER_PATTERN = "formatterPattern";
+    public static final String KEY_CONFIG_JMX_OBJECTNAME = "jmxObjectName";
+    public static final String KEY_CONFIG_JMX_SERVER = "jmxServer";
+    public static final String KEY_CONFIG_FILTER_EXP = "filterExpression";
+    public static final String KEY_CONFIG_FILTER_SCRIPT = "filterScript";
+    public static final String KEY_CONFIG_FILTER_FILE = "filterFile";
+    
+    // event keys
     public static final String KEY_EVENT_TYPE = "jmxlogger.log.event";
     public static final String KEY_EVENT_SOURCE = "source";
     public static final String KEY_EVENT_LOGGER = "loggerName";

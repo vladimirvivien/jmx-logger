@@ -5,82 +5,27 @@
 
 package jmxlogger.tools;
 
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- *
- * @author vvivien
- */
 public class JmxLogConfig {
-    private String level;
-    private Pattern logPattern;
-    private String sourceClass;
-    private String sourceMethod;
-    private String sourceThread;
-    private String thrownClass;
-    private long timestampHi = -1L;
-    private long timestampLo = -1L;
-
-    public String getLevel(){
-        return level;
+    private HashMap<String,Object> config;
+    public JmxLogConfig(){
+        config = new HashMap<String,Object>();
     }
-    public void setLevel(String l){
-        level = l;
+    public JmxLogConfig(Map<String,Object> values){
+        config = (HashMap) values;
     }
-    public Pattern getLogPattern() {
-        return logPattern;
+    public void putValues(final Map<String,Object> values){
+        config = (HashMap) values;
     }
-
-    public void setLogPattern(Pattern logPattern) {
-        this.logPattern = logPattern;
+    public void putValue(String key, Object value){
+        config.put(key, value);
     }
-
-    public String getSourceClass() {
-        return sourceClass;
+    public Object getValue(String key){
+        return config.get(key);
     }
-
-    public void setSourceClass(String sourceClass) {
-        this.sourceClass = sourceClass;
+    public Map<String,Object> getValues() {
+        return config;
     }
-
-    public String getSourceMethod() {
-        return sourceMethod;
-    }
-
-    public void setSourceMethod(String sourceMethod) {
-        this.sourceMethod = sourceMethod;
-    }
-
-    public String getSourceThread() {
-        return sourceThread;
-    }
-
-    public void setSourceThread(String sourceThread) {
-        this.sourceThread = sourceThread;
-    }
-
-    public String getThrownClass() {
-        return thrownClass;
-    }
-
-    public void setThrownClass(String thrownClass) {
-        this.thrownClass = thrownClass;
-    }
-
-    public long getTimestampHi() {
-        return timestampHi;
-    }
-
-    public void setTimestampHi(long timestampHi) {
-        this.timestampHi = timestampHi;
-    }
-
-    public long getTimestampLo() {
-        return timestampLo;
-    }
-
-    public void setTimestampLo(long timestampLo) {
-        this.timestampLo = timestampLo;
-    }
-
 }

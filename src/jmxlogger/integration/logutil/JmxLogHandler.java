@@ -47,18 +47,13 @@ public class JmxLogHandler extends Handler implements JmxLogger{
     private JmxLogService logService;
 
     private final static String KEY_LEVEL = "jmxlogger.Handler.level";
-    private final static String KEY_FILTER = "jmxlogger.Handler.filter";
-    private final static String KEY_LOGPATTERN = "jmxlogger.Handler.logPattern";
     private final static String KEY_FORMATTER = "jmxlogger.Handler.formatter";
-    private final static String KEY_OBJNAME = "jmxlogger.Handler.objectName";
-    private final static String KEY_SERVER = "jmxlogger.Handler.serverSelection";
-    private final static String KEY_FILTER_PATTERN = "jmx.logger.filter.logPattern";
-    private final static String KEY_FILTER_SOURCE = "jmx.logger.filter.sourceClass";
-    private final static String KEY_FILTER_METHOD = "jmx.logger.filter.sourceMethod";
-    private final static String KEY_FILTER_THREAD = "jmx.logger.filter.sourceThread";
-    private final static String KEY_FILTER_THROWN = "jmx.logger.filter.thrownClass";
-    private final static String KEY_FILTER_TSLO = "jmx.logger.filter.timestampLo";
-    private final static String KEY_FILTER_TSHI = "jmx.logger.filter.timestampHi";
+    private final static String KEY_OBJNAME = "jmxlogger.Handler.jmxObjectName";
+    private final static String KEY_SERVER = "jmxlogger.Handler.jmxServer";
+    private final static String KEY_FILTER_EXP = "jmxlogger.Handler.filterExpression";
+    private final static String KEY_FILTER_CLASS = "jmxlogger.Handler.filterClass";
+    private final static String KEY_FILTER_SCRIPT = "jmxlogger.Handler.filterScript";
+
 
     /**
      * Default constructor.  Initializes a default MBeanServer (platform) and
@@ -110,7 +105,7 @@ public class JmxLogHandler extends Handler implements JmxLogger{
      * @param objName
      */
     public void setObjectName(ObjectName objName){
-        logService.setObjectName(objName);
+        logService.getJmxLogConfig().putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, objName);
     }
 
     /**
@@ -118,7 +113,8 @@ public class JmxLogHandler extends Handler implements JmxLogger{
      * @return ObjectName instance
      */
     public ObjectName getObjectName() {
-        return (logService.getObjectName() != null) ? logService.getObjectName() : null;
+        return (logService != null) ? 
+            (ObjectName)logService.getJmxLogConfig().getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) : null;
     }
 
     /**
@@ -126,7 +122,7 @@ public class JmxLogHandler extends Handler implements JmxLogger{
      * @param server
      */
     public void setMBeanServer(MBeanServer server){
-        logService.setMBeanServer(server);
+        logService.getJmxLogConfig().putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
     }
 
     /**
@@ -134,7 +130,8 @@ public class JmxLogHandler extends Handler implements JmxLogger{
      * @return MBeanServer
      */
     public MBeanServer getMBeanServer() {
-        return logService.getMBeanServer();
+        return (logService != null) ?
+            (MBeanServer)logService.getJmxLogConfig().getValue(ToolBox.KEY_CONFIG_JMX_SERVER) : null;
     }
 
     /**
@@ -228,8 +225,8 @@ public class JmxLogHandler extends Handler implements JmxLogger{
     private boolean isConfiguredOk() {
         return (logService != null &&
                 logService.isStarted() &&
-                logService.getMBeanServer() != null &&
-                logService.getObjectName() != null &&
+                logService.getJmxLogConfig().getValue(ToolBox.KEY_CONFIG_JMX_SERVER) != null &&
+                logService.getJmxLogConfig().getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) != null &&
                 getFormatter() != null &&
                 this.getLevel() != null);
     }
@@ -244,7 +241,7 @@ public class JmxLogHandler extends Handler implements JmxLogger{
         super.setLevel(value != null ? Level.parse(value) : Level.FINE);
 
         // configure filter (default none)
-        value = manager.getProperty(KEY_FILTER);
+        value = manager.getProperty(KEY_FILTER_CLASS);
         if (value != null && value.length() != 0) {
             // assume it's a class name and load it.
             try {
@@ -301,7 +298,7 @@ public class JmxLogHandler extends Handler implements JmxLogger{
         }
 
         // setup internal filter
-        logService.setLogFilterConfig(prepareFilterConfig());
+        logService.setJmxLogConfig(prepareFilterConfig());
     }
 
     /**
