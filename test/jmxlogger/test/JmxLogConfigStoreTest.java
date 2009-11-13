@@ -6,7 +6,7 @@
 package jmxlogger.test;
 
 import java.util.HashMap;
-import jmxlogger.tools.JmxLogConfig;
+import jmxlogger.tools.JmxLogConfigStore;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,9 +16,9 @@ import static org.junit.Assert.*;
  *
  * @author vvivien
  */
-public class JmxLogConfigTest {
+public class JmxLogConfigStoreTest {
 
-    public JmxLogConfigTest() {
+    public JmxLogConfigStoreTest() {
     }
 
     @BeforeClass
@@ -31,14 +31,12 @@ public class JmxLogConfigTest {
 
     @Test
     public void testConstructors() {
-        JmxLogConfig cfg = new JmxLogConfig();
-        assert cfg.getValues() == null : "Default constructor failed.";
+        JmxLogConfigStore cfg = new JmxLogConfigStore();
 
         HashMap vals = new HashMap();
         vals.put("a", "b");
-        cfg = new JmxLogConfig(vals);
+        cfg = new JmxLogConfigStore(vals);
         assert cfg.getValue("a").equals("b") : "Constructor fails to pass in values";
-        assert cfg.getValues().size() == 1 : "Constructor fails to pass in values";
     }
 
 
