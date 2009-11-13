@@ -44,6 +44,7 @@ import org.apache.log4j.spi.Filter;
  */
 public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer{
     private JmxLogService jmxLogService;
+    private JmxLogConfigStore config;
     private String msgPattern;
     private String serverSelection="platform";
     private Layout logLayout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
@@ -64,7 +65,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
      */
     public JmxLogAppender(ObjectName name){
         initializeLogger();
-        jmxLogService.setObjectName(name);
+        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
         configure();
     }
 
@@ -74,7 +75,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
      */
     public JmxLogAppender(MBeanServer server){
         initializeLogger();
-        jmxLogService.setMBeanServer(server);
+        setMBeanServer(server);
         configure();
         
     }
@@ -87,75 +88,59 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
      */
     public JmxLogAppender(MBeanServer server, ObjectName name){
         initializeLogger();
-        jmxLogService.setMBeanServer(server);
-        jmxLogService.setObjectName(name);
+        setMBeanServer(server);
+        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
         configure();
     }
 
     /**
-     * Setter for the ObjectName to use.
-     * @param objName - instance of ObjectName to use for JMX emitter MBean.
+     * Setter for emitter MBean ObjectName.
+     * @param objName
      */
     public void setObjectName(String objName){
-        jmxLogService.setObjectName(ToolBox.buildObjectName(objName));
+        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, createObjectNameInstance(objName));
     }
 
     /**
-     * Getter for ObjectName used for JMX emitter.
-     * @return
+     * Getter of ObjectName for emitter MBean.
+     * @return ObjectName instance
      */
-    public String getObjectName() {
-        return (jmxLogService.getObjectName() != null) ? jmxLogService.getObjectName().toString() : null;
+    public ObjectName getObjectName() {
+        return (ObjectName)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
     }
 
     /**
      * Setter for MBeanServer used to register emitter MBean.
-     * @param server - MBeanServer
+     * @param server
      */
     public void setMBeanServer(MBeanServer server){
-        jmxLogService.setMBeanServer(server);
+        config.putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
     }
 
     /**
-     * Getter of MBeanServer used JMX emitter MBean.
+     * Getter of MBeanServer.
      * @return MBeanServer
      */
     public MBeanServer getMBeanServer() {
-        return jmxLogService.getMBeanServer();
+        return (MBeanServer)config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
     }
 
-    /**
-     * To be implemented later.
-     * @param pattern
-     */
-    public synchronized void setLogPattern(String pattern){
-        msgPattern = pattern;
-    }
-    /**
-     * To be implemented later.
-     * @return String
-     */
-    public synchronized String getLogPattern(){
-        return msgPattern.toString();
+    public void setFilterExpression(String exp){
+        config.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
     }
 
-    /**
-     * Setter for server selection.  Valid values are "platform" which causes the
-     * platform MBenServer to be used. Or the domain name of an existing MBeanServer
-     * can be used.
-     * @param selection ["platform"|"server domain name"]
-     */
-    public synchronized void setServerSelection(String selection){
-        serverSelection = selection;
+    public String getFilterExpression(){
+        return (String)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
     }
 
-    /**
-     * Getter for MBeanServer selection.
-     * @return the selection.
-     */
-    public synchronized String getServerSelection(){
-        return serverSelection;
+    public void setFilterScript(String fileName) {
+        config.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, fileName);
     }
+
+    public String getFilterScript(){
+        return (String)config.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
+    }
+
 
     /**
      * Log4J life cycle method, called once all gettters/setters are called.
@@ -324,13 +309,49 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
         return event;
     }
 
-    public void setLogLevel(String l) {
-        Level level = Level.toLevel(l);
-        setThreshold(level);
+    private Level createLevelInstance(String level){
+        return level != null ? Level.parse(level) : Level.FINE;
     }
 
-    public String getLogLevel() {
-        return getThreshold().toString();
+    private ObjectName createObjectNameInstance(String name){
+        ObjectName objName = null;
+        if(objName == null){
+            objName = ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode()));
+        }else{
+            objName = ToolBox.buildObjectName(name);
+        }
+        return objName;
     }
+    private Filter createFilterInstance(String className){
+        Filter f = null;
+        if (className != null && className.length() != 0) {
+            // assume it's a valid class name on the classpath and load it.
+            try {
+                Class cls = ClassLoader.getSystemClassLoader().loadClass(className);
+                f = (Filter) cls.newInstance();
+            } catch (Exception ex) {
+                reportError("Unable to load filter class [" + className + "]. Filter will be set to null" ,
+                    ex, ErrorManager.CLOSE_FAILURE);
+            }
+        }
+        return f;
+    }
+
+    private Formatter createFormatterInstance(String className) {
+        Formatter f = new SimpleFormatter();
+        if (className != null && className.length() != 0) {
+            // assume it's a class and load it.
+            try {
+                Class cls = ClassLoader.getSystemClassLoader().loadClass(className);
+                f = (Formatter) cls.newInstance();
+            } catch (Exception ex) {
+                reportError("Unable to load formatter class [" + className + "]. Will default to SimpleFormatter" ,
+                    ex, ErrorManager.CLOSE_FAILURE);
+            }
+
+        }
+        return f;
+    }
+
 
 }

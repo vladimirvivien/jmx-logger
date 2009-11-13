@@ -117,66 +117,11 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     }
 
     public void setLogLevel(String level) {
-        logService.setLoggerLevel(level);
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public String getLogLevel() {
-        return logService.getLoggerLevel();
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void setFilteredPattern(String pattern) {
-        logService.getJmxLogConfig().setLogPattern(Pattern.compile(pattern));
-    }
-
-    public String getFilteredPattern() {
-        return logService.getJmxLogConfig().getLogPattern().toString();
-    }
-
-    public void setFilteredSourceClass(String name) {
-        logService.getJmxLogConfig().setSourceClass(name);
-    }
-
-    public String getFilteredSourceClass() {
-        return logService.getJmxLogConfig().getSourceClass();
-    }
-
-    public void setFilteredSourceMethod(String name) {
-        logService.getJmxLogConfig().setSourceMethod(name);
-    }
-
-    public String getFilteredSourceMethod() {
-        return logService.getJmxLogConfig().getSourceMethod();
-    }
-
-    public void setFilteredSourceThread(String name) {
-        logService.getJmxLogConfig().setSourceThread(name);
-    }
-
-    public String getFilteredSourceThread() {
-        return logService.getJmxLogConfig().getSourceThread();
-    }
-
-    public void setFilteredThrownClass(String name) {
-        logService.getJmxLogConfig().setThrownClass(name);
-    }
-
-    public String getFilteredThrownClass() {
-        return logService.getJmxLogConfig().getThrownClass();
-    }
-
-    public void setFilteredTimestampHi(long value) {
-        logService.getJmxLogConfig().getTimestampHi();
-    }
-
-    public long getFilteredTimestampHi() {
-        return logService.getJmxLogConfig().getTimestampHi();
-    }
-
-    public void setFilteredTimestampLo(long value) {
-        logService.getJmxLogConfig().getTimestampLo();
-    }
-
-    public long getFilteredTimestampLo() {
-        return logService.getJmxLogConfig().getTimestampLo();
-    }
 }

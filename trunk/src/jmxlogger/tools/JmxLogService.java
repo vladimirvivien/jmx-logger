@@ -33,9 +33,7 @@ import javax.management.ObjectName;
  */
 public class JmxLogService {
     private JmxLogEmitterMBean logMBean;
-    private JmxLogConfigurer jmxLogger;
     private JmxLogFilter logFilter;
-    private JmxLogConfigurer logConfigurer;
     private JmxLogConfigStore configStore;
 
     private final PriorityBlockingQueue<JmxEventWrapper> queue =
@@ -61,14 +59,6 @@ public class JmxLogService {
      */
     public static JmxLogService createInstance(){
         return new JmxLogService();
-    }
-
-    public synchronized JmxLogConfigurer getJmxLogConfigurer() {
-        return logConfigurer;
-    }
-
-    public synchronized void setJmxLogConfig(JmxLogConfigurer config){
-        logConfigurer = config;
     }
 
     public synchronized void setJmxLogConfigStore(JmxLogConfigStore store){
