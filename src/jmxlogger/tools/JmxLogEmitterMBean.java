@@ -28,20 +28,4 @@ public interface JmxLogEmitterMBean {
     public long getLogCount();
     public void setLogLevel(String level);
     public String getLogLevel();
-
-    // filter
-    public void setFilteredPattern(String pattern);
-    public String getFilteredPattern();
-    public void setFilteredSourceClass(String name);
-    public String getFilteredSourceClass();
-    public void setFilteredSourceMethod(String name);
-    public String getFilteredSourceMethod();
-    public void setFilteredSourceThread(String name);
-    public String getFilteredSourceThread();
-    public void setFilteredThrownClass(String name);
-    public String getFilteredThrownClass();
-    public void setFilteredTimestampHi(long value);
-    public long getFilteredTimestampHi();
-    public void setFilteredTimestampLo(long value);
-    public long getFilteredTimestampLo();
 }

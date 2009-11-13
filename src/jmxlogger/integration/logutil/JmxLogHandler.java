@@ -30,6 +30,7 @@ import java.util.logging.SimpleFormatter;
 import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import jmxlogger.tools.JmxLogConfigStore.ConfigEvent;
 import jmxlogger.tools.JmxLogConfigurer;
 import jmxlogger.tools.JmxLogConfigStore;
 import jmxlogger.tools.JmxLogService;
@@ -42,15 +43,15 @@ import jmxlogger.tools.ToolBox;
  *
  * @author vladimir.vivien
  */
-public class JmxLogHandler extends Handler implements JmxLogConfigurer{
+public class JmxLogHandler extends Handler {
     LogManager manager = LogManager.getLogManager();
     private JmxLogService logService;
     private JmxLogConfigStore config;
 
     private final static String KEY_LEVEL = "jmxlogger.Handler.level";
     private final static String KEY_FORMATTER = "jmxlogger.Handler.formatter";
-    private final static String KEY_OBJNAME = "jmxlogger.Handler.jmxObjectName";
-    private final static String KEY_SERVER = "jmxlogger.Handler.jmxServer";
+    private final static String KEY_OBJNAME = "jmxlogger.Handler.objectName";
+    private final static String KEY_SERVER = "jmxlogger.Handler.mbeanServer";
     private final static String KEY_FILTER = "jmxlogger.Handler.filter";
     private final static String KEY_FILTER_EXP = "jmxlogger.Handler.filterExpression";
     private final static String KEY_FILTER_SCRIPT = "jmxlogger.Handler.filterScript";
@@ -101,14 +102,6 @@ public class JmxLogHandler extends Handler implements JmxLogConfigurer{
         start();
     }
 
-    public void setLogLevel(String level) {
-        super.setLevel(createLevelInstance(level));
-    }
-
-    public String getLogLevel() {
-        return super.getLevel().toString();
-    }
-
     /**
      * Setter for emitter MBean ObjectName.
      * @param objName
@@ -122,8 +115,7 @@ public class JmxLogHandler extends Handler implements JmxLogConfigurer{
      * @return ObjectName instance
      */
     public ObjectName getObjectName() {
-        return (logService != null) ? 
-            (ObjectName)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) : null;
+        return (ObjectName)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
     }
 
     /**
@@ -139,8 +131,7 @@ public class JmxLogHandler extends Handler implements JmxLogConfigurer{
      * @return MBeanServer
      */
     public MBeanServer getMBeanServer() {
-        return (logService != null) ?
-            (MBeanServer)config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) : null;
+        return (MBeanServer)config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
     }
 
     public void setFilterExpression(String exp){
@@ -302,6 +293,16 @@ public class JmxLogHandler extends Handler implements JmxLogConfigurer{
         logService = (logService == null) ? JmxLogService.createInstance() : logService;
         config = new JmxLogConfigStore();
         logService.setJmxLogConfigStore(config);
+
+        // what to do when a value is update
+        config.addListener(new JmxLogConfigStore.EventListener() {
+
+            public void onValueChanged(JmxLogConfigStore.ConfigEvent event) {
+                 if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL)){
+                    setLevel((Level)event.getValue());
+                }
+            }
+        } );
     }
 
     private Level createLevelInstance(String level){
