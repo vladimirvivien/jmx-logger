@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jmxlogger.JmxLogger;
+import jmxlogger.tools.JmxLogConfigurer;
 import jmxlogger.tools.JmxLogFilter;
-import jmxlogger.tools.JmxLogConfig;
+import jmxlogger.tools.JmxLogConfigStore;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import jmxlogger.tools.JmxLogService;
@@ -36,13 +36,13 @@ import org.apache.log4j.spi.ErrorCode;
 import org.apache.log4j.spi.Filter;
 
 /**
- * This class implements the Log4J appender for JmxLogger.  It can be used to broadcast
+ * This class implements the Log4J appender for JmxLogConfigurer.  It can be used to broadcast
  * Log4J log events as JMX events.  When this class is initialized by the logging
  * framework, it creates a JMX MBean that emitts log event.
  *
  * @author vladimir.vivien
  */
-public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
+public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer{
     private JmxLogService jmxLogService;
     private String msgPattern;
     private String serverSelection="platform";
@@ -285,7 +285,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogger{
         }
         
         if(filter != null){
-            JmxLogConfig cfg = ((DefaultLog4jFilter)filter).getLogFilterConfig();
+            JmxLogConfigStore cfg = ((DefaultLog4jFilter)filter).getLogFilterConfig();
 
             jmxLogService.setJmxLogConfig(cfg);
         }

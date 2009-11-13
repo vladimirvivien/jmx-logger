@@ -8,12 +8,12 @@ package jmxlogger.tools;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JmxLogConfig {
+public class JmxLogConfigStore {
     private HashMap<String,Object> config;
-    public JmxLogConfig(){
+    public JmxLogConfigStore(){
         config = new HashMap<String,Object>();
     }
-    public JmxLogConfig(Map<String,Object> values){
+    public JmxLogConfigStore(Map<String,Object> values){
         config = (HashMap) values;
     }
     public void putValues(final Map<String,Object> values){
