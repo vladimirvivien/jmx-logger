@@ -20,10 +20,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jmxlogger.JmxLogger;
 
 /**
  * This service level class manages the creation of JMX emitter MBean facilitates
@@ -35,9 +33,10 @@ import jmxlogger.JmxLogger;
  */
 public class JmxLogService {
     private JmxLogEmitterMBean logMBean;
-    private JmxLogger jmxLogger;
+    private JmxLogConfigurer jmxLogger;
     private JmxLogFilter logFilter;
-    private JmxLogConfig logConfig;
+    private JmxLogConfigurer logConfigurer;
+    private JmxLogConfigStore configStore;
 
     private final PriorityBlockingQueue<JmxEventWrapper> queue =
             new PriorityBlockingQueue<JmxEventWrapper>(100);
@@ -53,7 +52,7 @@ public class JmxLogService {
         logMBean = new JmxLogEmitter();
         ((JmxLogEmitter)logMBean).setLogService(this);
         logFilter = new JmxLogFilter();
-        logConfig = new JmxLogConfig();
+        configStore = new JmxLogConfigStore();
     }
 
     /**
@@ -64,20 +63,16 @@ public class JmxLogService {
         return new JmxLogService();
     }
 
-    public synchronized JmxLogConfig getJmxLogConfig() {
-        return logConfig;
+    public synchronized JmxLogConfigurer getJmxLogConfigurer() {
+        return logConfigurer;
     }
 
-    public synchronized void setJmxLogConfig(JmxLogConfig config){
-        logConfig = config;
+    public synchronized void setJmxLogConfig(JmxLogConfigurer config){
+        logConfigurer = config;
     }
 
-    public synchronized void setJmxLogFilter(JmxLogFilter filter){
-        logFilter = filter;
-    }
-
-    public synchronized JmxLogFilter getJmxLogFilter(){
-        return logFilter;
+    public synchronized void setJmxLogConfigStore(JmxLogConfigStore store){
+        configStore = store;
     }
 
     /**
@@ -87,8 +82,8 @@ public class JmxLogService {
     public void start(){
         this.setupNoteProducers();
         this.setupNoteConsumerTask();
-        MBeanServer svr = (MBeanServer) logConfig.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
-        ObjectName objName = (ObjectName)logConfig.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        MBeanServer svr = (MBeanServer) configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
+        ObjectName objName = (ObjectName)configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
         if(svr == null || objName == null){
             throw new IllegalArgumentException("Unable to start log service - " +
                     "instance of MBeanServer and ObjectName must be " +
@@ -104,8 +99,8 @@ public class JmxLogService {
     public void stop(){
         noteConsumer.shutdownNow();
         noteProducers.shutdownNow();
-        MBeanServer svr = (MBeanServer) logConfig.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
-        ObjectName objName = (ObjectName)logConfig.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        MBeanServer svr = (MBeanServer) configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
+        ObjectName objName = (ObjectName)configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
         ToolBox.unregisterMBean(svr, objName);
         logMBean.stop();
     }
@@ -136,14 +131,6 @@ public class JmxLogService {
                 }
             }
         });
-    }
-
-    public void setLoggerLevel(String level){
-        jmxLogger.setLogLevel(level);
-    }
-
-    public String getLoggerLevel(){
-        return jmxLogger.getLogLevel();
     }
 
     private void setupNoteProducers() {

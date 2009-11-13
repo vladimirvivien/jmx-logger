@@ -30,28 +30,29 @@ import java.util.logging.SimpleFormatter;
 import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jmxlogger.JmxLogger;
-import jmxlogger.tools.JmxLogConfig;
+import jmxlogger.tools.JmxLogConfigurer;
+import jmxlogger.tools.JmxLogConfigStore;
 import jmxlogger.tools.JmxLogService;
 import jmxlogger.tools.ToolBox;
 
 /**
- * This class implements the Java Logging Handler for JmxLogger.  It can be used to broadcast
+ * This class implements the Java Logging Handler for JmxLogConfigurer.  It can be used to broadcast
  * logging events as JMX events.  When this class is initialized by the logging
  * framework, it creates a JMX MBean that emitts log event.
  *
  * @author vladimir.vivien
  */
-public class JmxLogHandler extends Handler implements JmxLogger{
+public class JmxLogHandler extends Handler implements JmxLogConfigurer{
     LogManager manager = LogManager.getLogManager();
     private JmxLogService logService;
+    private JmxLogConfigStore config;
 
     private final static String KEY_LEVEL = "jmxlogger.Handler.level";
     private final static String KEY_FORMATTER = "jmxlogger.Handler.formatter";
     private final static String KEY_OBJNAME = "jmxlogger.Handler.jmxObjectName";
     private final static String KEY_SERVER = "jmxlogger.Handler.jmxServer";
+    private final static String KEY_FILTER = "jmxlogger.Handler.filter";
     private final static String KEY_FILTER_EXP = "jmxlogger.Handler.filterExpression";
-    private final static String KEY_FILTER_CLASS = "jmxlogger.Handler.filterClass";
     private final static String KEY_FILTER_SCRIPT = "jmxlogger.Handler.filterScript";
 
 
@@ -100,12 +101,20 @@ public class JmxLogHandler extends Handler implements JmxLogger{
         start();
     }
 
+    public void setLogLevel(String level) {
+        super.setLevel(createLevelInstance(level));
+    }
+
+    public String getLogLevel() {
+        return super.getLevel().toString();
+    }
+
     /**
      * Setter for emitter MBean ObjectName.
      * @param objName
      */
     public void setObjectName(ObjectName objName){
-        logService.getJmxLogConfig().putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, objName);
+        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, objName);
     }
 
     /**
@@ -114,7 +123,7 @@ public class JmxLogHandler extends Handler implements JmxLogger{
      */
     public ObjectName getObjectName() {
         return (logService != null) ? 
-            (ObjectName)logService.getJmxLogConfig().getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) : null;
+            (ObjectName)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) : null;
     }
 
     /**
@@ -122,7 +131,7 @@ public class JmxLogHandler extends Handler implements JmxLogger{
      * @param server
      */
     public void setMBeanServer(MBeanServer server){
-        logService.getJmxLogConfig().putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
+        config.putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
     }
 
     /**
@@ -131,7 +140,23 @@ public class JmxLogHandler extends Handler implements JmxLogger{
      */
     public MBeanServer getMBeanServer() {
         return (logService != null) ?
-            (MBeanServer)logService.getJmxLogConfig().getValue(ToolBox.KEY_CONFIG_JMX_SERVER) : null;
+            (MBeanServer)config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) : null;
+    }
+
+    public void setFilterExpression(String exp){
+        config.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
+    }
+
+    public String getFilterExpression(){
+        return (String)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+    }
+
+    public void setFilterScript(String fileName) {
+        config.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, fileName);
+    }
+
+    public String getFilterScript(){
+        return (String)config.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
     }
 
     /**
@@ -225,8 +250,8 @@ public class JmxLogHandler extends Handler implements JmxLogger{
     private boolean isConfiguredOk() {
         return (logService != null &&
                 logService.isStarted() &&
-                logService.getJmxLogConfig().getValue(ToolBox.KEY_CONFIG_JMX_SERVER) != null &&
-                logService.getJmxLogConfig().getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) != null &&
+                config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) != null &&
+                config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) != null &&
                 getFormatter() != null &&
                 this.getLevel() != null);
     }
@@ -237,51 +262,23 @@ public class JmxLogHandler extends Handler implements JmxLogger{
     private void configure() {
         // configure level (default INFO)
         String value;
-        value = manager.getProperty(KEY_LEVEL);
-        super.setLevel(value != null ? Level.parse(value) : Level.FINE);
+        setLevel(createLevelInstance(manager.getProperty(KEY_LEVEL)));
 
         // configure filter (default none)
-        value = manager.getProperty(KEY_FILTER_CLASS);
-        if (value != null && value.length() != 0) {
-            // assume it's a class name and load it.
-            try {
-                Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
-                super.setFilter((Filter) cls.newInstance());
-            } catch (Exception ex) {
-                reportError("Unable to load filter class " + value + ". Filter will be set to null" ,
-                    ex, ErrorManager.CLOSE_FAILURE);
-                // ignore it and load SimpleFormatter.
-                super.setFilter(null);
-            }
-        } else {
-            super.setFilter(null);
-        }
+        setFilter(createFilterInstance(manager.getProperty(KEY_FILTER)));
+        setFilterExpression(manager.getProperty(KEY_FILTER_EXP));
+        setFilterScript(manager.getProperty(KEY_FILTER_SCRIPT));
 
+        
         // configure formatter (default SimpleFormatter)
-        value = manager.getProperty(KEY_FORMATTER);
-        if (value != null && value.length() != 0) {
-            // assume it's a class and load it.
-            try {
-                Class cls = ClassLoader.getSystemClassLoader().loadClass(value);
-                super.setFormatter((Formatter) cls.newInstance());
-            } catch (Exception ex) {
-                reportError("Unable to load formatter class " + value + ". Will default to SimpleFormatter" ,
-                    ex, ErrorManager.CLOSE_FAILURE);
-                // ignore it and load SimpleFormatter.
-                super.setFormatter(new SimpleFormatter());
-            }
+        setFormatter(createFormatterInstance(manager.getProperty(KEY_FORMATTER)));
 
-        } else {
-            super.setFormatter(new SimpleFormatter());
-        }
-
-        // configure internal Jmx ObjectName (default provided by JmxLogService)
-
+        // configure internal Jmx ObjectName
         value = manager.getProperty(KEY_OBJNAME);
         if(value != null && value.length() != 0){
-            logService.setObjectName(ToolBox.buildObjectName(value));
+            setObjectName(ToolBox.buildObjectName(value));
         }else{
-            logService.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
+            setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
         }
 
         // configure server used
@@ -289,16 +286,13 @@ public class JmxLogHandler extends Handler implements JmxLogger{
         if(value != null && value.length() != 0){
             if(value.equalsIgnoreCase("platform")) {
                 // use existing platform server
-                logService.setMBeanServer(ManagementFactory.getPlatformMBeanServer());
+                setMBeanServer(ManagementFactory.getPlatformMBeanServer());
             }else{
                 setMBeanServer(ToolBox.findMBeanServer(value));
             }
         }else{
             setMBeanServer(ManagementFactory.getPlatformMBeanServer());
         }
-
-        // setup internal filter
-        logService.setJmxLogConfig(prepareFilterConfig());
     }
 
     /**
@@ -306,7 +300,45 @@ public class JmxLogHandler extends Handler implements JmxLogger{
      */
     private void initializeLogger() {
         logService = (logService == null) ? JmxLogService.createInstance() : logService;
+        config = new JmxLogConfigStore();
+        logService.setJmxLogConfigStore(config);
     }
+
+    private Level createLevelInstance(String level){
+        return level != null ? Level.parse(level) : Level.FINE;
+    }
+    private Filter createFilterInstance(String className){
+        Filter f = null;
+        if (className != null && className.length() != 0) {
+            // assume it's a valid class name on the classpath and load it.
+            try {
+                Class cls = ClassLoader.getSystemClassLoader().loadClass(className);
+                f = (Filter) cls.newInstance();
+            } catch (Exception ex) {
+                reportError("Unable to load filter class [" + className + "]. Filter will be set to null" ,
+                    ex, ErrorManager.CLOSE_FAILURE);
+            }
+        }
+        return f;
+    }
+
+    private Formatter createFormatterInstance(String className) {
+        Formatter f = new SimpleFormatter();
+        if (className != null && className.length() != 0) {
+            // assume it's a class and load it.
+            try {
+                Class cls = ClassLoader.getSystemClassLoader().loadClass(className);
+                f = (Formatter) cls.newInstance();
+            } catch (Exception ex) {
+                reportError("Unable to load formatter class [" + className + "]. Will default to SimpleFormatter" ,
+                    ex, ErrorManager.CLOSE_FAILURE);
+            }
+
+        }
+        return f;
+    }
+
+    
 
     /**
      * Transfers Java Logging LogRecord data to a map to be passed to JMX event bus.
@@ -329,44 +361,4 @@ public class JmxLogHandler extends Handler implements JmxLogger{
 
         return event;
     }
-
-    private JmxLogConfig prepareFilterConfig() {
-        // configure default filters
-        JmxLogConfig cfg = new JmxLogConfig();
-        cfg.setLogPattern(Pattern.compile(manager.getProperty(KEY_FILTER_PATTERN)));
-        cfg.setSourceClass(manager.getProperty(KEY_FILTER_SOURCE));
-        cfg.setSourceMethod(manager.getProperty(KEY_FILTER_METHOD));
-        cfg.setSourceThread(manager.getProperty(KEY_FILTER_THREAD));
-        cfg.setThrownClass(manager.getProperty(KEY_FILTER_THROWN));
-        long ts = 0;
-        try {
-            ts = Long.parseLong(manager.getProperty(KEY_FILTER_TSLO));
-        } catch (NumberFormatException ex) {
-        }
-        ts = 0;
-        cfg.setTimestampLo(ts);
-        try {
-            ts = Long.parseLong(manager.getProperty(KEY_FILTER_TSLO));
-        } catch (NumberFormatException ex) {
-        }
-        cfg.setTimestampHi(ts);
-        return cfg;
-    }
-
-    /**
-     * This method abstracts out the log level.
-     * @param level
-     */
-    public void setLogLevel(String level) {
-        this.setLevel(Level.parse(level));
-    }
-
-    /**
-     * This method abstracts out the log level.
-     * @return
-     */
-    public String getLogLevel() {
-        return this.getLevel().getName();
-    }
-    
 }

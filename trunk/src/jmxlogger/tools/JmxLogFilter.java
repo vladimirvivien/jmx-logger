@@ -13,18 +13,18 @@ import java.util.regex.Pattern;
  * @author vvivien
  */
 public class JmxLogFilter {
-    private JmxLogConfig config;
+    private JmxLogConfigStore config;
 
     public JmxLogFilter(){
-        config = new JmxLogConfig();
+        config = new JmxLogConfigStore();
     }
-    public JmxLogFilter(JmxLogConfig cfg){
+    public JmxLogFilter(JmxLogConfigStore cfg){
         config = cfg;
     }
-    public void setLogFilterConfig(JmxLogConfig cfg){
+    public void setLogFilterConfig(JmxLogConfigStore cfg){
         config = cfg;
     }
-    public JmxLogConfig getLogFilterConfig() {
+    public JmxLogConfigStore getLogFilterConfig() {
         return config;
     }
 
