@@ -6,31 +6,38 @@
 package jmxlogger.tools;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class JmxLogConfigStore {
+public class JmxConfigStore {
     private ConcurrentHashMap<String,Object> config;
-    private ArrayList<JmxLogConfigStore.EventListener> listeners;
+    private ArrayList<JmxConfigStore.ConfigEventListener> listeners;
     private ExecutorService publisher;;
     
-    public JmxLogConfigStore(){
+    public JmxConfigStore(){
         config = new ConcurrentHashMap<String,Object>();
-        listeners = new ArrayList();
+        listeners = new ArrayList<JmxConfigStore.ConfigEventListener>();
         setupPublisher();
     }
-    public JmxLogConfigStore(Map<String,Object> values){
-        config = (ConcurrentHashMap) values;
-        listeners = new ArrayList();
+    public JmxConfigStore(Map<String,Object> values){
+        config = new ConcurrentHashMap<String,Object>(values);
+        listeners = new ArrayList<JmxConfigStore.ConfigEventListener>();
         setupPublisher();
     }
 
-    public synchronized void addListener(JmxLogConfigStore.EventListener l){
+    public synchronized void addListener(JmxConfigStore.ConfigEventListener l){
         listeners.add(l);
+    }
+
+    public synchronized void removeListener(JmxConfigStore.ConfigEventListener l){
+        listeners.remove(l);
+    }
+
+    public List<JmxConfigStore.ConfigEventListener> getListeners() {
+        return listeners;
     }
 
     public synchronized void putValue(String key, Object value){
@@ -40,19 +47,26 @@ public class JmxLogConfigStore {
     public synchronized Object getValue(String key){
         return config.get(key);
     }
+
+    public synchronized Map getValues() {
+        return config;
+    }
     
     private void setupPublisher() {
         publisher = Executors.newSingleThreadExecutor();
     }
 
-    public void postEvent(JmxLogConfigStore.ConfigEvent event){
+    public void postEvent(JmxConfigStore.ConfigEvent event){
+        if(event.getSource() == null){
+            throw new IllegalArgumentException("Config Event must have a source.");
+        }
         publishPutEventToListeners(event, listeners);
     }
 
-    private void publishPutEventToListeners(final JmxLogConfigStore.ConfigEvent event, final List<JmxLogConfigStore.EventListener> listeners){
+    private void publishPutEventToListeners(final JmxConfigStore.ConfigEvent event, final List<JmxConfigStore.ConfigEventListener> listeners){
         publisher.execute(new Runnable() {
             public void run() {
-                for(JmxLogConfigStore.EventListener l : listeners){
+                for(JmxConfigStore.ConfigEventListener l : listeners){
                     l.onValueChanged(event);
                 }
             }
@@ -74,8 +88,9 @@ public class JmxLogConfigStore {
             return value;
         }
     }
-    public static interface EventListener extends java.util.EventListener{
-        public void onValueChanged(JmxLogConfigStore.ConfigEvent event);
+    
+    public static interface ConfigEventListener extends java.util.EventListener{
+        public void onValueChanged(JmxConfigStore.ConfigEvent event);
     }
 
 }

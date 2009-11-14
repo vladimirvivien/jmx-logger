@@ -5,32 +5,12 @@
 
 package jmxlogger.tools;
 
-import java.util.Map;
-import java.util.regex.Pattern;
-
 /**
  *
- * @author vvivien
+ * @author vladimir
  */
-public class JmxLogFilter {
-    private JmxLogConfigStore config;
+public interface JmxLogFilter {
 
-    public JmxLogFilter(){
-        config = new JmxLogConfigStore();
-    }
-    public JmxLogFilter(JmxLogConfigStore cfg){
-        config = cfg;
-    }
-    public void setLogFilterConfig(JmxLogConfigStore cfg){
-        config = cfg;
-    }
-    public JmxLogConfigStore getLogFilterConfig() {
-        return config;
-    }
-
-    public boolean isLogAllowed(JmxEventWrapper eventWrapper){
-        Map<String,Object> event = eventWrapper.unwrap();
-        return false;
-    }
+    boolean isLogAllowed(JmxEventWrapper eventWrapper);
 
 }

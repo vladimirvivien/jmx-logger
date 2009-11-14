@@ -49,9 +49,9 @@ public class ToolBox {
     public static final String KEY_EVENT_SOURCE_THREAD = "threadId";
     public static final String KEY_EVENT_SEQ_NUM = "sequenceNumber";
     public static final String KEY_EVENT_TIME_STAMP = "timeStamp";
-    public static final String KEY_EVENT_FORMATTED_MESSAGE = "formattedMsg";
-    public static final String KEY_EVENT_RAW_MESSAGE = "rawMsg";
-    public static final String KEY_EVENT_THROWABLE = "throwable";
+    public static final String KEY_EVENT_FORMATTED_MESSAGE = "formattedMessage";
+    public static final String KEY_EVENT_RAW_MESSAGE = "rawMessage";
+    public static final String KEY_EVENT_THROWABLE = "exceptionName";
 
     private static final ErrorManager EM = new ErrorManager();
     private static final String DEFAULT_NAME = "jmxlogger:type=LogEmitter";

@@ -145,16 +145,16 @@ public class JmxLogHandlerTest {
         return on;
     }
 
-    @Test
-    public void testSetLogLevel() {
-        JmxLogHandler l = new JmxLogHandler();
-        l.setLogLevel("INFO");
-        assert l.getLogLevel().equals("INFO");
-
-        l.setLogLevel("SEVERE");
-        assert l.getLogLevel().equals("SEVERE");
-
-        l.setLogLevel("FINE");
-        assert l.getLogLevel().equals("FINE");
-    }
+//    @Test
+//    public void testSetLogLevel() {
+//        JmxLogHandler l = new JmxLogHandler();
+//        l.setLogLevel("INFO");
+//        assert l.getLogLevel().equals("INFO");
+//
+//        l.setLogLevel("SEVERE");
+//        assert l.getLogLevel().equals("SEVERE");
+//
+//        l.setLogLevel("FINE");
+//        assert l.getLogLevel().equals("FINE");
+//    }
 }

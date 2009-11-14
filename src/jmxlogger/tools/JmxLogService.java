@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import jmxlogger.tools.JmxConfigStore.ConfigEvent;
 
 /**
  * This service level class manages the creation of JMX emitter MBean facilitates
@@ -33,8 +34,8 @@ import javax.management.ObjectName;
  */
 public class JmxLogService {
     private JmxLogEmitterMBean logMBean;
-    private JmxLogFilter logFilter;
-    private JmxLogConfigStore configStore;
+    private JmxScriptedLogFilter logFilter;
+    private JmxConfigStore configStore;
 
     private final PriorityBlockingQueue<JmxEventWrapper> queue =
             new PriorityBlockingQueue<JmxEventWrapper>(100);
@@ -47,11 +48,8 @@ public class JmxLogService {
      * Private Constructor.
      */
     private JmxLogService() {
-        logMBean = new JmxLogEmitter();
-        ((JmxLogEmitter)logMBean).setLogService(this);
-        logFilter = new JmxLogFilter();
-        configStore = new JmxLogConfigStore();
-    }
+        initializeService();
+     }
 
     /**
      * Factory method to create instance of this class.
@@ -61,8 +59,24 @@ public class JmxLogService {
         return new JmxLogService();
     }
 
-    public synchronized void setJmxLogConfigStore(JmxLogConfigStore store){
-        configStore = store;
+    public synchronized JmxConfigStore getJmxConfigStore(){
+        return configStore;
+    }
+
+    private void initializeService() {
+        logMBean = new JmxLogEmitter();
+        ((JmxLogEmitter)logMBean).setLogService(this);
+        logFilter = new JmxScriptedLogFilter();
+        configStore = new JmxConfigStore();
+
+        // add listener to reset filterExpression and filterFile
+        configStore.addListener(new JmxConfigStore.ConfigEventListener() {
+            public void onValueChanged(ConfigEvent event) {
+                if(!event.getSource().equals(JmxLogService.this) && event.getKey().equals(ToolBox.KEY_CONFIG_FILTER_EXP)){
+                    logFilter.setFilterExpression((String)event.getValue());
+                }
+            }
+        });
     }
 
     /**
@@ -79,6 +93,7 @@ public class JmxLogService {
                     "instance of MBeanServer and ObjectName must be " +
                     "provided.");
         }
+        // setup
         ToolBox.registerMBean(svr, objName, logMBean);
         logMBean.start();
     }

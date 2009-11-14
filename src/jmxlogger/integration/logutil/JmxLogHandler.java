@@ -27,12 +27,9 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
-import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jmxlogger.tools.JmxLogConfigStore.ConfigEvent;
-import jmxlogger.tools.JmxLogConfigurer;
-import jmxlogger.tools.JmxLogConfigStore;
+import jmxlogger.tools.JmxConfigStore;
 import jmxlogger.tools.JmxLogService;
 import jmxlogger.tools.ToolBox;
 
@@ -46,7 +43,7 @@ import jmxlogger.tools.ToolBox;
 public class JmxLogHandler extends Handler {
     LogManager manager = LogManager.getLogManager();
     private JmxLogService logService;
-    private JmxLogConfigStore config;
+    private JmxConfigStore config;
 
     private final static String KEY_LEVEL = "jmxlogger.Handler.level";
     private final static String KEY_FORMATTER = "jmxlogger.Handler.formatter";
@@ -102,6 +99,12 @@ public class JmxLogHandler extends Handler {
         start();
     }
 
+    @Override
+    public void setLevel(Level l) {
+        super.setLevel(l);
+        config.putValue(ToolBox.KEY_CONFIG_LOG_LEVEL, l.getName());
+    }
+    
     /**
      * Setter for emitter MBean ObjectName.
      * @param objName
@@ -291,15 +294,13 @@ public class JmxLogHandler extends Handler {
      */
     private void initializeLogger() {
         logService = (logService == null) ? JmxLogService.createInstance() : logService;
-        config = new JmxLogConfigStore();
-        logService.setJmxLogConfigStore(config);
+        config = logService.getJmxConfigStore();
 
         // what to do when a value is update
-        config.addListener(new JmxLogConfigStore.EventListener() {
-
-            public void onValueChanged(JmxLogConfigStore.ConfigEvent event) {
-                 if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL)){
-                    setLevel((Level)event.getValue());
+        config.addListener(new JmxConfigStore.ConfigEventListener() {
+            public void onValueChanged(JmxConfigStore.ConfigEvent event) {
+                 if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL) && event.getSource() != JmxLogHandler.this){
+                    setLevel(Level.parse((String)event.getValue()));
                 }
             }
         } );
