@@ -156,28 +156,28 @@ public class JmxLogEmitterTest {
         e.stop();
     }
 
-    @Test
-    public void testGetLog4jLevel() {
-        JmxLogAppender a = new JmxLogAppender();
-        JmxLogService  svc = JmxLogService.createInstance();
-        svc.setLogger(a);
-        JmxLogEmitter e = new JmxLogEmitter();
-        e.setLogService(svc);
-        assert e.getLogLevel().equals("DEBUG");
-        e.setLogLevel("WARN");
-        assert e.getLogLevel().equals("WARN");
-    }
-    @Test
-    public void testJavaLogLevel() {
-        JmxLogHandler a = new JmxLogHandler();
-        JmxLogService  svc = JmxLogService.createInstance();
-        svc.setLogger(a);
-        JmxLogEmitter e = new JmxLogEmitter();
-        e.setLogService(svc);
-        assert e.getLogLevel().equals("FINE");
-        e.setLogLevel("WARNING");
-        assert e.getLogLevel().equals("WARNING");
-        e.setLogLevel("CONFIG");
-        assert e.getLogLevel().equals("CONFIG");
-    }
+//    @Test
+//    public void testGetLog4jLevel() {
+//        JmxLogAppender a = new JmxLogAppender();
+//        JmxLogService  svc = JmxLogService.createInstance();
+//        svc.setLogger(a);
+//        JmxLogEmitter e = new JmxLogEmitter();
+//        e.setLogService(svc);
+//        assert e.getLogLevel().equals("DEBUG");
+//        e.setLogLevel("WARN");
+//        assert e.getLogLevel().equals("WARN");
+//    }
+//    @Test
+//    public void testJavaLogLevel() {
+//        JmxLogHandler a = new JmxLogHandler();
+//        JmxLogService  svc = JmxLogService.createInstance();
+//        svc.setLogger(a);
+//        JmxLogEmitter e = new JmxLogEmitter();
+//        e.setLogService(svc);
+//        assert e.getLogLevel().equals("FINE");
+//        e.setLogLevel("WARNING");
+//        assert e.getLogLevel().equals("WARNING");
+//        e.setLogLevel("CONFIG");
+//        assert e.getLogLevel().equals("CONFIG");
+//    }
 }

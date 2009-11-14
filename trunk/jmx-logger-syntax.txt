@@ -1,12 +1,12 @@
 #java.util.logging format
 handlers = jmxlogger.integration.logutil.JmxLoggingHander
-jmx.logger.Handler.level=ALL|SEVERE|INFO|FINE|etc
-jmx.logger.Handler.formatter = java.util.logging.XMLFormatter|any standard formatter
-jmx.logger.Handler.objectName=JMX Object Name
-jmx.logger.Handler.mbeanServer="platform"|domain name of server
-jmx.logger.filterExpression=#{log.level == "INFO" && log.matches("/pattern/")}
-jmx.logger.filterScript=file://some/local/file.mvl
-jmx.logger.filter=java.util.logging.Filter
+jmxlogger.Handler.level=ALL|SEVERE|INFO|FINE|etc
+jmxlogger.Handler.formatter = java.util.logging.XMLFormatter|any standard formatter
+jmxlogger.Handler.objectName=JMX Object Name
+jmxlogger.Handler.mbeanServer="platform"|domain name of server
+jmxlogger.Handler.filterExpression=#{log.level == "INFO" && log.matches("/pattern/")}
+jmxlogger.Handler.filterScript=file://some/local/file.mvl
+jmxlogger.Handler.filter=java.util.logging.Filter
 
 
 #log4j xml format

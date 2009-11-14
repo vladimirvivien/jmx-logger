@@ -19,12 +19,10 @@ package jmxlogger.integration.log4j;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jmxlogger.tools.JmxLogConfigurer;
-import jmxlogger.tools.JmxLogFilter;
-import jmxlogger.tools.JmxLogConfigStore;
+import jmxlogger.tools.JmxScriptedLogFilter;
+import jmxlogger.tools.JmxConfigStore;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import jmxlogger.tools.JmxLogService;
@@ -32,8 +30,8 @@ import jmxlogger.tools.ToolBox;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
+import org.apache.log4j.Priority;
 import org.apache.log4j.spi.ErrorCode;
-import org.apache.log4j.spi.Filter;
 
 /**
  * This class implements the Log4J appender for JmxLogConfigurer.  It can be used to broadcast
@@ -42,13 +40,13 @@ import org.apache.log4j.spi.Filter;
  *
  * @author vladimir.vivien
  */
-public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer{
+public class JmxLogAppender extends AppenderSkeleton{
     private JmxLogService jmxLogService;
-    private JmxLogConfigStore config;
+    private JmxConfigStore config;
     private String msgPattern;
     private String serverSelection="platform";
     private Layout logLayout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
-    private JmxLogFilter logFilter;
+    private JmxScriptedLogFilter logFilter;
     /**
      * Default constructor.  Creates a new JMX MBean emitter and registers that
      * emitter on the underlying Platform MBeanServer.
@@ -93,12 +91,14 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
         configure();
     }
 
-    /**
-     * Setter for emitter MBean ObjectName.
-     * @param objName
-     */
-    public void setObjectName(String objName){
-        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, createObjectNameInstance(objName));
+    @Override
+    public void setThreshold(Priority level){
+        super.setThreshold(level);
+        config.putValue(ToolBox.KEY_CONFIG_LOG_LEVEL, level.toString());
+    }
+
+    public void setObjectName(ObjectName name){
+        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
     }
 
     /**
@@ -107,6 +107,18 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
      */
     public ObjectName getObjectName() {
         return (ObjectName)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+    }
+
+    /**
+     * Setter for emitter MBean ObjectName.
+     * @param objName
+     */
+    public void setObjectName(String objName){
+        setObjectName(createObjectNameInstance(objName));
+    }
+
+    public void setMBeanServer(String domain) {
+        setMBeanServer(createServerInstance(domain));
     }
 
     /**
@@ -124,6 +136,7 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
     public MBeanServer getMBeanServer() {
         return (MBeanServer)config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
     }
+
 
     public void setFilterExpression(String exp){
         config.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
@@ -208,8 +221,8 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
     private boolean isConfiguredOk(){
         return jmxLogService != null &&
                 jmxLogService.isStarted() &&
-                jmxLogService.getMBeanServer() != null &&
-                jmxLogService.getObjectName() != null &&
+                config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) != null &&
+                config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) != null &&
                 layout != null &&
                 this.getThreshold() != null;
     }
@@ -226,8 +239,19 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
      * Initialize the JMX Logger object.
      */
     private void initializeLogger() {
-      jmxLogService = (jmxLogService == null) ? JmxLogService.createInstance() : jmxLogService;
-      jmxLogService.setLogger(this);
+        jmxLogService = (jmxLogService == null) ? JmxLogService.createInstance() : jmxLogService;
+        config = jmxLogService.getJmxConfigStore();
+        // what to do when a value is update
+        config.addListener(new JmxConfigStore.ConfigEventListener() {
+
+            public void onValueChanged(JmxConfigStore.ConfigEvent event) {
+                if (event.getSource() != null && event.getSource() != JmxLogAppender.this) {
+                    if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL)) {
+                        setThreshold(Level.toLevel((String) event.getValue()));
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -235,44 +259,22 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
      */
     private void configure() {
         // config layout
-        if (super.getLayout() == null) {
-            super.setLayout(logLayout);
+        if (getLayout() == null) {
+            setLayout(logLayout);
         }
         // config level
-        if(super.getThreshold() == null){
-            super.setThreshold(Level.DEBUG);
+        if(getThreshold() == null){
+            setThreshold(Level.DEBUG);
         }
 
         // configure server
-        if (jmxLogService.getMBeanServer() == null) {
-            if (getServerSelection().equalsIgnoreCase("platform")) {
-                jmxLogService.setMBeanServer(ManagementFactory.getPlatformMBeanServer());
-            } else {
-                jmxLogService.setMBeanServer(ToolBox.findMBeanServer(getServerSelection()));
-            }
+        if (config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) == null) {
+            this.setMBeanServer("platform");
         }
 
         // configure internal object name
-        if(jmxLogService.getObjectName() == null){
-            jmxLogService.setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
-        }
-
-        // grab default log filter (if any)
-        // note that filter is userd as a dto and its rule not calculated.
-        // instead, filtering happens in the JmxLogFilter to take advantage of
-        // async
-        Filter filter = getFilter();
-        while (filter != null){
-            if(filter instanceof DefaultLog4jFilter){
-                break;
-            }
-            filter = filter.getNext();
-        }
-        
-        if(filter != null){
-            JmxLogConfigStore cfg = ((DefaultLog4jFilter)filter).getLogFilterConfig();
-
-            jmxLogService.setJmxLogConfig(cfg);
+        if(config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) == null){
+            setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
         }
     }
 
@@ -309,10 +311,6 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
         return event;
     }
 
-    private Level createLevelInstance(String level){
-        return level != null ? Level.parse(level) : Level.FINE;
-    }
-
     private ObjectName createObjectNameInstance(String name){
         ObjectName objName = null;
         if(objName == null){
@@ -322,35 +320,18 @@ public class JmxLogAppender extends AppenderSkeleton implements JmxLogConfigurer
         }
         return objName;
     }
-    private Filter createFilterInstance(String className){
-        Filter f = null;
-        if (className != null && className.length() != 0) {
-            // assume it's a valid class name on the classpath and load it.
-            try {
-                Class cls = ClassLoader.getSystemClassLoader().loadClass(className);
-                f = (Filter) cls.newInstance();
-            } catch (Exception ex) {
-                reportError("Unable to load filter class [" + className + "]. Filter will be set to null" ,
-                    ex, ErrorManager.CLOSE_FAILURE);
+
+    private MBeanServer createServerInstance(String domain) {
+        MBeanServer svr = ManagementFactory.getPlatformMBeanServer();
+        if(domain != null && domain.length() != 0){
+            if(domain.equalsIgnoreCase("platform")) {
+                // use existing platform server
+                svr = ManagementFactory.getPlatformMBeanServer();
+            }else{
+                svr = ToolBox.findMBeanServer(domain);
             }
         }
-        return f;
-    }
-
-    private Formatter createFormatterInstance(String className) {
-        Formatter f = new SimpleFormatter();
-        if (className != null && className.length() != 0) {
-            // assume it's a class and load it.
-            try {
-                Class cls = ClassLoader.getSystemClassLoader().loadClass(className);
-                f = (Formatter) cls.newInstance();
-            } catch (Exception ex) {
-                reportError("Unable to load formatter class [" + className + "]. Will default to SimpleFormatter" ,
-                    ex, ErrorManager.CLOSE_FAILURE);
-            }
-
-        }
-        return f;
+        return svr;
     }
 
 

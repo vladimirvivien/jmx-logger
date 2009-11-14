@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Pattern;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 
@@ -116,11 +115,11 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
         this.logService = ls;
     }
 
-    public void setLogLevel(String level) {
+    public void setLevel(String level) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public String getLogLevel() {
+    public String getLevel() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
