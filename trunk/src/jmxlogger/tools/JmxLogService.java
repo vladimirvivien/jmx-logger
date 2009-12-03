@@ -59,15 +59,10 @@ public class JmxLogService {
         return new JmxLogService();
     }
 
-    public synchronized JmxConfigStore getJmxConfigStore(){
-        return configStore;
-    }
-
     private void initializeService() {
         logMBean = new JmxLogEmitter();
-        ((JmxLogEmitter)logMBean).setLogService(this);
         logFilter = new JmxScriptedLogFilter();
-        configStore = new JmxConfigStore();
+        configStore = ToolBox.getConfigStoreInstance();
 
         // add listener to reset filterExpression and filterFile
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {

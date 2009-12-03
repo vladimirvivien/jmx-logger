@@ -16,12 +16,14 @@
 
 package jmxlogger.tools;
 
+import java.awt.Toolkit;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
+import jmxlogger.tools.JmxConfigStore.ConfigEvent;
 
 /**
  * This is the emitter MBean class.  It is actually registered as the management
@@ -32,8 +34,25 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     private volatile boolean started = false;
     private AtomicLong count = new AtomicLong(0);
     private Date startDate;
-    private JmxLogService logService;
-    
+    private JmxConfigStore configStore;
+    private String logLevel;
+
+    public JmxLogEmitter() {
+        initializeBean();
+    }
+
+    private void initializeBean() {
+        configStore = ToolBox.getConfigStoreInstance();
+
+        // add listener to reset filterExpression and filterFile
+        configStore.addListener(new JmxConfigStore.ConfigEventListener() {
+            public void onValueChanged(ConfigEvent event) {
+                if(!event.getSource().equals(JmxLogEmitter.this) && event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL)){
+                    logLevel = (String) event.getValue();
+                }
+            }
+        });
+    }
     /**
      * Life cycle method to start the MBean.
      */
@@ -111,16 +130,14 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
         return note;
     }
 
-    public void setLogService(JmxLogService ls){
-        this.logService = ls;
-    }
-
     public void setLevel(String level) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        logLevel = level;
+        configStore.putValue(ToolBox.KEY_CONFIG_LOG_LEVEL, level);
+        configStore.postEvent(new ConfigEvent(this, ToolBox.KEY_CONFIG_LOG_LEVEL, level));
     }
 
     public String getLevel() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return logLevel;
     }
 
 }

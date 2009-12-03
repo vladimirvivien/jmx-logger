@@ -56,6 +56,12 @@ public class ToolBox {
     private static final ErrorManager EM = new ErrorManager();
     private static final String DEFAULT_NAME = "jmxlogger:type=LogEmitter";
 
+    private static final JmxConfigStore config;
+
+    static {
+        config = new JmxConfigStore();
+    }
+
     /***
      * Returns the default event type of jmxlogger.log.event
      * @return jmxlogger.log.event
@@ -163,4 +169,7 @@ public class ToolBox {
         EM.error(error, ex, ErrorManager.GENERIC_FAILURE);
     }
 
+    public static JmxConfigStore getConfigStoreInstance() {
+        return config;
+    }
 }
