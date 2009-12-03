@@ -10,7 +10,5 @@ package jmxlogger.tools;
  * @author vladimir
  */
 public interface JmxLogFilter {
-
     boolean isLogAllowed(JmxEventWrapper eventWrapper);
-
 }

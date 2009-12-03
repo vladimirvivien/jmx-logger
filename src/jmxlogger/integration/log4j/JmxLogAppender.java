@@ -23,6 +23,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.tools.JmxScriptedLogFilter;
 import jmxlogger.tools.JmxConfigStore;
+import jmxlogger.tools.JmxConfigStore.ConfigEvent;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import jmxlogger.tools.JmxLogService;
@@ -42,11 +43,8 @@ import org.apache.log4j.spi.ErrorCode;
  */
 public class JmxLogAppender extends AppenderSkeleton{
     private JmxLogService jmxLogService;
-    private JmxConfigStore config;
-    private String msgPattern;
-    private String serverSelection="platform";
+    private JmxConfigStore configStore;
     private Layout logLayout = new PatternLayout("%-4r [%t] %-5p %c %x - %m%n");
-    private JmxScriptedLogFilter logFilter;
     /**
      * Default constructor.  Creates a new JMX MBean emitter and registers that
      * emitter on the underlying Platform MBeanServer.
@@ -63,7 +61,7 @@ public class JmxLogAppender extends AppenderSkeleton{
      */
     public JmxLogAppender(ObjectName name){
         initializeLogger();
-        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
+        configStore.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
         configure();
     }
 
@@ -87,18 +85,19 @@ public class JmxLogAppender extends AppenderSkeleton{
     public JmxLogAppender(MBeanServer server, ObjectName name){
         initializeLogger();
         setMBeanServer(server);
-        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
+        configStore.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
         configure();
     }
 
     @Override
     public void setThreshold(Priority level){
         super.setThreshold(level);
-        config.putValue(ToolBox.KEY_CONFIG_LOG_LEVEL, level.toString());
+        configStore.putValue(ToolBox.KEY_CONFIG_LOG_LEVEL, level.toString());
+        configStore.postEvent(new ConfigEvent(this, ToolBox.KEY_CONFIG_LOG_LEVEL, level.toString()));
     }
 
     public void setObjectName(ObjectName name){
-        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
+        configStore.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
     }
 
     /**
@@ -106,7 +105,7 @@ public class JmxLogAppender extends AppenderSkeleton{
      * @return ObjectName instance
      */
     public ObjectName getObjectName() {
-        return (ObjectName)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        return (ObjectName)configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
     }
 
     /**
@@ -126,7 +125,7 @@ public class JmxLogAppender extends AppenderSkeleton{
      * @param server
      */
     public void setMBeanServer(MBeanServer server){
-        config.putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
+        configStore.putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
     }
 
     /**
@@ -134,24 +133,24 @@ public class JmxLogAppender extends AppenderSkeleton{
      * @return MBeanServer
      */
     public MBeanServer getMBeanServer() {
-        return (MBeanServer)config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
+        return (MBeanServer)configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
     }
 
 
     public void setFilterExpression(String exp){
-        config.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
+        configStore.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
     }
 
     public String getFilterExpression(){
-        return (String)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        return (String)configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
     }
 
     public void setFilterScript(String fileName) {
-        config.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, fileName);
+        configStore.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, fileName);
     }
 
     public String getFilterScript(){
-        return (String)config.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
+        return (String)configStore.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
     }
 
 
@@ -164,10 +163,8 @@ public class JmxLogAppender extends AppenderSkeleton{
         if(!jmxLogService.isStarted()){
             jmxLogService.start();
         }
-
     }
     
-
     /**
      * Log4J framework method, called when a jmxLogService logs an event.  Here, it
      * sends the log message to the JMX event bus.
@@ -221,8 +218,8 @@ public class JmxLogAppender extends AppenderSkeleton{
     private boolean isConfiguredOk(){
         return jmxLogService != null &&
                 jmxLogService.isStarted() &&
-                config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) != null &&
-                config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) != null &&
+                configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) != null &&
+                configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) != null &&
                 layout != null &&
                 this.getThreshold() != null;
     }
@@ -240,15 +237,13 @@ public class JmxLogAppender extends AppenderSkeleton{
      */
     private void initializeLogger() {
         jmxLogService = (jmxLogService == null) ? JmxLogService.createInstance() : jmxLogService;
-        config = jmxLogService.getJmxConfigStore();
+        configStore = ToolBox.getConfigStoreInstance();
         // what to do when a value is update
-        config.addListener(new JmxConfigStore.ConfigEventListener() {
+        configStore.addListener(new JmxConfigStore.ConfigEventListener() {
 
             public void onValueChanged(JmxConfigStore.ConfigEvent event) {
-                if (event.getSource() != null && event.getSource() != JmxLogAppender.this) {
-                    if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL)) {
-                        setThreshold(Level.toLevel((String) event.getValue()));
-                    }
+                if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL) && event.getSource() != JmxLogAppender.this) {
+                    setThreshold(Level.toLevel((String) event.getValue()));
                 }
             }
         });
@@ -258,22 +253,22 @@ public class JmxLogAppender extends AppenderSkeleton{
      * Configures the value objects for the appender.
      */
     private void configure() {
-        // config layout
+        // configStore layout
         if (getLayout() == null) {
             setLayout(logLayout);
         }
-        // config level
+        // configStore level
         if(getThreshold() == null){
             setThreshold(Level.DEBUG);
         }
 
         // configure server
-        if (config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) == null) {
+        if (configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) == null) {
             this.setMBeanServer("platform");
         }
 
         // configure internal object name
-        if(config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) == null){
+        if(configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) == null){
             setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
         }
     }

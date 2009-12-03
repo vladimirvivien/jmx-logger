@@ -30,6 +30,7 @@ import java.util.logging.SimpleFormatter;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.tools.JmxConfigStore;
+import jmxlogger.tools.JmxConfigStore.ConfigEvent;
 import jmxlogger.tools.JmxLogService;
 import jmxlogger.tools.ToolBox;
 
@@ -43,7 +44,7 @@ import jmxlogger.tools.ToolBox;
 public class JmxLogHandler extends Handler {
     LogManager manager = LogManager.getLogManager();
     private JmxLogService logService;
-    private JmxConfigStore config;
+    private JmxConfigStore configStore;
 
     private final static String KEY_LEVEL = "jmxlogger.Handler.level";
     private final static String KEY_FORMATTER = "jmxlogger.Handler.formatter";
@@ -102,7 +103,8 @@ public class JmxLogHandler extends Handler {
     @Override
     public void setLevel(Level l) {
         super.setLevel(l);
-        config.putValue(ToolBox.KEY_CONFIG_LOG_LEVEL, l.getName());
+        configStore.putValue(ToolBox.KEY_CONFIG_LOG_LEVEL, l.getName());
+        configStore.postEvent(new ConfigEvent(this, ToolBox.KEY_CONFIG_LOG_LEVEL, l.getName()));
     }
     
     /**
@@ -110,7 +112,7 @@ public class JmxLogHandler extends Handler {
      * @param objName
      */
     public void setObjectName(ObjectName objName){
-        config.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, objName);
+        configStore.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, objName);
     }
 
     /**
@@ -118,7 +120,7 @@ public class JmxLogHandler extends Handler {
      * @return ObjectName instance
      */
     public ObjectName getObjectName() {
-        return (ObjectName)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        return (ObjectName)configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
     }
 
     /**
@@ -126,7 +128,7 @@ public class JmxLogHandler extends Handler {
      * @param server
      */
     public void setMBeanServer(MBeanServer server){
-        config.putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
+        configStore.putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
     }
 
     /**
@@ -134,23 +136,23 @@ public class JmxLogHandler extends Handler {
      * @return MBeanServer
      */
     public MBeanServer getMBeanServer() {
-        return (MBeanServer)config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
+        return (MBeanServer)configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
     }
 
     public void setFilterExpression(String exp){
-        config.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
+        configStore.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
     }
 
     public String getFilterExpression(){
-        return (String)config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        return (String)configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
     }
 
     public void setFilterScript(String fileName) {
-        config.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, fileName);
+        configStore.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, fileName);
     }
 
     public String getFilterScript(){
-        return (String)config.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
+        return (String)configStore.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
     }
 
     /**
@@ -244,8 +246,8 @@ public class JmxLogHandler extends Handler {
     private boolean isConfiguredOk() {
         return (logService != null &&
                 logService.isStarted() &&
-                config.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) != null &&
-                config.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) != null &&
+                configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) != null &&
+                configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) != null &&
                 getFormatter() != null &&
                 this.getLevel() != null);
     }
@@ -294,10 +296,10 @@ public class JmxLogHandler extends Handler {
      */
     private void initializeLogger() {
         logService = (logService == null) ? JmxLogService.createInstance() : logService;
-        config = logService.getJmxConfigStore();
+        configStore = ToolBox.getConfigStoreInstance();
 
         // what to do when a value is update
-        config.addListener(new JmxConfigStore.ConfigEventListener() {
+        configStore.addListener(new JmxConfigStore.ConfigEventListener() {
             public void onValueChanged(JmxConfigStore.ConfigEvent event) {
                  if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL) && event.getSource() != JmxLogHandler.this){
                     setLevel(Level.parse((String)event.getValue()));

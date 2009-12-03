@@ -35,8 +35,6 @@ public class JmxEventWrapper implements Comparable{
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 67 * hash + (this.event != null ? this.event.hashCode() : 0);
-        return hash;
+        return event.hashCode();
     }
 }
