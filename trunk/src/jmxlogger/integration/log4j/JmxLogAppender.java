@@ -125,6 +125,7 @@ public class JmxLogAppender extends AppenderSkeleton{
      * @param server
      */
     public void setMBeanServer(MBeanServer server){
+        System.out.println("Config server " + server.hashCode());
         configStore.putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
     }
 
@@ -133,6 +134,7 @@ public class JmxLogAppender extends AppenderSkeleton{
      * @return MBeanServer
      */
     public MBeanServer getMBeanServer() {
+        System.out.println("Retrieve server" + configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER).hashCode());
         return (MBeanServer)configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
     }
 
@@ -240,13 +242,16 @@ public class JmxLogAppender extends AppenderSkeleton{
         configStore = ToolBox.getConfigStoreInstance();
         // what to do when a value is update
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {
-
             public void onValueChanged(JmxConfigStore.ConfigEvent event) {
                 if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL) && event.getSource() != JmxLogAppender.this) {
-                    setThreshold(Level.toLevel((String) event.getValue()));
+                    setInternalThreshold((String) event.getValue());
                 }
             }
         });
+    }
+
+    private void setInternalThreshold(String t){
+        super.setThreshold(Level.toLevel(t));
     }
 
     /**
@@ -264,7 +269,7 @@ public class JmxLogAppender extends AppenderSkeleton{
 
         // configure server
         if (configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) == null) {
-            this.setMBeanServer("platform");
+            this.setMBeanServer(createServerInstance("platform"));
         }
 
         // configure internal object name
@@ -318,13 +323,8 @@ public class JmxLogAppender extends AppenderSkeleton{
 
     private MBeanServer createServerInstance(String domain) {
         MBeanServer svr = ManagementFactory.getPlatformMBeanServer();
-        if(domain != null && domain.length() != 0){
-            if(domain.equalsIgnoreCase("platform")) {
-                // use existing platform server
-                svr = ManagementFactory.getPlatformMBeanServer();
-            }else{
-                svr = ToolBox.findMBeanServer(domain);
-            }
+        if(domain != null && !domain.equalsIgnoreCase("platform")){
+            svr = ToolBox.findMBeanServer(domain);
         }
         return svr;
     }

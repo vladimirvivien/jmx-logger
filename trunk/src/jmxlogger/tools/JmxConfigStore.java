@@ -6,6 +6,7 @@
 package jmxlogger.tools;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,7 +45,7 @@ public class JmxConfigStore {
         config.put(key, value);
     }
     
-    public synchronized Object getValue(String key){
+    public Object getValue(String key){
         return config.get(key);
     }
 
@@ -64,13 +65,24 @@ public class JmxConfigStore {
     }
 
     private void publishPutEventToListeners(final JmxConfigStore.ConfigEvent event, final List<JmxConfigStore.ConfigEventListener> listeners){
-        publisher.execute(new Runnable() {
-            public void run() {
-                for(JmxConfigStore.ConfigEventListener l : listeners){
-                    l.onValueChanged(event);
-                }
-            }
-        });
+        for (final JmxConfigStore.ConfigEventListener l : listeners) {
+            l.onValueChanged(event);
+        }
+
+//        for (final JmxConfigStore.ConfigEventListener l : listeners) {
+//            publisher.execute(new Runnable() {
+//                public void run() {
+//                    l.onValueChanged(event);
+//                }
+//            });
+//        }
+//        publisher.execute(new Runnable() {
+//            public void run() {
+//                for(JmxConfigStore.ConfigEventListener l : listeners){
+//                    l.onValueChanged(event);
+//                }
+//            }
+//        });
     }
 
     public static class ConfigEvent extends java.util.EventObject {
