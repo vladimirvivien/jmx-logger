@@ -106,6 +106,7 @@ public class JmxLogHandler extends Handler {
         configStore.putValue(ToolBox.KEY_CONFIG_LOG_LEVEL, l.getName());
         configStore.postEvent(new ConfigEvent(this, ToolBox.KEY_CONFIG_LOG_LEVEL, l.getName()));
     }
+
     
     /**
      * Setter for emitter MBean ObjectName.
@@ -301,11 +302,15 @@ public class JmxLogHandler extends Handler {
         // what to do when a value is update
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {
             public void onValueChanged(JmxConfigStore.ConfigEvent event) {
-                 if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL) && event.getSource() != JmxLogHandler.this){
-                    setLevel(Level.parse((String)event.getValue()));
+                 if (event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL)){
+                    updateInternalLevel((String)event.getValue());
                 }
             }
         } );
+    }
+
+    private void updateInternalLevel(String l){
+        super.setLevel(createLevelInstance(l));
     }
 
     private Level createLevelInstance(String level){

@@ -53,30 +53,35 @@ public class JmxLogAppenderTest {
     }
 
     @Test
-    public void testConstructors() {
+    public void testDefaultCtor() {
         JmxLogAppender l = new JmxLogAppender();
         assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - no default server found.";
         assert l.getObjectName() != null : "JmxLogAppender - default name not set.";
         assert l.getLayout() != null : "JmxLogAppender - default layout not set.";
-
-
-        l = new JmxLogAppender(javax.management.MBeanServerFactory.createMBeanServer("test"));
-        assert !l.getMBeanServer().equals(platformServer) : "JmxLogAppender - constructor not setting server";
-        assert l.getMBeanServer().getDefaultDomain().equals("test");
-
-        l = new JmxLogAppender(objectName);
-        assert l.getObjectName().equals(objectName.toString()) : "JmxLogAppender - constructor not seting object name.";
-        assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - no default server found.";
     }
 
     @Test
-    public void testSetMBeanServer() {
-        JmxLogAppender l = new JmxLogAppender();
-        l.setMBeanServer(platformServer);
-        assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - MBeanServer setter failing.";
-        l.setMBeanServer("platform");
-        assert l.getMBeanServer().equals(platformServer) : "Not setting platform server by name";
+    public void testCtorWithMBeanServerInstance() {
+        JmxLogAppender l = new JmxLogAppender(javax.management.MBeanServerFactory.createMBeanServer("test"));
+        assert !l.getMBeanServer().equals(platformServer) : "JmxLogAppender - constructor not setting server";
+        assert l.getMBeanServer().getDefaultDomain().equals("test");
     }
+
+    @Test
+    public void testCtorWithObjectNameInstance(){
+        JmxLogAppender l = new JmxLogAppender(objectName);
+        assert l.getObjectName().equals(objectName) : "JmxLogAppender - constructor not seting object name.";
+        assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - no default server found.";
+    }
+
+//    @Test
+//    public void testSetMBeanServer() {
+//        JmxLogAppender l = new JmxLogAppender();
+//        l.setMBeanServer(platformServer);
+//        assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - MBeanServer setter failing.";
+//        l.setMBeanServer("platform");
+//        assert l.getMBeanServer().equals(platformServer) : "Not setting platform server by name";
+//    }
 
 //    @Test
 //    public void testSetObjectName(){
