@@ -31,9 +31,6 @@ public class JmxLogAppenderTest {
     private LogListener lstnr;
 
     public JmxLogAppenderTest() {
-        platformServer = ManagementFactory.getPlatformMBeanServer();
-        objectName = ToolBox.buildObjectName("log4j.logging:type=Log4jAppender");
-        lstnr = new LogListener();
     }
 
     @BeforeClass
@@ -46,6 +43,9 @@ public class JmxLogAppenderTest {
 
     @Before
     public void setUp() {
+        platformServer = ManagementFactory.getPlatformMBeanServer();
+        objectName = ToolBox.buildObjectName("log4j.logging:type=Log4jAppender");
+        lstnr = new LogListener();
     }
 
     @After
@@ -54,6 +54,7 @@ public class JmxLogAppenderTest {
 
     @Test
     public void testDefaultCtor() {
+        System.out.println ("JmxLogAppender()");
         JmxLogAppender l = new JmxLogAppender();
         assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - no default server found.";
         assert l.getObjectName() != null : "JmxLogAppender - default name not set.";
@@ -62,6 +63,7 @@ public class JmxLogAppenderTest {
 
     @Test
     public void testCtorWithMBeanServerInstance() {
+        System.out.println ("JmxLogAppender(MBeanServer)");
         JmxLogAppender l = new JmxLogAppender(javax.management.MBeanServerFactory.createMBeanServer("test"));
         assert !l.getMBeanServer().equals(platformServer) : "JmxLogAppender - constructor not setting server";
         assert l.getMBeanServer().getDefaultDomain().equals("test");
@@ -69,6 +71,8 @@ public class JmxLogAppenderTest {
 
     @Test
     public void testCtorWithObjectNameInstance(){
+        System.out.println ("JmxLogAppender(ObjectName)");
+        platformServer = ManagementFactory.getPlatformMBeanServer();
         JmxLogAppender l = new JmxLogAppender(objectName);
         assert l.getObjectName().equals(objectName) : "JmxLogAppender - constructor not seting object name.";
         assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - no default server found.";
