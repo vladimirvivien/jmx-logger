@@ -45,6 +45,7 @@ public class JmxLogHandler extends Handler {
     LogManager manager = LogManager.getLogManager();
     private JmxLogService logService;
     private JmxConfigStore configStore;
+    private volatile boolean configured = false;
 
     private final static String KEY_LEVEL = "jmxlogger.Handler.level";
     private final static String KEY_FORMATTER = "jmxlogger.Handler.formatter";
@@ -173,6 +174,7 @@ public class JmxLogHandler extends Handler {
      * Life cycle method to call to stop logService.
      */
     public void stop() {
+        configured = false;
         if(logService != null && logService.isStarted()){
             logService.stop();
         }
@@ -244,8 +246,13 @@ public class JmxLogHandler extends Handler {
         return (super.isLoggable(record));
     }
 
+    public boolean isConfigured() {
+        return configured;
+    }
+
     private boolean isConfiguredOk() {
-        return (logService != null &&
+        return (isConfigured() &&
+                logService != null &&
                 logService.isStarted() &&
                 configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) != null &&
                 configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) != null &&
@@ -258,13 +265,21 @@ public class JmxLogHandler extends Handler {
      */
     private void configure() {
         // configure level (default INFO)
-        String value;
-        setLevel(createLevelInstance(manager.getProperty(KEY_LEVEL)));
+        String value = manager.getProperty(KEY_LEVEL);
+        setLevel(createLevelInstance(value));
 
         // configure filter (default none)
-        setFilter(createFilterInstance(manager.getProperty(KEY_FILTER)));
-        setFilterExpression(manager.getProperty(KEY_FILTER_EXP));
-        setFilterScript(manager.getProperty(KEY_FILTER_SCRIPT));
+        value = manager.getProperty(KEY_FILTER);
+        if(value != null)
+            setFilter(createFilterInstance(value));
+
+        value = manager.getProperty(KEY_FILTER_EXP);
+        if(value != null)
+            setFilterExpression(value);
+
+        value = manager.getProperty(KEY_FILTER_SCRIPT);
+        if(value != null)
+            setFilterScript(value);
 
         
         // configure formatter (default SimpleFormatter)
@@ -290,6 +305,8 @@ public class JmxLogHandler extends Handler {
         }else{
             setMBeanServer(ManagementFactory.getPlatformMBeanServer());
         }
+
+        configured = true;
     }
 
     /**
@@ -297,7 +314,7 @@ public class JmxLogHandler extends Handler {
      */
     private void initializeLogger() {
         logService = (logService == null) ? JmxLogService.createInstance() : logService;
-        configStore = ToolBox.getConfigStoreInstance();
+        configStore = logService.getDefaultConfigurationStore();
 
         // what to do when a value is update
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {

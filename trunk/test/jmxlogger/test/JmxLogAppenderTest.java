@@ -6,13 +6,14 @@
 package jmxlogger.test;
 
 import java.lang.management.ManagementFactory;
-import java.util.logging.Level;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.integration.log4j.JmxLogAppender;
 import jmxlogger.tools.ToolBox;
+import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.After;
@@ -54,113 +55,98 @@ public class JmxLogAppenderTest {
 
     @Test
     public void testDefaultCtor() {
-        System.out.println ("JmxLogAppender()");
         JmxLogAppender l = new JmxLogAppender();
-        assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - no default server found.";
-        assert l.getObjectName() != null : "JmxLogAppender - default name not set.";
+        l.activateOptions();
+        assert l.getMBeanServerValue().equals(platformServer) : "JmxLogAppender - no default server found.";
+        assert l.getObjectNameValue() != null : "JmxLogAppender - default name not set.";
         assert l.getLayout() != null : "JmxLogAppender - default layout not set.";
     }
 
     @Test
     public void testCtorWithMBeanServerInstance() {
-        System.out.println ("JmxLogAppender(MBeanServer)");
         JmxLogAppender l = new JmxLogAppender(javax.management.MBeanServerFactory.createMBeanServer("test"));
-        assert !l.getMBeanServer().equals(platformServer) : "JmxLogAppender - constructor not setting server";
-        assert l.getMBeanServer().getDefaultDomain().equals("test");
+        l.activateOptions();
+        assert !l.getMBeanServerValue().equals(platformServer) : "JmxLogAppender - constructor not setting server";
+        assert l.getMBeanServerValue().getDefaultDomain().equals("test");
     }
 
     @Test
     public void testCtorWithObjectNameInstance(){
-        System.out.println ("JmxLogAppender(ObjectName)");
         platformServer = ManagementFactory.getPlatformMBeanServer();
         JmxLogAppender l = new JmxLogAppender(objectName);
-        assert l.getObjectName().equals(objectName) : "JmxLogAppender - constructor not seting object name.";
-        assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - no default server found.";
+        l.activateOptions();
+        assert l.getObjectNameValue().equals(objectName) : "JmxLogAppender - constructor not seting object name.";
+        assert l.getMBeanServerValue().equals(platformServer) : "JmxLogAppender - no default server found.";
     }
 
-//    @Test
-//    public void testSetMBeanServer() {
-//        JmxLogAppender l = new JmxLogAppender();
-//        l.setMBeanServer(platformServer);
-//        assert l.getMBeanServer().equals(platformServer) : "JmxLogAppender - MBeanServer setter failing.";
-//        l.setMBeanServer("platform");
-//        assert l.getMBeanServer().equals(platformServer) : "Not setting platform server by name";
-//    }
+    @Test
+    public void testSetMBeanServer() {
+        JmxLogAppender l = new JmxLogAppender();
+        l.setMBeanServerValue(platformServer);
+        l.activateOptions();
+        assert l.getMBeanServerValue().equals(platformServer) : "JmxLogAppender - MBeanServer setter failing.";
+        l.setMBeanServer("platform");
+        assert l.getMBeanServerValue().equals(platformServer) : "Not setting platform server by name";
+    }
 
-//    @Test
-//    public void testSetObjectName(){
-//        JmxLogAppender l = new JmxLogAppender();
-//        l.setObjectName(objectName.toString());
-//        assert l.getObjectName().equals(objectName.toString()) : "JmxLogAppender - ObjectName setter fails.";
-//    }
-//
-//    @Test
-//    public void testSetLogPattern() {
-//        JmxLogAppender l = new JmxLogAppender();
-//        l.setLogPattern("somePattern");
-//        assert l.getLogPattern() != null : "JmxLogAppender - LogPattern setter fails.";
-//    }
-//
-//    @Test
-//    public void testServerSelection() {
-//        JmxLogAppender l = new JmxLogAppender();
-//        l.setServerSelection("someServer");
-//        assert l.getServerSelection().equals("someServer") : "JmxLogAppender - ServerSelection sertter tails";
-//    }
-//
-//    @Test
-//    public void testLog() throws Exception{
-//        Logger logger = Logger.getLogger(JmxLogAppenderTest.class);
-//        DOMConfigurator.configure("log4j.xml");
-//        platformServer.addNotificationListener(objectName, lstnr, null,null);
-//        logger.info("Hello!");
-//
-//        int count = 0;
-//        while(count < 10 && lstnr.getNoteCount() <= 0){
-//            try {
-//                Thread.currentThread().sleep(500);
-//                count++;
-//                System.out.println ("Waiting for notification ... " + count * 500 + " millis.");
-//            } catch (InterruptedException ex) {
-//                throw new RuntimeException(ex);
-//            }
-//        }
-//
-//        assert lstnr.getNoteCount() > 0 : "JmxLoggingHandler ! broadcasting log event";
-//    }
-//
-//    @Test
-//    public void testSetLogLevel() {
-//        JmxLogAppender l = new JmxLogAppender();
-//        l.setLogLevel("INFO");
-//        assert l.getLogLevel().equals("INFO");
-//
-//        l.setLogLevel("WARN");
-//        assert l.getLogLevel().equals("WARN");
-//
-//        l.setLogLevel("ERROR");
-//        assert l.getLogLevel().equals("ERROR");
-//    }
-//
-//    @Test
-//    public void testFilterCreation() {
-//        Logger logger = LogManager.getLogger(JmxLogAppenderTest.class.getName());
-//        JmxLogAppender appender = new JmxLogAppender();
-//        DefaultLog4jFilter filter = new DefaultLog4jFilter();
-//        appender.addFilter(filter);
-//        filter.setLogPattern("(.)(.)*Exception(.)(.)*");
-//
-//        Filter f = appender.getFilter();
-//        DefaultLog4jFilter lf = null;
-//        while (f != null){
-//            if(f instanceof DefaultLog4jFilter){
-//                lf = (DefaultLog4jFilter) f;
-//                break;
-//            }
-//            f = f.getNext();
-//        }
-//
-//        assert lf.getLogPattern().equals("(.)(.)*Exception(.)(.)*");
-//    }
-    
+    @Test
+    public void testSetObjectName(){
+        JmxLogAppender l = new JmxLogAppender();
+        l.setObjectName(objectName.toString());
+        l.activateOptions();
+        assert l.getObjectNameValue().equals(objectName) : "JmxLogAppender - ObjectName setter fails.";
+    }
+
+    @Test
+    public void testSetFilterExpression() {
+        JmxLogAppender l = new JmxLogAppender();
+        l.setFilterExpression("mvel expression");
+        l.activateOptions();
+        assert l.getFilterExpression() != null : "JmxLogAppender - filter expression not set.";
+    }
+
+    @Test
+    public void testServerSelection() {
+        JmxLogAppender l = new JmxLogAppender();
+        l.setMBeanServer("platform");
+        l.activateOptions();
+        assert l.getMBeanServerValue().equals(platformServer) : "JmxLogAppender - ServerSelection sertter tails";
+    }
+
+    @Test
+    public void testLog() throws Exception{
+        Logger logger = Logger.getLogger(JmxLogAppenderTest.class);
+        DOMConfigurator.configure("log4j.xml");
+        platformServer.addNotificationListener(objectName, lstnr, null,null);
+        logger.info("Hello!");
+
+        int count = 0;
+        while(count < 10 && lstnr.getNoteCount() <= 0){
+            try {
+                Thread.currentThread().sleep(500); // stall thread
+                count++;
+                System.out.println ("Waiting for notification ... " + count * 500 + " millis.");
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        assert lstnr.getNoteCount() > 0 : "JmxLoggingHandler ! broadcasting log event";
+    }
+
+    @Test
+    public void testFilterCreation() {
+        JmxLogAppender appender = new JmxLogAppender();
+        appender.setFilterExpression("expression");
+        appender.activateOptions();
+        assert appender.getFilterExpression().equals("expression");
+    }
+
+    @Test
+    public void testFilterScript ()  {
+        JmxLogAppender appender = new JmxLogAppender();
+        appender.setFilterScript("fileName");
+        appender.activateOptions();
+        assert appender.getFilterScript().equals("fileName");
+    }
 }

@@ -37,13 +37,12 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     private JmxConfigStore configStore;
     private String logLevel;
 
-    public JmxLogEmitter() {
+    public JmxLogEmitter(JmxConfigStore store) {
+        configStore = store;
         initializeBean();
     }
 
     private void initializeBean() {
-        configStore = ToolBox.getConfigStoreInstance();
-
         // add listener to reset filterExpression and filterFile
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {
             public void onValueChanged(ConfigEvent event) {
