@@ -42,44 +42,44 @@ public class JmxScriptedLogFilterTest {
     }
 
     @Test
-    public void testFormattedLogPattern() {
-        event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, debugMsg);
+    public void testIsLogAllowed() {
+        event.put(ToolBox.KEY_EVENT_LEVEL, "INFO");
         JmxEventWrapper eventwrap = new JmxEventWrapper(event);
-        assert filter.isLogAllowed(eventwrap);
-
-        filter.setFilterExpression("formattedMessage != null");
-        assert filter.isLogAllowed(eventwrap);
-
-//        String pattern = "\\d{4}-\\d{2}-\\d{2}\\s\\d\\d:\\d\\d:\\d\\d,\\d{3}\\sDEBUG";
-//        config.setLogPattern(Pattern.compile(pattern));
-//        assert filter.isLogAllowed(eventwrap);
-//        pattern = "\\d{4}-\\d{2}-\\d{2}\\s\\d\\d:\\d\\d:\\d\\d,\\d{3}\\sINFO";
-//        config.setLogPattern(Pattern.compile(pattern));
-//        assert !filter.isLogAllowed(eventwrap);
+        // if test is absent, return true
+         assert filter.isLogAllowed(eventwrap);
+         filter.setFilterExpression("logLevel == 'INFO'");
+         assert filter.isLogAllowed(eventwrap);
     }
 
-//    @Test
-//    public void testRawLogPattern() {
-//        event.put(ToolBox.KEY_EVENT_RAW_MESSAGE, "Error has been encountered.");
-//        JmxEventWrapper eventwrap = new JmxEventWrapper(event);
-//        String pattern = "\\d{4}-\\d{2}-\\d{2}\\s\\d\\d:\\d\\d:\\d\\d,\\d{3}\\sDEBUG";
-//        config.setLogPattern(Pattern.compile(pattern));
-//        assert !filter.isLogAllowed(eventwrap);
-//        pattern = "Error*";
-//        config.setLogPattern(Pattern.compile(pattern));
-//        assert filter.isLogAllowed(eventwrap);
-//    }
-//
-//    @Test
-//    public void testSourceClassAllowed() {
-//        event.put(ToolBox.KEY_EVENT_SOURCE_CLASS, this.getClass().getName());
-//        JmxEventWrapper warpper = new JmxEventWrapper(event);
-//        config.setSourceClass(this.getClass().getName());
-//        assert filter.isLogAllowed(warpper);
-//        config.setSourceClass("jxmlogger.tools.JmxLogFilter");
-//        assert !filter.isLogAllowed(warpper);
-//    }
-//
+    @Test
+    public void testFormattedMessage() {
+        event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, debugMsg);
+        JmxEventWrapper eventwrap = new JmxEventWrapper(event);
+        filter.setFilterExpression("formattedMessage contains 'DEBUG'");
+        assert filter.isLogAllowed(eventwrap);
+
+        filter.setFilterExpression("formattedMessage contains 'INFO'");
+        assert ! filter.isLogAllowed(eventwrap);
+    }
+
+    @Test
+    public void testRawMessage() {
+        event.put(ToolBox.KEY_EVENT_RAW_MESSAGE, "ERROR, STOP EVERYTHING");
+        JmxEventWrapper eventwrap = new JmxEventWrapper(event);
+        filter.setFilterExpression("rawMessage.length() == 22");
+        assert filter.isLogAllowed(eventwrap);
+    }
+
+    @Test
+    public void testSourceClass() {
+        event.put(ToolBox.KEY_EVENT_SOURCE_CLASS, this.getClass().getName());
+        JmxEventWrapper warpper = new JmxEventWrapper(event);
+        filter.setFilterExpression(String.format("sourceClassName == '%s'", this.getClass().getName()));
+        assert filter.isLogAllowed(warpper);
+        filter.setFilterExpression("sourceClassName == 'jxmlogger.tools.JmxLogFilter'");
+        assert !filter.isLogAllowed(warpper);
+    }
+
 //    @Test
 //    public void testSourceMethodAllowed() {
 //        event.put(ToolBox.KEY_EVENT_SOURCE_METHOD, "isLogAllowed");

@@ -43,7 +43,7 @@ public class ToolBox {
     public static final String KEY_EVENT_TYPE = "jmxlogger.log.event";
     public static final String KEY_EVENT_SOURCE = "source";
     public static final String KEY_EVENT_LOGGER = "loggerName";
-    public static final String KEY_EVENT_LEVEL = "levelName";
+    public static final String KEY_EVENT_LEVEL = "logLevel";
     public static final String KEY_EVENT_SOURCE_CLASS = "sourceClassName";
     public static final String KEY_EVENT_SOURCE_METHOD = "sourceMethodName";
     public static final String KEY_EVENT_SOURCE_THREAD = "threadId";
@@ -55,12 +55,6 @@ public class ToolBox {
 
     private static final ErrorManager EM = new ErrorManager();
     private static final String DEFAULT_NAME = "jmxlogger:type=LogEmitter";
-
-    private static final JmxConfigStore config;
-
-    static {
-        config = new JmxConfigStore();
-    }
 
     /***
      * Returns the default event type of jmxlogger.log.event
@@ -167,9 +161,5 @@ public class ToolBox {
      */
     public static void reportError(String error, Exception ex){
         EM.error(error, ex, ErrorManager.GENERIC_FAILURE);
-    }
-
-    public static JmxConfigStore getConfigStoreInstance() {
-        return config;
     }
 }

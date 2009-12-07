@@ -18,6 +18,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import jmxlogger.integration.log4j.JmxLogAppender;
 import jmxlogger.integration.logutil.JmxLogHandler;
+import jmxlogger.tools.JmxConfigStore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -62,7 +63,7 @@ public class JmxLogEmitterTest {
     @Test
     public void testIsValidMBean() {
         try {
-            registerMBean(new JmxLogEmitter(), name);
+            registerMBean(new JmxLogEmitter(new JmxConfigStore()), name);
             assert server.getObjectInstance(name) != null : "MBean is not registered";
         } catch (InstanceNotFoundException ex) {
             throw new RuntimeException(ex);
@@ -91,7 +92,7 @@ public class JmxLogEmitterTest {
 
     @Test
     public void testLifecycleMethods() {
-        JmxLogEmitter e = new JmxLogEmitter();
+        JmxLogEmitter e = new JmxLogEmitter(new JmxConfigStore());
         e.start();
         assert e.isStarted() : "Emitter not started after start() call.";
         e.stop();
@@ -100,7 +101,7 @@ public class JmxLogEmitterTest {
 
     @Test
     public void testLogCount() {
-        JmxLogEmitter e = new JmxLogEmitter();
+        JmxLogEmitter e = new JmxLogEmitter(new JmxConfigStore());
         e.start();
         Map<String,Object> event = new HashMap<String,Object>();
         event.put(ToolBox.KEY_EVENT_SOURCE, e.getClass().getName());
@@ -125,7 +126,7 @@ public class JmxLogEmitterTest {
 
     @Test
     public void testSendCount() {
-        JmxLogEmitter e = new JmxLogEmitter();
+        JmxLogEmitter e = new JmxLogEmitter(new JmxConfigStore());
         registerMBean(e, name);
         LogListener listener = new LogListener();
         try {
@@ -155,29 +156,4 @@ public class JmxLogEmitterTest {
         assert listener.getNoteCount() > 0 : "JmxLogEmitter MBean not emitting sendLog() event";
         e.stop();
     }
-
-//    @Test
-//    public void testGetLog4jLevel() {
-//        JmxLogAppender a = new JmxLogAppender();
-//        JmxLogService  svc = JmxLogService.createInstance();
-//        svc.setLogger(a);
-//        JmxLogEmitter e = new JmxLogEmitter();
-//        e.setLogService(svc);
-//        assert e.getLogLevel().equals("DEBUG");
-//        e.setLogLevel("WARN");
-//        assert e.getLogLevel().equals("WARN");
-//    }
-//    @Test
-//    public void testJavaLogLevel() {
-//        JmxLogHandler a = new JmxLogHandler();
-//        JmxLogService  svc = JmxLogService.createInstance();
-//        svc.setLogger(a);
-//        JmxLogEmitter e = new JmxLogEmitter();
-//        e.setLogService(svc);
-//        assert e.getLogLevel().equals("FINE");
-//        e.setLogLevel("WARNING");
-//        assert e.getLogLevel().equals("WARNING");
-//        e.setLogLevel("CONFIG");
-//        assert e.getLogLevel().equals("CONFIG");
-//    }
 }

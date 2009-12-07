@@ -48,8 +48,14 @@ public class JmxLogService {
      * Private Constructor.
      */
     private JmxLogService() {
+        configStore = new JmxConfigStore();
         initializeService();
      }
+
+    private JmxLogService(JmxConfigStore store){
+        configStore = store;
+        initializeService();
+    }
 
     /**
      * Factory method to create instance of this class.
@@ -59,10 +65,12 @@ public class JmxLogService {
         return new JmxLogService();
     }
 
+    public static JmxLogService createInstance(JmxConfigStore store){
+        return new JmxLogService(store);
+    }
     private void initializeService() {
-        logMBean = new JmxLogEmitter();
+        logMBean = new JmxLogEmitter(configStore);
         logFilter = new JmxScriptedLogFilter();
-        configStore = ToolBox.getConfigStoreInstance();
 
         // add listener to reset filterExpression and filterFile
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {
@@ -73,6 +81,11 @@ public class JmxLogService {
             }
         });
     }
+
+    public JmxConfigStore getDefaultConfigurationStore() {
+        return configStore;
+    }
+
 
     /**
      * Life cycle method that starts the logger.  It registers the emitter MBean

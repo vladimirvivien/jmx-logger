@@ -51,7 +51,7 @@ public class JmxLogAppender extends AppenderSkeleton{
      */
     public JmxLogAppender() {
         initializeLogger();
-        configure();
+        //configure();
     }
 
     /**
@@ -61,8 +61,8 @@ public class JmxLogAppender extends AppenderSkeleton{
      */
     public JmxLogAppender(ObjectName name){
         initializeLogger();
-        configStore.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
-        configure();
+        setObjectNameValue(name);
+        //configure();
     }
 
     /**
@@ -71,9 +71,8 @@ public class JmxLogAppender extends AppenderSkeleton{
      */
     public JmxLogAppender(MBeanServer server){
         initializeLogger();
-        setMBeanServer(server);
-        configure();
-        
+        setMBeanServerValue(server);
+        //configure();
     }
 
     /**
@@ -84,9 +83,8 @@ public class JmxLogAppender extends AppenderSkeleton{
      */
     public JmxLogAppender(MBeanServer server, ObjectName name){
         initializeLogger();
-        setMBeanServer(server);
-        configStore.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
-        configure();
+        setMBeanServerValue(server);
+        setObjectNameValue(name);
     }
 
     @Override
@@ -96,53 +94,44 @@ public class JmxLogAppender extends AppenderSkeleton{
         configStore.postEvent(new ConfigEvent(this, ToolBox.KEY_CONFIG_LOG_LEVEL, level.toString()));
     }
 
-    public void setObjectName(ObjectName name){
-        configStore.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
+    public void setObjectName(String objName){
+        setObjectNameValue(createObjectNameInstance(objName));
     }
 
-    /**
-     * Getter of ObjectName for emitter MBean.
-     * @return ObjectName instance
-     */
-    public ObjectName getObjectName() {
+    public String getObjectName(String objName){
+        ObjectName name = (ObjectName) configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        return name != null ? name.toString() : null;
+    }
+
+    public void setObjectNameValue(ObjectName name){
+        configStore.putValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME, name);
+    }
+    public ObjectName getObjectNameValue() {
         return (ObjectName)configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
     }
 
-    /**
-     * Setter for emitter MBean ObjectName.
-     * @param objName
-     */
-    public void setObjectName(String objName){
-        setObjectName(createObjectNameInstance(objName));
-    }
-
     public void setMBeanServer(String domain) {
-        setMBeanServer(createServerInstance(domain));
+        setMBeanServerValue(createServerInstance(domain));
     }
-
-    /**
-     * Setter for MBeanServer used to register emitter MBean.
-     * @param server
-     */
-    public void setMBeanServer(MBeanServer server){
+    public String getMBeanServer() {
+        MBeanServer svr = (MBeanServer)configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
+        return svr != null ? svr.toString() : null;
+    }
+    
+    public void setMBeanServerValue(MBeanServer server){
         configStore.putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
     }
 
-    /**
-     * Getter of MBeanServer.
-     * @return MBeanServer
-     */
-    public MBeanServer getMBeanServer() {
-        return (MBeanServer)configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
+    public MBeanServer getMBeanServerValue() {
+         return (MBeanServer)configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
     }
-
 
     public void setFilterExpression(String exp){
         configStore.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
     }
 
     public String getFilterExpression(){
-        return (String)configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        return (String)configStore.getValue(ToolBox.KEY_CONFIG_FILTER_EXP);
     }
 
     public void setFilterScript(String fileName) {
@@ -237,7 +226,7 @@ public class JmxLogAppender extends AppenderSkeleton{
      */
     private void initializeLogger() {
         jmxLogService = (jmxLogService == null) ? JmxLogService.createInstance() : jmxLogService;
-        configStore = ToolBox.getConfigStoreInstance();
+        configStore = jmxLogService.getDefaultConfigurationStore();
         // what to do when a value is update
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {
             public void onValueChanged(JmxConfigStore.ConfigEvent event) {
@@ -267,15 +256,12 @@ public class JmxLogAppender extends AppenderSkeleton{
 
         // configure server
         if (configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) == null) {
-            this.setMBeanServer(createServerInstance("platform"));
-            System.out.println ("DEBUG: No Server found, set MBeanServer to " + this.getMBeanServer());
-        }else{
-            System.out.println ("DEBUG: Found MBeanServer" + this.getMBeanServer());
+            this.setMBeanServerValue(createServerInstance("platform"));
         }
 
         // configure internal object name
         if(configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME) == null){
-            setObjectName(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
+            setObjectNameValue(ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode())));
         }
     }
 
@@ -314,7 +300,7 @@ public class JmxLogAppender extends AppenderSkeleton{
 
     private ObjectName createObjectNameInstance(String name){
         ObjectName objName = null;
-        if(objName == null){
+        if(name == null){
             objName = ToolBox.buildDefaultObjectName(Integer.toString(this.hashCode()));
         }else{
             objName = ToolBox.buildObjectName(name);
