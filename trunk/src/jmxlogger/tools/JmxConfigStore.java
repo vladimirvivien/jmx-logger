@@ -52,6 +52,13 @@ public class JmxConfigStore {
     public synchronized Map getValues() {
         return config;
     }
+
+    /**
+     * Clears the store of its content.
+     */
+    public void clear ()  {
+        config.clear();
+    }
     
     private void setupPublisher() {
         publisher = Executors.newSingleThreadExecutor();

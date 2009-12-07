@@ -125,7 +125,6 @@ public class JmxLogAppender extends AppenderSkeleton{
      * @param server
      */
     public void setMBeanServer(MBeanServer server){
-        System.out.println("Config server " + server.hashCode());
         configStore.putValue(ToolBox.KEY_CONFIG_JMX_SERVER, server);
     }
 
@@ -134,7 +133,6 @@ public class JmxLogAppender extends AppenderSkeleton{
      * @return MBeanServer
      */
     public MBeanServer getMBeanServer() {
-        System.out.println("Retrieve server" + configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER).hashCode());
         return (MBeanServer)configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER);
     }
 
@@ -270,6 +268,9 @@ public class JmxLogAppender extends AppenderSkeleton{
         // configure server
         if (configStore.getValue(ToolBox.KEY_CONFIG_JMX_SERVER) == null) {
             this.setMBeanServer(createServerInstance("platform"));
+            System.out.println ("DEBUG: No Server found, set MBeanServer to " + this.getMBeanServer());
+        }else{
+            System.out.println ("DEBUG: Found MBeanServer" + this.getMBeanServer());
         }
 
         // configure internal object name
