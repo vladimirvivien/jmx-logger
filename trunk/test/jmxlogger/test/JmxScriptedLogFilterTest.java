@@ -5,6 +5,8 @@
 
 package jmxlogger.test;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import jmxlogger.tools.JmxConfigStore;
@@ -25,7 +27,6 @@ public class JmxScriptedLogFilterTest {
     }
 
     private JmxScriptedLogFilter filter;
-    private JmxConfigStore config;
     private Map<String,Object> event;
     private String debugMsg = "2009-07-29 14:18:00,516 DEBUG [jmxlogger.JmxLogger] This is a debug message";
     private String infoMsg  = "2009-07-30 16:02:00,500  INFO [jmxlogger.JmxTester] This is an info message";
@@ -33,7 +34,6 @@ public class JmxScriptedLogFilterTest {
     @Before
     public void setUpClass() throws Exception {
         filter = new JmxScriptedLogFilter();
-        config = new JmxConfigStore();
         event = new HashMap<String,Object>();
     }
 
@@ -80,42 +80,44 @@ public class JmxScriptedLogFilterTest {
         assert !filter.isLogAllowed(warpper);
     }
 
-//    @Test
-//    public void testSourceMethodAllowed() {
-//        event.put(ToolBox.KEY_EVENT_SOURCE_METHOD, "isLogAllowed");
-//        JmxEventWrapper warpper = new JmxEventWrapper(event);
-//        config.setSourceMethod("isLogAllowed");
-//        assert filter.isLogAllowed(warpper);
-//        config.setSourceMethod("testSourceMethodAllowed");
-//        assert !filter.isLogAllowed(warpper);
-//    }
-//
-//    @Test
-//    public void testThrownClassAllowed() {
-//        event.put(ToolBox.KEY_EVENT_THROWABLE, "java.lang.RuntimeException");
-//        JmxEventWrapper warpper = new JmxEventWrapper(event);
-//        config.setThrownClass("java.lang.RuntimeException");
-//        assert filter.isLogAllowed(warpper);
-//        config.setThrownClass("java.lang.String");
-//        assert !filter.isLogAllowed(warpper);
-//    }
-//
-//@Test
-//    public void testTimestampLoBound() {
-//        long today = new Date().getTime();
-//        Calendar cal = Calendar.getInstance();
-//        cal.setTimeInMillis(today);
-//        cal.add(Calendar.DAY_OF_MONTH, 1);
-//        long tomorrow = cal.getTimeInMillis();
-//        event.put(ToolBox.KEY_EVENT_TIME_STAMP, tomorrow);
-//        JmxEventWrapper warpper = new JmxEventWrapper(event);
-//        config.setTimestampLo(today);
-//        assert filter.isLogAllowed(warpper);
-//
-//        event.put(ToolBox.KEY_EVENT_TIME_STAMP, today);
-//        config.setTimestampLo(tomorrow);
-//        assert !filter.isLogAllowed(warpper);
-//    }
+    @Test
+    public void testSourceMethod() {
+        event.put(ToolBox.KEY_EVENT_SOURCE_METHOD, "isLogAllowed");
+        JmxEventWrapper warpper = new JmxEventWrapper(event);
+        filter.setFilterExpression("sourceMethodName == 'isLogAllowed'");
+        assert filter.isLogAllowed(warpper);
+        filter.setFilterExpression("sourceMethodName == 'testSourceMethodName'");
+        assert !filter.isLogAllowed(warpper);
+    }
+
+    @Test
+    public void testThrownClassAllowed() {
+        event.put(ToolBox.KEY_EVENT_THROWABLE, "java.lang.RuntimeException");
+        JmxEventWrapper warpper = new JmxEventWrapper(event);
+        filter.setFilterExpression("exceptionName == 'java.lang.RuntimeException'");
+        assert filter.isLogAllowed(warpper);
+
+        filter.setFilterExpression("exceptionName.equals('java.lang.Exception')");
+        assert !filter.isLogAllowed(warpper);
+    }
+
+
+@Test
+    public void testTimeStamp() {
+        long today = new Date().getTime();
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(today);
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        long tomorrow = cal.getTimeInMillis();
+        event.put(ToolBox.KEY_EVENT_TIME_STAMP, tomorrow);
+
+        JmxEventWrapper warpper = new JmxEventWrapper(event);
+        filter.setFilterExpression("timestamp > new Date().getTime()");
+        assert filter.isLogAllowed(warpper);
+        filter.setFilterExpression("timestamp < new Date().getTime()");
+        assert !filter.isLogAllowed(warpper);
+    }
+
 //
 //    public void testTimestampHiBound() {
 //        long today = new Date().getTime();

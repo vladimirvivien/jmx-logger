@@ -136,6 +136,7 @@ public class JmxLogService {
                     "Call JmxEventLogger.start() before you log messages.");
         }
         final JmxEventWrapper noteWrapper = new JmxEventWrapper(event);
+       
         noteProducers.execute(new Runnable(){
             public void run() {
                 // apply filter configuration then put event not on queue

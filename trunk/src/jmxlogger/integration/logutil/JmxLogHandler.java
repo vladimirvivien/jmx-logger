@@ -53,7 +53,7 @@ public class JmxLogHandler extends Handler {
     private final static String KEY_SERVER = "jmxlogger.Handler.mbeanServer";
     private final static String KEY_FILTER = "jmxlogger.Handler.filter";
     private final static String KEY_FILTER_EXP = "jmxlogger.Handler.filterExpression";
-    private final static String KEY_FILTER_SCRIPT = "jmxlogger.Handler.filterScript";
+    private final static String KEY_FILTER_SCRIPT = "jmxlogger.Handler.filterScriptFile";
 
 
     /**
@@ -143,17 +143,18 @@ public class JmxLogHandler extends Handler {
 
     public void setFilterExpression(String exp){
         configStore.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
+        configStore.postEvent(new ConfigEvent(this, ToolBox.KEY_CONFIG_FILTER_EXP, exp));
     }
 
     public String getFilterExpression(){
-        return (String)configStore.getValue(ToolBox.KEY_CONFIG_JMX_OBJECTNAME);
+        return (String)configStore.getValue(ToolBox.KEY_CONFIG_FILTER_EXP);
     }
 
-    public void setFilterScript(String fileName) {
+    public void setFilterScriptFile(String fileName) {
         configStore.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, fileName);
     }
 
-    public String getFilterScript(){
+    public String getFilterScriptFile(){
         return (String)configStore.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
     }
 
@@ -279,7 +280,7 @@ public class JmxLogHandler extends Handler {
 
         value = manager.getProperty(KEY_FILTER_SCRIPT);
         if(value != null)
-            setFilterScript(value);
+            setFilterScriptFile(value);
 
         
         // configure formatter (default SimpleFormatter)
@@ -378,6 +379,7 @@ public class JmxLogHandler extends Handler {
         event.put(ToolBox.KEY_EVENT_LEVEL,record.getLevel().getName());
         event.put(ToolBox.KEY_EVENT_LOGGER,record.getLoggerName());
         event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE,fmtMsg);
+        event.put(ToolBox.KEY_EVENT_RAW_MESSAGE, record.getMessage());
         event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(record.getSequenceNumber()));
         event.put(ToolBox.KEY_EVENT_SOURCE_CLASS,record.getSourceClassName());
         event.put(ToolBox.KEY_EVENT_SOURCE_METHOD,record.getSourceMethodName());

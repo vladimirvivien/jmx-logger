@@ -100,9 +100,9 @@ public class JmxLogAppenderTest {
     @Test
     public void testSetFilterExpression() {
         JmxLogAppender l = new JmxLogAppender();
-        l.setFilterExpression("mvel expression");
+        l.setFilterExpression("1 == 1");
         l.activateOptions();
-        assert l.getFilterExpression() != null : "JmxLogAppender - filter expression not set.";
+        assert l.getFilterExpression().equals( "1 == 1" ) : "JmxLogAppender - filter expression not set.";
     }
 
     @Test
@@ -118,7 +118,7 @@ public class JmxLogAppenderTest {
         Logger logger = Logger.getLogger(JmxLogAppenderTest.class);
         DOMConfigurator.configure("log4j.xml");
         platformServer.addNotificationListener(objectName, lstnr, null,null);
-        logger.info("Hello!");
+        logger.info("Hello World");
 
         int count = 0;
         while(count < 10 && lstnr.getNoteCount() <= 0){
@@ -131,8 +131,23 @@ public class JmxLogAppenderTest {
             }
         }
 
-        assert lstnr.getNoteCount() > 0 : "JmxLoggingHandler ! broadcasting log event";
+        assert lstnr.getNoteCount() == 0 : "JmxLoggingAppender ! broadcasting log event";
+
+        logger.info("This is a test for log4j.");
+        count = 0;
+        while(count < 10 && lstnr.getNoteCount() <= 0){
+            try {
+                Thread.currentThread().sleep(500); // stall thread
+                count++;
+                System.out.println ("Waiting for notification ... " + count * 500 + " millis.");
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        assert lstnr.getNoteCount() > 0 : "JmxLoggingAppender ! broadcasting log event";
     }
+
 
     @Test
     public void testFilterCreation() {
@@ -145,8 +160,37 @@ public class JmxLogAppenderTest {
     @Test
     public void testFilterScript ()  {
         JmxLogAppender appender = new JmxLogAppender();
-        appender.setFilterScript("fileName");
+        appender.setFilterScriptFile("fileName");
         appender.activateOptions();
-        assert appender.getFilterScript().equals("fileName");
+        assert appender.getFilterScriptFile().equals("fileName");
     }
+
+    @Test
+    public void testFilterExpIntegration() throws Exception{
+        Logger logger = Logger.getLogger(JmxLogAppenderTest.class);
+        DOMConfigurator.configure("log4j.xml");
+        platformServer.addNotificationListener(objectName, lstnr, null,null);
+
+        logger.info("Hello World!");
+        logger.info("This is a test for log4j.");
+        logger.info("Do not attempt to change the channel.");
+
+
+        // stall thread
+        int count = 0;
+        long logCount = (Long)platformServer.getAttribute(objectName, "LogCount");
+        while(count < 10 && logCount == 0){
+            try {
+                Thread.currentThread().sleep(500); // stall thread
+                logCount = (Long)platformServer.getAttribute(objectName, "LogCount");
+                count++;
+                System.out.println ("Waiting for notification ... " + count * 500 + " millis.");
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        assert logCount == 1;
+    }
+    
 }

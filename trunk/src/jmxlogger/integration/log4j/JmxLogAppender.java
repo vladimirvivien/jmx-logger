@@ -128,17 +128,18 @@ public class JmxLogAppender extends AppenderSkeleton{
 
     public void setFilterExpression(String exp){
         configStore.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, exp);
+        configStore.postEvent(new ConfigEvent(this, ToolBox.KEY_CONFIG_FILTER_EXP, exp));
     }
 
     public String getFilterExpression(){
         return (String)configStore.getValue(ToolBox.KEY_CONFIG_FILTER_EXP);
     }
 
-    public void setFilterScript(String fileName) {
+    public void setFilterScriptFile(String fileName) {
         configStore.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, fileName);
     }
 
-    public String getFilterScript(){
+    public String getFilterScriptFile(){
         return (String)configStore.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
     }
 
