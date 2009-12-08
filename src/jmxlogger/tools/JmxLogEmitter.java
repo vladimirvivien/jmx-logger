@@ -36,6 +36,8 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     private Date startDate;
     private JmxConfigStore configStore;
     private String logLevel;
+    private String filterExp;
+    
 
     public JmxLogEmitter(JmxConfigStore store) {
         configStore = store;
@@ -48,6 +50,9 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
             public void onValueChanged(ConfigEvent event) {
                 if(!event.getSource().equals(JmxLogEmitter.this) && event.getKey().equals(ToolBox.KEY_CONFIG_LOG_LEVEL)){
                     logLevel = (String) event.getValue();
+                }
+                if(!event.getSource().equals(JmxLogEmitter.this) && event.getKey().equals(ToolBox.KEY_CONFIG_FILTER_EXP)){
+                    filterExp = (String) event.getValue();
                 }
             }
         });
@@ -137,6 +142,24 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
 
     public String getLevel() {
         return logLevel;
+    }
+
+    public String getFilterExpression() {
+        return filterExp;
+    }
+
+    public void setFilterExpression(String exp) {
+        filterExp = exp;
+        configStore.putValue(ToolBox.KEY_CONFIG_FILTER_EXP, filterExp);
+        configStore.postEvent(new ConfigEvent(this, ToolBox.KEY_CONFIG_FILTER_EXP, filterExp));
+    }
+
+    public String getFilterScriptFile() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setFilterScriptFile(String file) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

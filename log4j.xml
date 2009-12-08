@@ -12,8 +12,8 @@
   <appender name="jmxlogger" class="jmxlogger.integration.log4j.JmxLogAppender">
     <param name="ObjectName" value="log4j.logging:type=Log4jAppender"/>
     <!--param name="MBeanServer" value="platform"/-->
-    <param name="FilterExpression" value="#{log.level == 'INFO'  log.matches('/pattern/')}"/>
-    <param name="FilterScript" value="file://some/local/file.mvl"/>
+    <param name="FilterExpression" value="logLevel == 'INFO' &amp;&amp;  rawMessage contains 'test for log4j'"/>
+    <param name="FilterScriptFile" value="file://some/local/file.mvl"/>
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
     </layout>

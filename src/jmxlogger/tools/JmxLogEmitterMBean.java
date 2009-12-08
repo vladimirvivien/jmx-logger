@@ -28,4 +28,8 @@ public interface JmxLogEmitterMBean {
     public long getLogCount();
     public void setLevel(String level);
     public String getLevel();
+    public String getFilterExpression();
+    public void setFilterExpression(String exp);
+    public String getFilterScriptFile();
+    public void setFilterScriptFile(String file);
 }

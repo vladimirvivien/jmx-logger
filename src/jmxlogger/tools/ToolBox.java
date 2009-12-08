@@ -48,7 +48,7 @@ public class ToolBox {
     public static final String KEY_EVENT_SOURCE_METHOD = "sourceMethodName";
     public static final String KEY_EVENT_SOURCE_THREAD = "threadId";
     public static final String KEY_EVENT_SEQ_NUM = "sequenceNumber";
-    public static final String KEY_EVENT_TIME_STAMP = "timeStamp";
+    public static final String KEY_EVENT_TIME_STAMP = "timestamp";
     public static final String KEY_EVENT_FORMATTED_MESSAGE = "formattedMessage";
     public static final String KEY_EVENT_RAW_MESSAGE = "rawMessage";
     public static final String KEY_EVENT_THROWABLE = "exceptionName";
