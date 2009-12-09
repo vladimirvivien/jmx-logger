@@ -15,6 +15,7 @@
  */
 package jmxlogger.tools;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.logging.ErrorManager;
@@ -161,5 +162,9 @@ public class ToolBox {
      */
     public static void reportError(String error, Exception ex){
         EM.error(error, ex, ErrorManager.GENERIC_FAILURE);
+    }
+
+    public static boolean isFileValid(File f){
+        return f != null && f.exists() && !f.isDirectory();
     }
 }

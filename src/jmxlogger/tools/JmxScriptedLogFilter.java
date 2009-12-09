@@ -4,8 +4,12 @@
  */
 package jmxlogger.tools;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.mvel2.MVEL;
 import org.mvel2.ParserContext;
 
@@ -17,6 +21,7 @@ public class JmxScriptedLogFilter implements JmxLogFilter {
 
     private Serializable expression;
     private ParserContext context = new ParserContext();
+    private File scriptFile;
 
     public JmxScriptedLogFilter() {
         context.addPackageImport("java.util");
@@ -26,16 +31,30 @@ public class JmxScriptedLogFilter implements JmxLogFilter {
         expression = MVEL.compileExpression(exp, context);
     }
 
-    public String getFilterExpression(){
-        return (String)expression;
+    public void setScriptFile(File f){
+        if(!ToolBox.isFileValid(f)){
+            throw new IllegalStateException(String.format("File [%s] is not a valid file.", f ));
+        }
+        scriptFile = f;
     }
 
     public boolean isLogAllowed(JmxEventWrapper eventWrapper) {
-        if (expression == null) {
-            return true;
-        }
+
         Map<String, Object> event = eventWrapper.unwrap();
-        Object result = MVEL.executeExpression(expression, event);
+        Object result = false;
+        if(scriptFile != null){
+            try {
+                result = MVEL.evalFile(scriptFile, event);
+            } catch (IOException ex) {
+                throw new IllegalStateException("JmxScriptedLogFilter - unable to access script file: " + ex.getMessage());
+            }
+        }else{
+            if(expression == null){
+                result = true;
+            }else{
+                result = MVEL.executeExpression(expression, event);
+            }
+        }
         if (!(result instanceof Boolean)) {
             throw new IllegalStateException("Filter expession must evaluate to a Boolean result.");
         }

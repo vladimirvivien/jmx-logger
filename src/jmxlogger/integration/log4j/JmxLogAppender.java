@@ -16,6 +16,7 @@
 
 package jmxlogger.integration.log4j;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,11 +137,16 @@ public class JmxLogAppender extends AppenderSkeleton{
     }
 
     public void setFilterScriptFile(String fileName) {
-        configStore.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, fileName);
+        File f = new File(fileName);
+        if(ToolBox.isFileValid(f)){
+            configStore.putValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT, f);
+            configStore.postEvent(new ConfigEvent(this, ToolBox.KEY_CONFIG_FILTER_SCRIPT, f));
+        }
     }
 
     public String getFilterScriptFile(){
-        return (String)configStore.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
+        File file = (File)configStore.getValue(ToolBox.KEY_CONFIG_FILTER_SCRIPT);
+        return (file != null) ? file.getAbsolutePath() : null;
     }
 
 
