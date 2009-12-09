@@ -78,6 +78,10 @@ public class JmxLogService {
                 if(!event.getSource().equals(JmxLogService.this) && event.getKey().equals(ToolBox.KEY_CONFIG_FILTER_EXP)){
                     logFilter.setFilterExpression((String)event.getValue());
                 }
+                if(!event.getSource().equals(JmxLogService.this) && event.getKey().equals(ToolBox.KEY_CONFIG_FILTER_SCRIPT)){
+                    logFilter.setFilterExpression((String)event.getValue());
+                }
+
             }
         });
     }

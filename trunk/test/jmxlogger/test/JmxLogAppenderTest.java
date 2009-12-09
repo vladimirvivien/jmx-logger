@@ -189,8 +189,9 @@ public class JmxLogAppenderTest {
                 throw new RuntimeException(ex);
             }
         }
-
+        if(count > 9 && logCount == 0){
+            throw new IllegalStateException ("Unable to get Notification count within alloted time");
+        }
         assert logCount == 1;
     }
-    
 }

@@ -5,6 +5,7 @@
 
 package jmxlogger.test;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,13 +43,26 @@ public class JmxScriptedLogFilterTest {
     }
 
     @Test
-    public void testIsLogAllowed() {
+    public void testIsLogAllowedWithExpression() {
         event.put(ToolBox.KEY_EVENT_LEVEL, "INFO");
         JmxEventWrapper eventwrap = new JmxEventWrapper(event);
         // if test is absent, return true
          assert filter.isLogAllowed(eventwrap);
          filter.setFilterExpression("logLevel == 'INFO'");
          assert filter.isLogAllowed(eventwrap);
+    }
+    @Test
+    public void testIsLogAllowedWithScriptFile() {
+        event.put(ToolBox.KEY_EVENT_LEVEL, "INFO");
+        JmxEventWrapper eventwrap = new JmxEventWrapper(event);
+
+        try{
+            filter.setScriptFile(new File("bad-file.mvl"));
+            throw new IllegalStateException("Test should have filed upon missing file.");
+        }catch(Exception ex){}
+
+        filter.setScriptFile(new File ("test-script.mvl"));
+        assert filter.isLogAllowed(eventwrap);
     }
 
     @Test
