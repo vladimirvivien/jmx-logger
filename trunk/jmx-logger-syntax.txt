@@ -4,6 +4,7 @@ jmxlogger.Handler.level=ALL|SEVERE|INFO|FINE|etc
 jmxlogger.Handler.formatter = java.util.logging.XMLFormatter|any standard formatter
 jmxlogger.Handler.objectName=JMX Object Name
 jmxlogger.Handler.mbeanServer="platform"|domain name of server
+jmxlogger.Handler.serverAddress=localhost:1099
 jmxlogger.Handler.filterExpression=#{log.level == "INFO" && log.matches(pattern)}
 jmxlogger.Handler.filterScriptFile=/some/local/file.mvl
 jmxlogger.Handler.filter=java.util.logging.Filter
@@ -14,6 +15,7 @@ jmxlogger.Handler.filter=java.util.logging.Filter
   <appender name="jmxlogger" class="jmxlogger.integration.log4j.JmxLogAppender">
     <param name="ObjectName" value="log4j.logging:type=Log4jAppender"/>
     <param name="MBeanServer" value="platform"/>
+    <param name="ServerAddress" value="localhost:1099"/>
     <param name="FilterExpression" value="#{log.level == "INFO" && log.matches(pattern)}"/>
     <param name="FilterScriptFile" value="/some/local/file.mvl"/>
 
