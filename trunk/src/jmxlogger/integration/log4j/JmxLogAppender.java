@@ -149,6 +149,12 @@ public class JmxLogAppender extends AppenderSkeleton{
         return (file != null) ? file.getAbsolutePath() : null;
     }
 
+    public String getServerAddress() {
+        return (String)configStore.getValue(ToolBox.KEY_CONFIG_SERVER_ADDR);
+    }
+    public void setServerAddress(String addr){
+        configStore.putValue(ToolBox.KEY_CONFIG_SERVER_ADDR, addr);
+    }
 
     /**
      * Log4J life cycle method, called once all gettters/setters are called.

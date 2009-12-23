@@ -17,8 +17,11 @@ package jmxlogger.tools;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.logging.ErrorManager;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -26,6 +29,7 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import javax.management.remote.JMXServiceURL;
 
 /**
  * Utility class to provide helper method for the API.
@@ -39,6 +43,7 @@ public class ToolBox {
     public static final String KEY_CONFIG_JMX_SERVER = "jmxServer";
     public static final String KEY_CONFIG_FILTER_EXP = "filterExpression";
     public static final String KEY_CONFIG_FILTER_SCRIPT = "filterScript";
+    public static final String KEY_CONFIG_SERVER_ADDR = "serverAddress";
     
     // event keys
     public static final String KEY_EVENT_TYPE = "jmxlogger.log.event";
@@ -166,5 +171,25 @@ public class ToolBox {
 
     public static boolean isFileValid(File f){
         return f != null && f.exists() && !f.isDirectory();
+    }
+
+    public static JMXServiceURL createServiceUrlFromString(String url){
+        String[] urlParts = url.split(":");
+        String urlString = url;
+        if(urlParts.length == 2){
+            // assume hostname:port & return rmi service url
+            urlString = "service:jmx:rmi:///jndi/rmi://" +
+                urlParts[0] + ":" + urlParts[1] +
+                "/jmxrmi";
+        }
+
+        JMXServiceURL svcUrl = null;
+        try {
+            svcUrl = new JMXServiceURL(urlString);
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        return svcUrl;
     }
 }
