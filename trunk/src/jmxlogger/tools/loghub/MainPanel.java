@@ -81,7 +81,7 @@ public class MainPanel extends javax.swing.JPanel {
 
         jLabel1.setText("Address:");
 
-        txtAddress.setText("locahost:1099");
+        txtAddress.setText("localhost:1099");
         txtAddress.setToolTipText("Enter MBeanServer Address");
 
         jLabel2.setText("Username:");
@@ -105,7 +105,7 @@ public class MainPanel extends javax.swing.JPanel {
 
         jLabel4.setText("MBean:");
 
-        txtMBeanName.setText("jmxlogger.util.logging:type=JmxLogHandler");
+        txtMBeanName.setText("jmxlogger:type=logEmitter");
         txtMBeanName.setToolTipText("The MBean name of the LogEmitterMBean");
 
         btnDisconnect.setText("Disconnect");
@@ -129,7 +129,7 @@ public class MainPanel extends javax.swing.JPanel {
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtMBeanName)
+                            .addComponent(txtMBeanName, javax.swing.GroupLayout.DEFAULT_SIZE, 292, Short.MAX_VALUE)
                             .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 292, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                                 .addComponent(txtUsername, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
@@ -227,7 +227,7 @@ public class MainPanel extends javax.swing.JPanel {
 
         txtLogText.setColumns(20);
         txtLogText.setEditable(false);
-        txtLogText.setFont(new java.awt.Font("Lucida Sans Typewriter", 0, 12)); // NOI18N
+        txtLogText.setFont(new java.awt.Font("Lucida Sans Typewriter", 0, 12));
         txtLogText.setRows(5);
         jScrollPane1.setViewportView(txtLogText);
 

@@ -5,6 +5,7 @@
 
 package jmxlogger.test;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -45,7 +46,7 @@ public class JmxLogAppenderTest {
     @Before
     public void setUp() {
         platformServer = ManagementFactory.getPlatformMBeanServer();
-        objectName = ToolBox.buildObjectName("log4j.logging:type=Log4jAppender");
+        objectName = ToolBox.buildObjectName("jmxlogger:type=logEmitter");
         lstnr = new LogListener();
     }
 
@@ -131,7 +132,9 @@ public class JmxLogAppenderTest {
             }
         }
 
-        assert lstnr.getNoteCount() == 0 : "JmxLoggingAppender ! broadcasting log event";
+        System.out.println ("NoteCount: " + lstnr.getNoteCount());
+
+        assert lstnr.getNoteCount() > 0 : "JmxLoggingAppender ! broadcasting log event";
 
         logger.info("This is a test for log4j.");
         count = 0;
@@ -160,9 +163,10 @@ public class JmxLogAppenderTest {
     @Test
     public void testFilterScript ()  {
         JmxLogAppender appender = new JmxLogAppender();
-        appender.setFilterScriptFile("fileName");
+        appender.setFilterScriptFile("test-script.mvl");
         appender.activateOptions();
-        assert appender.getFilterScriptFile().equals("fileName");
+        System.out.println ("File: " + appender.getFilterScriptFile());
+        assert appender.getFilterScriptFile().equals(new File("test-script.mvl").getAbsolutePath());
     }
 
     @Test
@@ -192,6 +196,6 @@ public class JmxLogAppenderTest {
         if(count > 9 && logCount == 0){
             throw new IllegalStateException ("Unable to get Notification count within alloted time");
         }
-        assert logCount == 1;
+        assert logCount > 0;
     }
 }

@@ -105,7 +105,7 @@
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="txtMBeanName" max="32767" attributes="1"/>
+                                  <Component id="txtMBeanName" pref="292" max="32767" attributes="1"/>
                                   <Component id="txtAddress" alignment="0" pref="292" max="32767" attributes="1"/>
                                   <Group type="102" alignment="1" attributes="0">
                                       <Component id="txtUsername" pref="140" max="32767" attributes="0"/>
@@ -162,7 +162,7 @@
             </Component>
             <Component class="javax.swing.JTextField" name="txtAddress">
               <Properties>
-                <Property name="text" type="java.lang.String" value="locahost:1099"/>
+                <Property name="text" type="java.lang.String" value="localhost:1099"/>
                 <Property name="toolTipText" type="java.lang.String" value="Enter MBeanServer Address"/>
               </Properties>
             </Component>
@@ -211,7 +211,7 @@
             </Component>
             <Component class="javax.swing.JTextField" name="txtMBeanName">
               <Properties>
-                <Property name="text" type="java.lang.String" value="jmxlogger.util.logging:type=JmxLogHandler"/>
+                <Property name="text" type="java.lang.String" value="jmxlogger:type=logEmitter"/>
                 <Property name="toolTipText" type="java.lang.String" value="The MBean name of the LogEmitterMBean"/>
               </Properties>
             </Component>

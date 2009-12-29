@@ -50,7 +50,7 @@ public class JmxLogHandlerTest {
     @Before
     public void setUp() {
         platformServer = ManagementFactory.getPlatformMBeanServer();
-        objectName = buildObjectName("jmxlogger.util.logging:type=JmxLogHandler");
+        objectName = buildObjectName("jmxlogger:type=logEmitter");
         lstnr = new LogListener();
     }
 
@@ -113,7 +113,7 @@ public class JmxLogHandlerTest {
         MBeanServer server = MBeanServerFactory.createMBeanServer("testDomain");
         JmxLogHandler h = new JmxLogHandler(server);
 
-        assert h.getObjectName().toString().equals("jmxlogger.util.logging:type=JmxLogHandler") : "JmxLoggingHandler not loading objectName property from properties file.";
+        assert h.getObjectName().toString().equals("jmxlogger:type=logEmitter") : "JmxLoggingHandler not loading objectName property from properties file.";
         assert h.getMBeanServer().getDefaultDomain().equals("testDomain") : "JmxLoggingHandler not loading serverDomain property from properties file.";
         assert h.getLevel().equals(Level.INFO) : "JmxLoggingHandler not loading level property from properties file.";
         assert h.getFormatter().getClass().getName().equals("java.util.logging.SimpleFormatter") : "JmxLoggingHandler not loading formatter properly.";

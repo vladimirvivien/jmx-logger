@@ -23,7 +23,8 @@ import org.junit.runners.Suite;
     jmxlogger.test.JmxScriptedLogFilterTest.class,
     jmxlogger.test.JmxLogHandlerTest.class,
     jmxlogger.test.JmxLogAppenderTest.class,
-    jmxlogger.test.JmxLogEmitterTest.class
+    jmxlogger.test.JmxLogEmitterTest.class,
+    jmxlogger.test.ClientServiceTest.class
 })
 
 public class JmxLoggerTestSuite {

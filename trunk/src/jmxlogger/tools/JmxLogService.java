@@ -16,6 +16,7 @@
 
 package jmxlogger.tools;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -79,7 +80,7 @@ public class JmxLogService {
                     logFilter.setFilterExpression((String)event.getValue());
                 }
                 if(!event.getSource().equals(JmxLogService.this) && event.getKey().equals(ToolBox.KEY_CONFIG_FILTER_SCRIPT)){
-                    logFilter.setFilterExpression((String)event.getValue());
+                    logFilter.setScriptFile((File)event.getValue());
                 }
 
             }
