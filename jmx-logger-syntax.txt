@@ -12,7 +12,7 @@ jmxlogger.Handler.filter=java.util.logging.Filter
 #log4j xml format
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
   <appender name="jmxlogger" class="jmxlogger.integration.log4j.JmxLogAppender">
-    <param name="ObjectName" value="log4j.logging:type=Log4jAppender"/>
+    <param name="ObjectName" value="jmxlogger:type=logEmitter"/>
     <param name="MBeanServer" value="platform"/>
     <param name="FilterExpression" value="#{log.level == "INFO" && log.matches(pattern)}"/>
     <param name="FilterScriptFile" value="/some/local/file.mvl"/>
