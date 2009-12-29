@@ -10,7 +10,7 @@
   </appender>
 
   <appender name="jmxlogger" class="jmxlogger.integration.log4j.JmxLogAppender">
-    <param name="ObjectName" value="jmxlogger:type=logEmitter"/>
+    <param name="ObjectName" value="jmxlogger:type=LogEmitter"/>
     <param name="MBeanServer" value="platform"/>
     <param name="FilterExpression" value="logLevel == 'INFO' &amp;&amp;  rawMessage contains 'test for log4j'"/>
     <param name="FilterScriptFile" value="test-script.mvl"/>

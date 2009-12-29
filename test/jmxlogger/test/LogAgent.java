@@ -78,11 +78,10 @@ public class LogAgent {
         UnicastRemoteObject.unexportObject(reg, true);
     }
 
-    public static String LOGGER_NAME = "jmxlogger:name=logger,type=test";
+    public static String LOGGER_NAME = "jmxlogger:type=logEmitter";
     public static void main(String[] args) throws Exception {
-        new LogAgent(ToolBox.buildObjectName(LOGGER_NAME), 3000).start();
+        new LogAgent(ToolBox.buildObjectName(LOGGER_NAME), 7070).start();
     }
-
 }
 
 class LogGenerator {
