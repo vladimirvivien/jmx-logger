@@ -18,6 +18,7 @@ import jmxlogger.tools.JmxLogEmitterMBean;
 import jmxlogger.tools.ToolBox;
 
 public class ClientService {
+    private JMXServiceURL serviceUrl;
     private JMXConnector connector;
     private MBeanServerConnection server;
     private ClientConnectionListener connListener;
@@ -29,7 +30,8 @@ public class ClientService {
 
     public String connect(String url, String uname, String pwd){
         try{
-            JMXServiceURL serviceUrl = ToolBox.createServiceUrlFromString(url);
+            serviceUrl = ToolBox.createServiceUrlFromString(url);
+
             HashMap env = new HashMap();
             env.put (JMXConnector.CREDENTIALS, new String[] {uname, pwd});
             connector = JMXConnectorFactory.connect(serviceUrl, env);
@@ -60,6 +62,18 @@ public class ClientService {
             throw new RuntimeException("Error while connecting to MBeanServer: " + ioe.getMessage(), ioe);
         }catch(Exception ex){
             throw new RuntimeException("Unable to connect to server: " +  ex.getMessage(), ex);
+        }
+    }
+
+    public String getServiceUrl(){
+        return (serviceUrl != null) ? serviceUrl.toString() : null;
+    }
+
+    public String getConnectionId() {
+        try{
+            return (connector != null) ? connector.getConnectionId() : null;
+        }catch(IOException ex){
+            throw new RuntimeException(ex);
         }
     }
 

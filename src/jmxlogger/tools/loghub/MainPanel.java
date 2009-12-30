@@ -11,6 +11,7 @@
 
 package jmxlogger.tools.loghub;
 
+import java.awt.Color;
 import javax.management.Notification;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
@@ -145,9 +146,9 @@ public class MainPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3)
-                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
@@ -274,8 +275,7 @@ public class MainPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 375, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 338, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -286,7 +286,7 @@ public class MainPanel extends javax.swing.JPanel {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -300,26 +300,44 @@ public class MainPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_btnShowConnDialogActionPerformed
 
     private void setupConnection() {
-        String connId = clientService.connect(
-                this.txtAddress.getText(),
-                this.txtUsername.getText(),
-                new String(this.txtPassword.getPassword()));
+        String connId = null;
+        try{
+            connId = clientService.connect(
+                    this.txtAddress.getText(),
+                    this.txtUsername.getText(),
+                    new String(this.txtPassword.getPassword()));
+        }catch(Exception ex){
+            postError("Unable to connect MBean server: " + ex.getMessage());
+        }
+        
         if(connId != null){
+            postMessage("Connected to server @ " + clientService.getServiceUrl());
+
             // get log emitter object
             logEmitter = clientService.getLogEmitter(ToolBox.buildObjectName(this.txtMBeanName.getText()));
+
             // update ui
             this.txtFilterLevel.setText(logEmitter.getLevel());
             this.txtFilterExpression.setText(logEmitter.getFilterExpression());
+
             // setup a listerer
             clientService.addListenerToLogEmitter(
                 ToolBox.buildObjectName(this.txtMBeanName.getText()),
                 new NotificationListener(){
+                    @Override
                     public void handleNotification(Notification notification, Object handback) {
                         MainPanel.this.txtLogText.append(notification.getMessage() + lineSep);
                     }
             });
         }
     }
+    private void postMessage(String msg){
+        txtLogText.append(msg + lineSep);
+    }
+    private void postError(String err){
+        txtLogText.append(err + lineSep);
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConnect;
     private javax.swing.JButton btnDisconnect;
