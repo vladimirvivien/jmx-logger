@@ -61,7 +61,7 @@ public class LogAgent {
         env.put("jmx.remote.x.access.file", "jmx-access.properties");
         System.out.println("Create an RMI connector server");
         JMXServiceURL url =
-            new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:3000/jmxrmi");
+            new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/jmxrmi");
         server = JMXConnectorServerFactory.newJMXConnectorServer(url, env, mbs);
         System.out.println("LogAgent RMI connector started with url " + url.toString());
         server.start();
@@ -78,7 +78,7 @@ public class LogAgent {
         UnicastRemoteObject.unexportObject(reg, true);
     }
 
-    public static String LOGGER_NAME = "jmxlogger:type=logEmitter";
+    public static String LOGGER_NAME = "jmxlogger:type=LogEmitter";
     public static void main(String[] args) throws Exception {
         new LogAgent(ToolBox.buildObjectName(LOGGER_NAME), 7070).start();
     }
@@ -94,11 +94,11 @@ class LogGenerator {
         logs.put("WARNING", "I am concerned...");
         logs.put("WARN", "I am concerned...");
         logs.put("SEVERE", "I am in trouble, something went wrong.");
-        logs.put("ERROR", "I am concerned...");
-        logs.put("FATAL", "I am concerned...");
+        logs.put("ERROR", "I am in trouble, something went wrong.");
+        logs.put("FATAL", "O crap, it's over, help!");
         logs.put("FINE", "I am up, I am down, I am all around!");
-        logs.put("DEBUG", "I am concerned...");
-        logs.put("TRACE", "I am concerned...");
+        logs.put("DEBUG", "I am up, I am down, I am all around!");
+        logs.put("TRACE", "I went to the store, bought cake, drove back, now I am here.");
         entries = logs.entrySet().toArray();
     }
 
