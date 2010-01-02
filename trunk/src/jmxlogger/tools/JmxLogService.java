@@ -17,10 +17,12 @@
 package jmxlogger.tools;
 
 import java.io.File;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import jmxlogger.tools.JmxConfigStore.ConfigEvent;
@@ -37,6 +39,7 @@ public class JmxLogService {
     private JmxLogEmitterMBean logMBean;
     private JmxScriptedLogFilter logFilter;
     private JmxConfigStore configStore;
+    private AtomicLong counter = new AtomicLong(0);
 
     private final PriorityBlockingQueue<JmxEventWrapper> queue =
             new PriorityBlockingQueue<JmxEventWrapper>(100);
@@ -44,6 +47,7 @@ public class JmxLogService {
     private ExecutorService noteConsumer;
     private ExecutorService noteProducers;
     private int producerSize = 5;
+    private Date startTime;
 
     /**
      * Private Constructor.
@@ -109,6 +113,7 @@ public class JmxLogService {
         // setup
         ToolBox.registerMBean(svr, objName, logMBean);
         logMBean.start();
+        startTime = new Date();
     }
 
     /**
@@ -135,17 +140,20 @@ public class JmxLogService {
      * Loges a message by sending it to the emitter to place ont he JMX event bus.
      * @param event
      */
-    public void log(Map<String,Object> event){
+    public void log(final Map<String,Object> event){
         if(!logMBean.isStarted()){
             throw new IllegalStateException("JmxEventLogger has not been started." +
                     "Call JmxEventLogger.start() before you log messages.");
         }
-        final JmxEventWrapper noteWrapper = new JmxEventWrapper(event);
        
         noteProducers.execute(new Runnable(){
             public void run() {
+                JmxEventWrapper noteWrapper = new JmxEventWrapper(event);
                 // apply filter configuration then put event not on queue
                 if(logFilter.isLogAllowed(noteWrapper)){
+                    long count = counter.incrementAndGet();
+                    noteWrapper.unwrap().put(ToolBox.KEY_EVENT_LOG_COUNT, new Long(count));
+                    noteWrapper.unwrap().put(ToolBox.KEY_EVENT_START_TIME, new Long(startTime.getTime()));
                     queue.put(noteWrapper);
                 }
             }

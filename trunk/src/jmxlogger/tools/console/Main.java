@@ -9,7 +9,7 @@
  * Created on Dec 22, 2009, 4:36:05 PM
  */
 
-package jmxlogger.tools.loghub;
+package jmxlogger.tools.console;
 
 import java.awt.BorderLayout;
 import java.util.logging.Level;

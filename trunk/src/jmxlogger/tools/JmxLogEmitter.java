@@ -19,6 +19,7 @@ package jmxlogger.tools;
 import java.awt.Toolkit;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.management.Notification;
@@ -37,6 +38,7 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     private JmxConfigStore configStore;
     private String logLevel;
     private String filterExp;
+    private HashMap<String,Long> counterMap;
     
 
     public JmxLogEmitter(JmxConfigStore store) {
@@ -45,6 +47,7 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     }
 
     private void initializeBean() {
+        counterMap = new HashMap<String,Long>();
         // add listener to reset filterExpression and filterFile
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {
             public void onValueChanged(ConfigEvent event) {
@@ -123,6 +126,8 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     private Notification buildNotification(Map<String,Object> event){
         long seqnum = (event.get(ToolBox.KEY_EVENT_SEQ_NUM) != null) ? (Long)event.get(ToolBox.KEY_EVENT_SEQ_NUM) : 0L;
         long timestamp  = (event.get(ToolBox.KEY_EVENT_TIME_STAMP) != null) ? (Long)event.get(ToolBox.KEY_EVENT_TIME_STAMP) : 0L;
+        event.put(ToolBox.KEY_EVENT_LOG_COUNT, new Long(count.get()));
+        event.put(ToolBox.KEY_EVENT_START_TIME, new Long(startDate.getTime()));
 
         Notification note = new Notification(
                 ToolBox.getDefaultEventType(),

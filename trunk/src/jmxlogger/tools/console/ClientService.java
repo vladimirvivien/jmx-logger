@@ -1,4 +1,4 @@
-package jmxlogger.tools.loghub;
+package jmxlogger.tools.console;
 
 import java.io.IOException;
 import java.util.HashMap;

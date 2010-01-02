@@ -9,12 +9,22 @@
  * Created on Dec 22, 2009, 3:58:42 PM
  */
 
-package jmxlogger.tools.loghub;
+package jmxlogger.tools.console;
 
 import java.awt.Color;
+import java.awt.Cursor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.management.Notification;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledDocument;
 import jmxlogger.tools.JmxLogEmitterMBean;
 import jmxlogger.tools.ToolBox;
 
@@ -26,6 +36,8 @@ public class MainPanel extends javax.swing.JPanel {
     private ClientService clientService;
     private JmxLogEmitterMBean logEmitter;
     private String lineSep = System.getProperty("line.separator");
+    private boolean connected = false;
+    private boolean logging = true;
 
     /** Creates new form MainPanel */
     public MainPanel() {
@@ -72,9 +84,9 @@ public class MainPanel extends javax.swing.JPanel {
         jSeparator2 = new javax.swing.JToolBar.Separator();
         btnRefresh = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        txtLogText = new javax.swing.JTextArea();
+        txtLogText = new javax.swing.JTextPane();
 
-        connectionDialog.setTitle("Server Connection");
+        connectionDialog.setTitle("Connect to MBean Server");
         connectionDialog.setIconImage(null);
         connectionDialog.setLocationByPlatform(true);
         connectionDialog.setMinimumSize(new java.awt.Dimension(402, 225));
@@ -126,8 +138,8 @@ public class MainPanel extends javax.swing.JPanel {
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtMBeanName, javax.swing.GroupLayout.DEFAULT_SIZE, 292, Short.MAX_VALUE)
-                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 292, Short.MAX_VALUE)
+                            .addComponent(txtMBeanName, javax.swing.GroupLayout.DEFAULT_SIZE, 317, Short.MAX_VALUE)
+                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 317, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                                 .addComponent(txtUsername, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -164,12 +176,12 @@ public class MainPanel extends javax.swing.JPanel {
             .addGroup(connectionDialogLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         connectionDialogLayout.setVerticalGroup(
             connectionDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(connectionDialogLayout.createSequentialGroup()
-                .addGap(41, 41, 41)
+                .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -177,7 +189,7 @@ public class MainPanel extends javax.swing.JPanel {
         setName("mainPanel"); // NOI18N
         setPreferredSize(new java.awt.Dimension(640, 480));
 
-        jPanel3.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         jLabel5.setText("Log Level:");
 
@@ -202,8 +214,8 @@ public class MainPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtFilterLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING))
-                .addContainerGap(487, Short.MAX_VALUE))
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 634, Short.MAX_VALUE)
+                .addContainerGap(469, Short.MAX_VALUE))
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 636, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -214,12 +226,15 @@ public class MainPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE))
         );
 
+        jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
 
-        btnShowConnDialog.setText("Connect");
+        btnShowConnDialog.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jmxlogger/tools/console/icons/network-receive.png"))); // NOI18N
+        btnShowConnDialog.setToolTipText("Connect");
+        btnShowConnDialog.setHideActionText(true);
         btnShowConnDialog.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnShowConnDialogActionPerformed(evt);
@@ -227,55 +242,75 @@ public class MainPanel extends javax.swing.JPanel {
         });
         jToolBar1.add(btnShowConnDialog);
 
-        btnDisconnect.setText("Disconnect");
+        btnDisconnect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jmxlogger/tools/console/icons/network-offline.png"))); // NOI18N
+        btnDisconnect.setToolTipText("Disconnect");
         btnDisconnect.setFocusable(false);
         btnDisconnect.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnDisconnect.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnDisconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDisconnectActionPerformed(evt);
+            }
+        });
         jToolBar1.add(btnDisconnect);
         jToolBar1.add(jSeparator1);
 
-        btnGo.setText("Go");
+        btnGo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jmxlogger/tools/console/icons/media-playback-start.png"))); // NOI18N
+        btnGo.setToolTipText("Run Console Logging");
         btnGo.setFocusable(false);
         btnGo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnGo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnGo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGoActionPerformed(evt);
+            }
+        });
         jToolBar1.add(btnGo);
 
-        btnPause.setText("Pause");
+        btnPause.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jmxlogger/tools/console/icons/media-playback-pause.png"))); // NOI18N
+        btnPause.setToolTipText("Pause Console Logging");
         btnPause.setFocusable(false);
         btnPause.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnPause.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnPause.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPauseActionPerformed(evt);
+            }
+        });
         jToolBar1.add(btnPause);
         jToolBar1.add(jSeparator2);
 
-        btnRefresh.setText("jButton1");
+        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jmxlogger/tools/console/icons/view-refresh.png"))); // NOI18N
+        btnRefresh.setToolTipText("Apply Values");
         btnRefresh.setActionCommand("Refresh");
         btnRefresh.setFocusable(false);
         btnRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnRefresh.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
         jToolBar1.add(btnRefresh);
 
-        txtLogText.setColumns(20);
-        txtLogText.setEditable(false);
-        txtLogText.setFont(new java.awt.Font("Lucida Sans Typewriter", 0, 12)); // NOI18N
-        txtLogText.setRows(5);
         jScrollPane1.setViewportView(txtLogText);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
+            .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 640, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 338, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -291,27 +326,57 @@ public class MainPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
-        setupConnection();
         connectionDialog.setVisible(false);
+        setupConnection();
 }//GEN-LAST:event_btnConnectActionPerformed
 
     private void btnShowConnDialogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShowConnDialogActionPerformed
-        connectionDialog.setVisible(true);
+        if(!connected) connectionDialog.setVisible(true);
     }//GEN-LAST:event_btnShowConnDialogActionPerformed
+
+    private void btnDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDisconnectActionPerformed
+        if(connected) tearDownConnection();
+    }//GEN-LAST:event_btnDisconnectActionPerformed
+
+    private void btnGoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGoActionPerformed
+        if(connected && !logging){
+            logging = true;
+            postMessage("Running logging.");
+        }
+    }//GEN-LAST:event_btnGoActionPerformed
+
+    private void btnPauseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPauseActionPerformed
+        if(connected && logging){
+            logging = false;
+            postAdvisory("Logging paused.");
+        }
+    }//GEN-LAST:event_btnPauseActionPerformed
+
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        if(connected && logEmitter != null){
+            logEmitter.setFilterExpression(txtFilterExpression.getText());
+            logEmitter.setLevel(txtFilterLevel.getText());
+        }
+    }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void setupConnection() {
         String connId = null;
         try{
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             connId = clientService.connect(
                     this.txtAddress.getText(),
                     this.txtUsername.getText(),
                     new String(this.txtPassword.getPassword()));
         }catch(Exception ex){
-            postError("Unable to connect MBean server: " + ex.getMessage());
+            connected = false;
+            postAdvisory("Unable to connect MBean server: " + ex.getMessage());
+        }finally{
+            this.setCursor(Cursor.getDefaultCursor());
         }
         
         if(connId != null){
-            postMessage("Connected to server @ " + clientService.getServiceUrl());
+            connected = true;
+            postAdvisory("Connected to server " + txtUsername.getText() + "@" + clientService.getServiceUrl());
 
             // get log emitter object
             logEmitter = clientService.getLogEmitter(ToolBox.buildObjectName(this.txtMBeanName.getText()));
@@ -326,16 +391,50 @@ public class MainPanel extends javax.swing.JPanel {
                 new NotificationListener(){
                     @Override
                     public void handleNotification(Notification notification, Object handback) {
-                        MainPanel.this.txtLogText.append(notification.getMessage() + lineSep);
+                        if(MainPanel.this.logging){
+                            Map<String,Object> data = (Map<String, Object>) handback;
+
+                            MainPanel.this.postMessage(notification.getMessage());
+                            MainPanel.this.txtLogText.setCaretPosition(MainPanel.this.txtLogText.getDocument().getLength());
+                        }
                     }
             });
         }
     }
-    private void postMessage(String msg){
-        txtLogText.append(msg + lineSep);
+
+    public void tearDownConnection() {
+        if(clientService != null && connected) {
+            try{
+                clientService.disconnect();
+                connected = false;
+                postAdvisory("Disconnected from server @ " + clientService.getServiceUrl());
+            }catch(Exception ex){
+                postAdvisory("Unable to disconnect from MBean Server: " + ex.getMessage());
+            }
+        }
     }
-    private void postError(String err){
-        txtLogText.append(err + lineSep);
+
+
+    private void postMessage(String msg){
+        StyledDocument doc = txtLogText.getStyledDocument();
+        try {
+            Style messageStyle = doc.addStyle("message", null);
+            StyleConstants.setForeground(messageStyle, Color.BLUE);
+            doc.insertString(doc.getLength(), msg + lineSep, messageStyle);
+        } catch (BadLocationException ex) {
+            throw new RuntimeException("Unable to set message style in text pane: " + ex.getMessage());
+        }
+    }
+
+    private void postAdvisory(String err){
+        StyledDocument doc = txtLogText.getStyledDocument();
+        try {
+            Style advisoryStyle = doc.addStyle("advisory", null);
+            StyleConstants.setForeground(advisoryStyle, Color.RED);
+            doc.insertString(doc.getLength(), err + lineSep, advisoryStyle);
+        } catch (BadLocationException ex) {
+            throw new RuntimeException("Unable to set message style in text pane: " + ex.getMessage());
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -363,7 +462,7 @@ public class MainPanel extends javax.swing.JPanel {
     private javax.swing.JTextField txtAddress;
     private javax.swing.JTextArea txtFilterExpression;
     private javax.swing.JTextField txtFilterLevel;
-    private javax.swing.JTextArea txtLogText;
+    private javax.swing.JTextPane txtLogText;
     private javax.swing.JTextField txtMBeanName;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtUsername;

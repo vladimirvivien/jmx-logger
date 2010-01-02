@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package jmxlogger.tools.loghub;
+package jmxlogger.tools.console;
 
 /**
  *
