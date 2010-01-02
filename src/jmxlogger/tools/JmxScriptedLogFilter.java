@@ -28,7 +28,9 @@ public class JmxScriptedLogFilter implements JmxLogFilter {
     }
 
     public void setFilterExpression(String exp) {
-        expression = MVEL.compileExpression(exp, context);
+        if(exp == null || exp.length() == 0)
+            expression = null;
+        else expression = MVEL.compileExpression(exp, context);
     }
 
     public void setScriptFile(File f){
@@ -41,7 +43,7 @@ public class JmxScriptedLogFilter implements JmxLogFilter {
     public boolean isLogAllowed(JmxEventWrapper eventWrapper) {
 
         Map<String, Object> event = eventWrapper.unwrap();
-        Object result = false;
+        Object result = new Boolean ("false");
         if(scriptFile != null){
             try {
                 result = MVEL.evalFile(scriptFile, event);
@@ -50,7 +52,7 @@ public class JmxScriptedLogFilter implements JmxLogFilter {
             }
         }else{
             if(expression == null){
-                result = true;
+                result = new Boolean("true");
             }else{
                 result = MVEL.executeExpression(expression, event);
             }
