@@ -38,7 +38,7 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     private JmxConfigStore configStore;
     private String logLevel;
     private String filterExp;
-    private HashMap<String,Long> counterMap;
+    private Map <String,Long> statistics;
     
 
     public JmxLogEmitter(JmxConfigStore store) {
@@ -47,7 +47,6 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     }
 
     private void initializeBean() {
-        counterMap = new HashMap<String,Long>();
         // add listener to reset filterExpression and filterFile
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {
             public void onValueChanged(ConfigEvent event) {
@@ -101,6 +100,10 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
         return count.longValue();
     }
 
+    public long getStats(String key){
+        return statistics.get(key);
+    }
+
     /**
      * Calls the sendNotification() method to send the log information to the
      * MBeanServer's event bus.  The log event is queued on internaal priority
@@ -126,8 +129,11 @@ public class JmxLogEmitter extends NotificationBroadcasterSupport implements Jmx
     private Notification buildNotification(Map<String,Object> event){
         long seqnum = (event.get(ToolBox.KEY_EVENT_SEQ_NUM) != null) ? (Long)event.get(ToolBox.KEY_EVENT_SEQ_NUM) : 0L;
         long timestamp  = (event.get(ToolBox.KEY_EVENT_TIME_STAMP) != null) ? (Long)event.get(ToolBox.KEY_EVENT_TIME_STAMP) : 0L;
-        event.put(ToolBox.KEY_EVENT_LOG_COUNT, new Long(count.get()));
+        event.put(ToolBox.KEY_EVENT_LOG_COUNTED, new Long(count.get()));
         event.put(ToolBox.KEY_EVENT_START_TIME, new Long(startDate.getTime()));
+
+        // keep a copy of the stats
+        statistics = (Map<String, Long>) event.get(ToolBox.KEY_EVENT_LOG_STAT);
 
         Notification note = new Notification(
                 ToolBox.getDefaultEventType(),

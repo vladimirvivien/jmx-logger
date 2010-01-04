@@ -17,8 +17,11 @@
 package jmxlogger.tools;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -39,7 +42,9 @@ public class JmxLogService {
     private JmxLogEmitterMBean logMBean;
     private JmxScriptedLogFilter logFilter;
     private JmxConfigStore configStore;
-    private AtomicLong counter = new AtomicLong(0);
+    private AtomicLong totalLogCounter = new AtomicLong(0);
+    private AtomicLong attemptedLogCounter = new AtomicLong(0);
+    private ConcurrentHashMap<String,Long> logStatistics;
 
     private final PriorityBlockingQueue<JmxEventWrapper> queue =
             new PriorityBlockingQueue<JmxEventWrapper>(100);
@@ -76,6 +81,7 @@ public class JmxLogService {
     private void initializeService() {
         logMBean = new JmxLogEmitter(configStore);
         logFilter = new JmxScriptedLogFilter();
+        logStatistics = new ConcurrentHashMap<String, Long>();
 
         // add listener to reset filterExpression and filterFile
         configStore.addListener(new JmxConfigStore.ConfigEventListener() {
@@ -86,7 +92,6 @@ public class JmxLogService {
                 if(!event.getSource().equals(JmxLogService.this) && event.getKey().equals(ToolBox.KEY_CONFIG_FILTER_SCRIPT)){
                     logFilter.setScriptFile((File)event.getValue());
                 }
-
             }
         });
     }
@@ -114,6 +119,7 @@ public class JmxLogService {
         ToolBox.registerMBean(svr, objName, logMBean);
         logMBean.start();
         startTime = new Date();
+        logStatistics.put(ToolBox.KEY_EVENT_START_TIME, new Long(startTime.getTime()));
     }
 
     /**
@@ -145,15 +151,32 @@ public class JmxLogService {
             throw new IllegalStateException("JmxEventLogger has not been started." +
                     "Call JmxEventLogger.start() before you log messages.");
         }
-       
+
+        // add total log counted
+        logStatistics.put(ToolBox.KEY_EVENT_LOG_COUNT_ATTEMPTED, new Long(attemptedLogCounter.incrementAndGet()));
+
+        // update LEVEL statistics
+        String level = (String) event.get(ToolBox.KEY_EVENT_LEVEL);
+        Long levelCount = logStatistics.get(level);
+        if (levelCount == null) {
+            logStatistics.put(level, new Long(1));
+        } else {
+            long updatedVal = levelCount.longValue() + 1;
+            logStatistics.put(level, new Long(updatedVal));
+        }
+
+        event.put(ToolBox.KEY_EVENT_LOG_STAT, Collections.unmodifiableMap(logStatistics));
+
         noteProducers.execute(new Runnable(){
             public void run() {
+                
                 JmxEventWrapper noteWrapper = new JmxEventWrapper(event);
                 // apply filter configuration then put event not on queue
                 if(logFilter.isLogAllowed(noteWrapper)){
-                    long count = counter.incrementAndGet();
-                    noteWrapper.unwrap().put(ToolBox.KEY_EVENT_LOG_COUNT, new Long(count));
-                    noteWrapper.unwrap().put(ToolBox.KEY_EVENT_START_TIME, new Long(startTime.getTime()));
+                    // update filtered Counter
+                    logStatistics.put(ToolBox.KEY_EVENT_LOG_COUNTED, new Long(totalLogCounter.incrementAndGet()));                 
+                    noteWrapper.unwrap().put(ToolBox.KEY_EVENT_LOG_STAT, Collections.unmodifiableMap(logStatistics));
+                    // put in queue to be sent.
                     queue.put(noteWrapper);
                 }
             }

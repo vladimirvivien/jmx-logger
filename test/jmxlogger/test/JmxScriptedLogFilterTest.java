@@ -51,6 +51,17 @@ public class JmxScriptedLogFilterTest {
          filter.setFilterExpression("logLevel == 'INFO'");
          assert filter.isLogAllowed(eventwrap);
     }
+
+    @Test
+    public void testIsLogAllowedWithBlankExpression() {
+        event.put(ToolBox.KEY_EVENT_LEVEL, "INFO");
+        JmxEventWrapper eventwrap = new JmxEventWrapper(event);
+        // if test is absent, return true
+         assert filter.isLogAllowed(eventwrap);
+         filter.setFilterExpression("");
+         assert filter.isLogAllowed(eventwrap);
+    }
+
     @Test
     public void testIsLogAllowedWithScriptFile() {
         event.put(ToolBox.KEY_EVENT_LEVEL, "INFO");
@@ -131,21 +142,4 @@ public class JmxScriptedLogFilterTest {
         filter.setFilterExpression("timestamp < new Date().getTime()");
         assert !filter.isLogAllowed(warpper);
     }
-
-//
-//    public void testTimestampHiBound() {
-//        long today = new Date().getTime();
-//        Calendar cal = Calendar.getInstance();
-//        cal.setTimeInMillis(today);
-//        cal.add(Calendar.DAY_OF_MONTH, 1);
-//        long tomorrow = cal.getTimeInMillis();
-//        event.put(ToolBox.KEY_EVENT_TIME_STAMP, today);
-//        JmxEventWrapper warpper = new JmxEventWrapper(event);
-//        config.setTimestampHi(tomorrow);
-//        assert filter.isLogAllowed(warpper);
-//
-//        event.put(ToolBox.KEY_EVENT_TIME_STAMP, tomorrow);
-//        config.setTimestampLo(today);
-//        assert !filter.isLogAllowed(warpper);
-//    }
 }
