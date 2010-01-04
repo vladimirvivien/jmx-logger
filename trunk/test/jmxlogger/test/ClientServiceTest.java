@@ -13,7 +13,7 @@ import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import jmxlogger.tools.JmxLogEmitterMBean;
 import jmxlogger.tools.ToolBox;
-import jmxlogger.tools.loghub.ClientService;
+import jmxlogger.tools.console.ClientService;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

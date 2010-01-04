@@ -44,6 +44,8 @@ public class ToolBox {
     public static final String KEY_CONFIG_FILTER_EXP = "filterExpression";
     public static final String KEY_CONFIG_FILTER_SCRIPT = "filterScript";
     public static final String KEY_CONFIG_SERVER_ADDR = "serverAddress";
+
+    public static final String KEY_DATA_LOG_STATS = "logStatistics";
     
     // event keys
     public static final String KEY_EVENT_TYPE = "jmxlogger.log.event";
@@ -58,8 +60,10 @@ public class ToolBox {
     public static final String KEY_EVENT_FORMATTED_MESSAGE = "formattedMessage";
     public static final String KEY_EVENT_RAW_MESSAGE = "rawMessage";
     public static final String KEY_EVENT_THROWABLE = "exceptionName";
-    public static final String KEY_EVENT_LOG_COUNT = "totalLogCount";
+    public static final String KEY_EVENT_LOG_COUNT_ATTEMPTED = "totalLogAttempted";
+    public static final String KEY_EVENT_LOG_COUNTED = "totalLogCounted";
     public static final String KEY_EVENT_START_TIME = "startDate";
+    public static final String KEY_EVENT_LOG_STAT = "logStat";
 
     private static final ErrorManager EM = new ErrorManager();
     private static final String DEFAULT_NAME = "jmxlogger:type=LogEmitter";
