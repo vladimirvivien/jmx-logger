@@ -40,9 +40,7 @@ public class JmxScriptedLogFilter implements JmxLogFilter {
         scriptFile = f;
     }
 
-    public boolean isLogAllowed(JmxEventWrapper eventWrapper) {
-
-        Map<String, Object> event = eventWrapper.unwrap();
+    public boolean isLogAllowed(Map<String,Object> event) {
         Object result = new Boolean ("false");
         if(scriptFile != null){
             try {

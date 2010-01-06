@@ -15,6 +15,7 @@ import javax.management.ObjectName;
 import jmxlogger.integration.log4j.JmxLogAppender;
 import jmxlogger.integration.logutil.JmxLogHandler;
 import jmxlogger.tools.JmxConfigStore;
+import jmxlogger.tools.JmxLogEmitterMBean;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -56,14 +57,14 @@ public class JmxLogServiceTest {
     public void tearDown() {
     }
 
-    //@Test
+    @Test
     public void testCreateInstance() {
         JmxLogService l1 = JmxLogService.createInstance();
         assert l1 != null : "JmxLogService.createInstance() is returning null";
         assert l1 != JmxLogService.createInstance() : "JmxLogService.createInstance() is not initializing new instance.";
     }
 
-    //@Test
+    @Test
     public void testDefaultConfigurationStore() {
 
         JmxLogService l = JmxLogService.createInstance();
@@ -80,7 +81,7 @@ public class JmxLogServiceTest {
 
 
 
-    //@Test
+    @Test
     public void testStart() throws Exception{
         JmxLogService l = JmxLogService.createInstance(configStore);
         l.start();
@@ -89,7 +90,7 @@ public class JmxLogServiceTest {
                 : "JmxLogService start() is not registering internal MBean object";
     }
 
-    //@Test
+    @Test
     public void testStop() throws Exception{
         JmxLogService l = JmxLogService.createInstance(configStore);
         l.start();
@@ -99,7 +100,7 @@ public class JmxLogServiceTest {
                 : "JmxLogService stop() is not unregistering internal MBean object";
     }
 
-    //@Test
+    @Test
     public void testLog() throws Exception{
         JmxLogService l = JmxLogService.createInstance(configStore);
         LogListener lstnr = new LogListener();
@@ -131,6 +132,7 @@ public class JmxLogServiceTest {
     public void testLogStatistics() throws Exception{
         JmxLogService l = JmxLogService.createInstance(configStore);
         l.start();
+
         // log debug
         Map<String,Object> debug = new HashMap<String,Object>();
         debug.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(2));
@@ -170,9 +172,14 @@ public class JmxLogServiceTest {
         count = stat.get(ToolBox.KEY_EVENT_LOG_COUNT_ATTEMPTED);
         assert count == 3;
         count = stat.get(ToolBox.KEY_EVENT_LOG_COUNTED);
-        System.out.println ("log counted " + count);
+
         assert count == 3;
         assert stat.get(ToolBox.KEY_EVENT_START_TIME) != null : "Start Time statistics not registering";
 
+        // get statistics from mbean
+        Long result = (Long)server.invoke(objName, "getStats", new Object[]{"INFO"}, new String[]{String.class.getName()});
+        assert result == 2 : "MBean not reporting stats properly";
+        result = (Long)server.invoke(objName, "getStats", new Object[]{"DEBUG"}, new String[]{String.class.getName()});
+        assert result == 1: "MBean not reporting stats properly.";
     }
 }

@@ -19,7 +19,6 @@ package jmxlogger.tools;
 import java.io.File;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -154,30 +153,27 @@ public class JmxLogService {
 
         // add total log counted
         logStatistics.put(ToolBox.KEY_EVENT_LOG_COUNT_ATTEMPTED, new Long(attemptedLogCounter.incrementAndGet()));
-
-        // update LEVEL statistics
-        String level = (String) event.get(ToolBox.KEY_EVENT_LEVEL);
-        Long levelCount = logStatistics.get(level);
-        if (levelCount == null) {
-            logStatistics.put(level, new Long(1));
-        } else {
-            long updatedVal = levelCount.longValue() + 1;
-            logStatistics.put(level, new Long(updatedVal));
-        }
-
         event.put(ToolBox.KEY_EVENT_LOG_STAT, Collections.unmodifiableMap(logStatistics));
 
         noteProducers.execute(new Runnable(){
             public void run() {
-                
-                JmxEventWrapper noteWrapper = new JmxEventWrapper(event);
                 // apply filter configuration then put event not on queue
-                if(logFilter.isLogAllowed(noteWrapper)){
+                if(logFilter.isLogAllowed(Collections.unmodifiableMap(event))){
+                    // update LEVEL statistics
+                    String level = (String) event.get(ToolBox.KEY_EVENT_LEVEL);
+                    Long levelCount = logStatistics.get(level);
+                    if (levelCount == null) {
+                        logStatistics.put(level, new Long(1));
+                    } else {
+                        long updatedVal = levelCount.longValue() + 1;
+                        logStatistics.put(level, new Long(updatedVal));
+                    }
+
                     // update filtered Counter
                     logStatistics.put(ToolBox.KEY_EVENT_LOG_COUNTED, new Long(totalLogCounter.incrementAndGet()));                 
-                    noteWrapper.unwrap().put(ToolBox.KEY_EVENT_LOG_STAT, Collections.unmodifiableMap(logStatistics));
+                    event.put(ToolBox.KEY_EVENT_LOG_STAT, Collections.unmodifiableMap(logStatistics));
                     // put in queue to be sent.
-                    queue.put(noteWrapper);
+                    queue.put(new JmxEventWrapper(Collections.unmodifiableMap(event)));
                 }
             }
         });

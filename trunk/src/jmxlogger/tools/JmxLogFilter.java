@@ -5,10 +5,12 @@
 
 package jmxlogger.tools;
 
+import java.util.Map;
+
 /**
  *
  * @author vladimir
  */
 public interface JmxLogFilter {
-    boolean isLogAllowed(JmxEventWrapper eventWrapper);
+    boolean isLogAllowed(Map <String,Object> event);
 }

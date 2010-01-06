@@ -62,8 +62,8 @@ public class ToolBox {
     public static final String KEY_EVENT_THROWABLE = "exceptionName";
     public static final String KEY_EVENT_LOG_COUNT_ATTEMPTED = "totalLogAttempted";
     public static final String KEY_EVENT_LOG_COUNTED = "totalLogCounted";
-    public static final String KEY_EVENT_START_TIME = "startDate";
-    public static final String KEY_EVENT_LOG_STAT = "logStat";
+    public static final String KEY_EVENT_START_TIME = "startTime";
+    public static final String KEY_EVENT_LOG_STAT = "logStats";
 
     private static final ErrorManager EM = new ErrorManager();
     private static final String DEFAULT_NAME = "jmxlogger:type=LogEmitter";
