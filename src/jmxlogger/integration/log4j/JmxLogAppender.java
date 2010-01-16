@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jmxlogger.tools.JmxScriptedLogFilter;
 import jmxlogger.tools.JmxConfigStore;
 import jmxlogger.tools.JmxConfigStore.ConfigEvent;
 import org.apache.log4j.AppenderSkeleton;

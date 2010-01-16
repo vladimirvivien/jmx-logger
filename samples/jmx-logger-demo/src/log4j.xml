@@ -9,20 +9,33 @@
     </layout>
   </appender>
 
-  <appender name="jmxlogger" class="jmxlogger.integration.log4j.JmxLogAppender">
-    <param name="ObjectName" value="jmxlogger:type=LogEmitter"/>
+  <appender name="jmxlogger1" class="jmxlogger.integration.log4j.JmxLogAppender">
+    <param name="Threshold" value="INFO"/>
+    <param name="ObjectName" value="jmxlogger:type=LogEmitter1"/>
     <param name="MBeanServer" value="platform"/>
-    <param name="FilterExpression" value="logLevel == 'INFO' &amp;&amp;  rawMessage contains 'test for log4j'"/>
-    <param name="FilterScriptFile" value="test-script.mvl"/>
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
     </layout>
   </appender>
 
+  <appender name="jmxlogger2" class="jmxlogger.integration.log4j.JmxLogAppender">
+    <param name="FilterExpression" value="rawMessage contains 'trouble'"/>
+    <param name="ObjectName" value="jmxlogger:type=LogEmitter2"/>
+    <param name="MBeanServer" value="platform"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+    </layout>
+  </appender>
+
+  <category name="demo.agent">
+      <priority value="DEBUG"/>
+      <appender-ref ref="jmxlogger2" />
+  </category>
+  
   <root>
-    <priority value ="DEBUG" />
+    <priority value="INFO"/>
     <appender-ref ref="console" />
-    <appender-ref ref="jmxlogger" />
+    <appender-ref ref="jmxlogger1" />
   </root>
 
 </log4j:configuration>

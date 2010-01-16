@@ -195,7 +195,6 @@ public class ToolBox {
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
         }
-
         return svcUrl;
     }
 }

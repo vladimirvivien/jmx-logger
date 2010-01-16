@@ -8,7 +8,6 @@
  *
  * Created on Dec 22, 2009, 3:58:42 PM
  */
-
 package jmxlogger.tools.console;
 
 import java.awt.Color;
@@ -33,19 +32,17 @@ import jmxlogger.tools.ToolBox;
  * @author vvivien
  */
 public class MainPanel extends javax.swing.JPanel {
+
     private ClientService clientService;
     private JmxLogEmitterMBean logEmitter;
     private String lineSep = System.getProperty("line.separator");
-    private boolean connected = false;
-    private boolean logging = true;
+    private volatile boolean connected = false;
+    private volatile boolean logging = true;
 
     /** Creates new form MainPanel */
     public MainPanel() {
         initComponents();
-        connectionDialog.setLocationRelativeTo(this.getParent());
-        connectionDialog.setVisible(false);
-        connectionDialog.pack();
-        clientService = new ClientService();
+        initializePanel();
     }
 
     /** This method is called from within the constructor to
@@ -75,6 +72,7 @@ public class MainPanel extends javax.swing.JPanel {
         jLabel6 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         txtFilterExpression = new javax.swing.JTextArea();
+        bthSave = new javax.swing.JButton();
         jToolBar1 = new javax.swing.JToolBar();
         btnShowConnDialog = new javax.swing.JButton();
         btnDisconnect = new javax.swing.JButton();
@@ -203,19 +201,29 @@ public class MainPanel extends javax.swing.JPanel {
         txtFilterExpression.setToolTipText("Enter an expression used as filter");
         jScrollPane2.setViewportView(txtFilterExpression);
 
+        bthSave.setText("Apply");
+        bthSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bthSaveActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createSequentialGroup()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtFilterLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING))
-                .addContainerGap(469, Short.MAX_VALUE))
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 636, Short.MAX_VALUE)
+                    .addComponent(jLabel6)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 523, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(bthSave)))
+                .addContainerGap(36, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -227,6 +235,9 @@ public class MainPanel extends javax.swing.JPanel {
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(bthSave))
         );
 
         jToolBar1.setFloatable(false);
@@ -310,7 +321,7 @@ public class MainPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 328, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -325,58 +336,99 @@ public class MainPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void initializePanel() {
+        connectionDialog.setLocationRelativeTo(this.getParent());
+        connectionDialog.setVisible(false);
+        connectionDialog.pack();
+
+        clientService = new ClientService();
+        clientService.setConnectionListener(new ClientConnectionListener() {
+
+            @Override
+            public void onConnectionOpened() {
+                //connected = true;
+                MainPanel.this.postAdvisory("Connection established with the server.");
+            }
+
+            @Override
+            public void onConnectionClosed() {
+                //connected = false;
+                MainPanel.this.postAdvisory("Connection to server closed.");
+            }
+
+            @Override
+            public void onConnectionFailed() {
+                //connected = false;
+                MainPanel.this.postAdvisory("Connection to server failed unexpectedly.");
+            }
+        });
+    }
+
     private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
         connectionDialog.setVisible(false);
         setupConnection();
 }//GEN-LAST:event_btnConnectActionPerformed
 
     private void btnShowConnDialogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShowConnDialogActionPerformed
-        if(!connected) connectionDialog.setVisible(true);
+        if (!connected) {
+            connectionDialog.setVisible(true);
+        }
     }//GEN-LAST:event_btnShowConnDialogActionPerformed
 
     private void btnDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDisconnectActionPerformed
-        if(connected) tearDownConnection();
+        if (connected) {
+            tearDownConnection();
+        }
     }//GEN-LAST:event_btnDisconnectActionPerformed
 
     private void btnGoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGoActionPerformed
-        if(connected && !logging){
+        if (connected && !logging) {
             logging = true;
             postMessage("Running logging.");
         }
     }//GEN-LAST:event_btnGoActionPerformed
 
     private void btnPauseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPauseActionPerformed
-        if(connected && logging){
+        if (connected && logging) {
             logging = false;
             postAdvisory("Logging paused.");
         }
     }//GEN-LAST:event_btnPauseActionPerformed
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
-        if(connected && logEmitter != null){
-            logEmitter.setFilterExpression(txtFilterExpression.getText());
-            logEmitter.setLevel(txtFilterLevel.getText());
+        if (connected && logEmitter != null) {
+            this.txtFilterLevel.setText(logEmitter.getLevel());
+            this.txtFilterExpression.setText(logEmitter.getFilterExpression());
         }
     }//GEN-LAST:event_btnRefreshActionPerformed
 
+    private void bthSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bthSaveActionPerformed
+        if (connected && logEmitter != null) {
+            logEmitter.setFilterExpression(txtFilterExpression.getText());
+            logEmitter.setLevel(txtFilterLevel.getText());
+        }
+    }//GEN-LAST:event_bthSaveActionPerformed
+
     private void setupConnection() {
         String connId = null;
-        try{
+        try {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             connId = clientService.connect(
                     this.txtAddress.getText(),
                     this.txtUsername.getText(),
                     new String(this.txtPassword.getPassword()));
-        }catch(Exception ex){
+        } catch (Exception ex) {
             connected = false;
             postAdvisory("Unable to connect MBean server: " + ex.getMessage());
-        }finally{
+        } finally {
             this.setCursor(Cursor.getDefaultCursor());
         }
-        
-        if(connId != null){
+
+        if (connId != null) {
             connected = true;
-            postAdvisory("Connected to server " + txtUsername.getText() + "@" + clientService.getServiceUrl());
+            logging = true;
+
+            postAdvisory("Connected: " + txtUsername.getText() + "@" + clientService.getServiceUrl());
 
             // get log emitter object
             logEmitter = clientService.getLogEmitter(ToolBox.buildObjectName(this.txtMBeanName.getText()));
@@ -387,35 +439,59 @@ public class MainPanel extends javax.swing.JPanel {
 
             // setup a listerer
             clientService.addListenerToLogEmitter(
-                ToolBox.buildObjectName(this.txtMBeanName.getText()),
-                new NotificationListener(){
-                    @Override
-                    public void handleNotification(Notification notification, Object handback) {
-                        if(MainPanel.this.logging){
-                            Map<String,Object> data = (Map<String, Object>) handback;
+                    ToolBox.buildObjectName(this.txtMBeanName.getText()),
+                    new NotificationListener() {
 
-                            MainPanel.this.postMessage(notification.getMessage());
-                            MainPanel.this.txtLogText.setCaretPosition(MainPanel.this.txtLogText.getDocument().getLength());
+                        @Override
+                        public void handleNotification(Notification notification, Object handback) {
+                            if (MainPanel.this.logging) {
+                                try {
+                                    Map<String, Object> data = (Map<String, Object>) notification.getUserData();
+                                    String level = (String) data.get(ToolBox.KEY_EVENT_LEVEL);
+                                    String formattedMsg = (String) data.get(ToolBox.KEY_EVENT_FORMATTED_MESSAGE);
+
+                                    if (level.equalsIgnoreCase("FINE")
+                                            || level.equalsIgnoreCase("FINER")
+                                            || level.equalsIgnoreCase("FINEST")
+                                            || level.equalsIgnoreCase("DEBUG")) {
+                                        MainPanel.this.postChatter(formattedMsg);
+                                    } else if (level.equalsIgnoreCase("INFO")) {
+                                        MainPanel.this.postMessage(formattedMsg);
+                                    } else if (level.equalsIgnoreCase("WARN")
+                                            || level.equalsIgnoreCase("WARNING")
+                                            || level.equalsIgnoreCase("CONFIG")) {
+                                        MainPanel.this.postWarning("formattedMsg");
+                                    } else if (level.equalsIgnoreCase("ERROR")
+                                            || level.equalsIgnoreCase("SEVERE")
+                                            || level.equalsIgnoreCase("FATAL")) {
+                                        MainPanel.this.postAdvisory(formattedMsg);
+                                    } else {
+                                        MainPanel.this.postMessage(formattedMsg);
+                                    }
+                                    MainPanel.this.txtLogText.setCaretPosition(MainPanel.this.txtLogText.getDocument().getLength());
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
                         }
-                    }
-            });
+                    });
         }
     }
 
     public void tearDownConnection() {
-        if(clientService != null && connected) {
-            try{
+        if (clientService != null && connected) {
+            try {
                 clientService.disconnect();
                 connected = false;
+                logging = false;
                 postAdvisory("Disconnected from server @ " + clientService.getServiceUrl());
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 postAdvisory("Unable to disconnect from MBean Server: " + ex.getMessage());
             }
         }
     }
 
-
-    private void postMessage(String msg){
+    private void postMessage(String msg) {
         StyledDocument doc = txtLogText.getStyledDocument();
         try {
             Style messageStyle = doc.addStyle("message", null);
@@ -426,7 +502,29 @@ public class MainPanel extends javax.swing.JPanel {
         }
     }
 
-    private void postAdvisory(String err){
+    private void postWarning(String msg) {
+        StyledDocument doc = txtLogText.getStyledDocument();
+        try {
+            Style messageStyle = doc.addStyle("warn", null);
+            StyleConstants.setForeground(messageStyle, Color.YELLOW);
+            doc.insertString(doc.getLength(), msg + lineSep, messageStyle);
+        } catch (BadLocationException ex) {
+            throw new RuntimeException("Unable to set message style in text pane: " + ex.getMessage());
+        }
+    }
+
+    private void postChatter(String msg) {
+        StyledDocument doc = txtLogText.getStyledDocument();
+        try {
+            Style messageStyle = doc.addStyle("warn", null);
+            StyleConstants.setForeground(messageStyle, Color.GRAY);
+            doc.insertString(doc.getLength(), msg + lineSep, messageStyle);
+        } catch (BadLocationException ex) {
+            throw new RuntimeException("Unable to set message style in text pane: " + ex.getMessage());
+        }
+    }
+
+    private void postAdvisory(String err) {
         StyledDocument doc = txtLogText.getStyledDocument();
         try {
             Style advisoryStyle = doc.addStyle("advisory", null);
@@ -436,8 +534,8 @@ public class MainPanel extends javax.swing.JPanel {
             throw new RuntimeException("Unable to set message style in text pane: " + ex.getMessage());
         }
     }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton bthSave;
     private javax.swing.JButton btnConnect;
     private javax.swing.JButton btnDisconnect;
     private javax.swing.JButton btnGo;
@@ -467,5 +565,4 @@ public class MainPanel extends javax.swing.JPanel {
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtUsername;
     // End of variables declaration//GEN-END:variables
-
 }
