@@ -18,6 +18,7 @@ package jmxlogger.integration.log4j;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.MBeanServer;
@@ -285,28 +286,33 @@ public class JmxLogAppender extends AppenderSkeleton{
      */
     private Map<String,Object> prepareLogEvent(String fmtMsg, LoggingEvent record){
         Map<String,Object> event = new HashMap<String,Object>();
+        long ts = new Date().getTime();
         event.put(ToolBox.KEY_EVENT_SOURCE,this.getClass().getName());
         event.put(ToolBox.KEY_EVENT_LEVEL,record.getLevel().toString());
         event.put(ToolBox.KEY_EVENT_LOGGER,record.getLoggerName());
         event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE,fmtMsg);
         event.put(ToolBox.KEY_EVENT_RAW_MESSAGE, record.getMessage());
-        event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(record.getTimeStamp()));
-        event.put(ToolBox.KEY_EVENT_SOURCE_CLASS,
-                (record.locationInformationExists())
-                ? record.getLocationInformation().getClassName()
-                : "Unavailable");
-        event.put(ToolBox.KEY_EVENT_SOURCE_METHOD,
-                (record.locationInformationExists())
-                ? record.getLocationInformation().getMethodName()
-                : "Unavailable" );
+        /* most log4j usage is below necessary version, therefore do not support
+         * the following methods.
+         */
+        //event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(record.getTimeStamp()));
+        event.put(ToolBox.KEY_EVENT_SEQ_NUM, new Long(ts));
+//        event.put(ToolBox.KEY_EVENT_SOURCE_CLASS,
+//                (record.locationInformationExists())
+//                ? record.getLocationInformation().getClassName()
+//                : "Unavailable");
+//        event.put(ToolBox.KEY_EVENT_SOURCE_METHOD,
+//                (record.locationInformationExists())
+//                ? record.getLocationInformation().getMethodName()
+//                : "Unavailable" );
         event.put(ToolBox.KEY_EVENT_SOURCE_THREAD,
                 record.getThreadName());
         event.put(ToolBox.KEY_EVENT_THROWABLE,
                 (record.getThrowableInformation() != null)
                 ? record.getThrowableInformation().getThrowable()
                 : null);
-        event.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(record.getTimeStamp()));
-
+        //event.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(record.getTimeStamp()));
+        event.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(ts));
         return event;
     }
 
