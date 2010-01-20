@@ -346,20 +346,23 @@ public class MainPanel extends javax.swing.JPanel {
 
             @Override
             public void onConnectionOpened() {
-                //connected = true;
-                MainPanel.this.postAdvisory("Connection established with the server.");
+                connected = true;
+                logging = true;
+                MainPanel.this.postAdvisory("Connection established with the server." + lineSep);
             }
 
             @Override
             public void onConnectionClosed() {
-                //connected = false;
-                MainPanel.this.postAdvisory("Connection to server closed.");
+                connected = false;
+                logging = false;
+                MainPanel.this.postAdvisory("Connection to server closed." + lineSep);
             }
 
             @Override
             public void onConnectionFailed() {
-                //connected = false;
-                MainPanel.this.postAdvisory("Connection to server failed unexpectedly.");
+                connected = false;
+                logging = false;
+                MainPanel.this.postAdvisory("Connection to server failed unexpectedly." + lineSep);
             }
         });
     }
@@ -384,14 +387,14 @@ public class MainPanel extends javax.swing.JPanel {
     private void btnGoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGoActionPerformed
         if (connected && !logging) {
             logging = true;
-            postMessage("Running logging.");
+            postMessage("Running logging." + lineSep);
         }
     }//GEN-LAST:event_btnGoActionPerformed
 
     private void btnPauseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPauseActionPerformed
         if (connected && logging) {
             logging = false;
-            postAdvisory("Logging paused.");
+            postAdvisory("Logging paused." + lineSep);
         }
     }//GEN-LAST:event_btnPauseActionPerformed
 
@@ -419,7 +422,7 @@ public class MainPanel extends javax.swing.JPanel {
                     new String(this.txtPassword.getPassword()));
         } catch (Exception ex) {
             connected = false;
-            postAdvisory("Unable to connect MBean server: " + ex.getMessage());
+            postAdvisory("Unable to connect MBean server: " + ex.getMessage()  + lineSep);
         } finally {
             this.setCursor(Cursor.getDefaultCursor());
         }
@@ -428,7 +431,7 @@ public class MainPanel extends javax.swing.JPanel {
             connected = true;
             logging = true;
 
-            postAdvisory("Connected: " + txtUsername.getText() + "@" + clientService.getServiceUrl());
+            postAdvisory("Connected: " + txtUsername.getText() + "@" + clientService.getServiceUrl() + lineSep);
 
             // get log emitter object
             logEmitter = clientService.getLogEmitter(ToolBox.buildObjectName(this.txtMBeanName.getText()));
@@ -460,7 +463,7 @@ public class MainPanel extends javax.swing.JPanel {
                                     } else if (level.equalsIgnoreCase("WARN")
                                             || level.equalsIgnoreCase("WARNING")
                                             || level.equalsIgnoreCase("CONFIG")) {
-                                        MainPanel.this.postWarning("formattedMsg");
+                                        MainPanel.this.postWarning(formattedMsg);
                                     } else if (level.equalsIgnoreCase("ERROR")
                                             || level.equalsIgnoreCase("SEVERE")
                                             || level.equalsIgnoreCase("FATAL")) {
@@ -484,9 +487,9 @@ public class MainPanel extends javax.swing.JPanel {
                 clientService.disconnect();
                 connected = false;
                 logging = false;
-                postAdvisory("Disconnected from server @ " + clientService.getServiceUrl());
+                postAdvisory("Disconnected from server @ " + clientService.getServiceUrl()  + lineSep);
             } catch (Exception ex) {
-                postAdvisory("Unable to disconnect from MBean Server: " + ex.getMessage());
+                postAdvisory("Unable to disconnect from MBean Server: " + ex.getMessage()  + lineSep);
             }
         }
     }
@@ -496,7 +499,7 @@ public class MainPanel extends javax.swing.JPanel {
         try {
             Style messageStyle = doc.addStyle("message", null);
             StyleConstants.setForeground(messageStyle, Color.BLUE);
-            doc.insertString(doc.getLength(), msg + lineSep, messageStyle);
+            doc.insertString(doc.getLength(), msg, messageStyle);
         } catch (BadLocationException ex) {
             throw new RuntimeException("Unable to set message style in text pane: " + ex.getMessage());
         }
@@ -506,8 +509,8 @@ public class MainPanel extends javax.swing.JPanel {
         StyledDocument doc = txtLogText.getStyledDocument();
         try {
             Style messageStyle = doc.addStyle("warn", null);
-            StyleConstants.setForeground(messageStyle, Color.YELLOW);
-            doc.insertString(doc.getLength(), msg + lineSep, messageStyle);
+            StyleConstants.setForeground(messageStyle, Color.ORANGE);
+            doc.insertString(doc.getLength(), msg, messageStyle);
         } catch (BadLocationException ex) {
             throw new RuntimeException("Unable to set message style in text pane: " + ex.getMessage());
         }
@@ -518,7 +521,7 @@ public class MainPanel extends javax.swing.JPanel {
         try {
             Style messageStyle = doc.addStyle("warn", null);
             StyleConstants.setForeground(messageStyle, Color.GRAY);
-            doc.insertString(doc.getLength(), msg + lineSep, messageStyle);
+            doc.insertString(doc.getLength(), msg, messageStyle);
         } catch (BadLocationException ex) {
             throw new RuntimeException("Unable to set message style in text pane: " + ex.getMessage());
         }
@@ -529,7 +532,7 @@ public class MainPanel extends javax.swing.JPanel {
         try {
             Style advisoryStyle = doc.addStyle("advisory", null);
             StyleConstants.setForeground(advisoryStyle, Color.RED);
-            doc.insertString(doc.getLength(), err + lineSep, advisoryStyle);
+            doc.insertString(doc.getLength(), err, advisoryStyle);
         } catch (BadLocationException ex) {
             throw new RuntimeException("Unable to set message style in text pane: " + ex.getMessage());
         }

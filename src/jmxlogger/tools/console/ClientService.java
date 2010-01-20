@@ -54,6 +54,8 @@ public class ClientService {
                     }
                 };
 
+                connector.addConnectionNotificationListener(noteListener, null, null);
+
             }
 
             return connector.getConnectionId();
