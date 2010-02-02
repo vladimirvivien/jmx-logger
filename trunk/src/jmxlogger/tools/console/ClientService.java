@@ -2,9 +2,6 @@ package jmxlogger.tools.console;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Observer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;

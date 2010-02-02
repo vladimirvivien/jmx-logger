@@ -17,8 +17,11 @@
 package jmxlogger.tools;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -154,6 +157,7 @@ public class JmxLogService {
         // add total log counted
         logStatistics.put(ToolBox.KEY_EVENT_LOG_COUNT_ATTEMPTED, new Long(attemptedLogCounter.incrementAndGet()));
         event.put(ToolBox.KEY_EVENT_LOG_STAT, Collections.unmodifiableMap(logStatistics));
+        event.put(ToolBox.KEY_EVENT_SYS_STAT, Collections.unmodifiableMap(ToolBox.getSystemInfo()));
 
         noteProducers.execute(new Runnable(){
             public void run() {
@@ -169,9 +173,23 @@ public class JmxLogService {
                         logStatistics.put(level, new Long(updatedVal));
                     }
 
+                    // update logger value
+                    String logger = (String)event.get(ToolBox.KEY_EVENT_LOGGER);
+                    Long loggerCount = logStatistics.get(logger);
+                    if (loggerCount == null) {
+                        logStatistics.put(logger, new Long(1));
+                    } else {
+                        long updatedVal = loggerCount.longValue() + 1;
+                        logStatistics.put(logger, new Long(updatedVal));
+                    }
+
                     // update filtered Counter
                     logStatistics.put(ToolBox.KEY_EVENT_LOG_COUNTED, new Long(totalLogCounter.incrementAndGet()));                 
                     event.put(ToolBox.KEY_EVENT_LOG_STAT, Collections.unmodifiableMap(logStatistics));
+
+                    // add system statiscs
+                    HashMap sysStats = new HashMap<String,Object>();
+
                     // put in queue to be sent.
                     queue.put(new JmxEventWrapper(Collections.unmodifiableMap(event)));
                 }

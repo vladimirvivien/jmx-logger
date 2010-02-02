@@ -16,12 +16,16 @@
 package jmxlogger.tools;
 
 import java.io.File;
+import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.RuntimeMXBean;
+import java.lang.management.ThreadMXBean;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.ErrorManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -44,8 +48,6 @@ public class ToolBox {
     public static final String KEY_CONFIG_FILTER_EXP = "filterExpression";
     public static final String KEY_CONFIG_FILTER_SCRIPT = "filterScript";
     public static final String KEY_CONFIG_SERVER_ADDR = "serverAddress";
-
-    public static final String KEY_DATA_LOG_STATS = "logStatistics";
     
     // event keys
     public static final String KEY_EVENT_TYPE = "jmxlogger.log.event";
@@ -60,10 +62,13 @@ public class ToolBox {
     public static final String KEY_EVENT_FORMATTED_MESSAGE = "formattedMessage";
     public static final String KEY_EVENT_RAW_MESSAGE = "rawMessage";
     public static final String KEY_EVENT_THROWABLE = "exceptionName";
+
+    public static final String KEY_EVENT_LOG_STAT = "logStats";
     public static final String KEY_EVENT_LOG_COUNT_ATTEMPTED = "totalLogAttempted";
     public static final String KEY_EVENT_LOG_COUNTED = "totalLogCounted";
     public static final String KEY_EVENT_START_TIME = "startTime";
-    public static final String KEY_EVENT_LOG_STAT = "logStats";
+
+    public static final String KEY_EVENT_SYS_STAT = "systemStats";
 
     private static final ErrorManager EM = new ErrorManager();
     private static final String DEFAULT_NAME = "jmxlogger:type=LogEmitter";
@@ -197,4 +202,40 @@ public class ToolBox {
         }
         return svcUrl;
     }
+
+    public static Map<String,Long> getSystemInfo() {
+        HashMap<String,Long> info = new HashMap<String,Long>();
+
+        // get runtime info
+        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+        info.put("startTime", new Long(runtime.getStartTime()));
+        info.put("uptime", new Long(runtime.getUptime()));
+
+        ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
+        info.put("loadedClassCount",  new Long(cl.getLoadedClassCount()));
+        info.put("unloadedClassCount", new Long(cl.getUnloadedClassCount()));
+
+        // memory
+        MemoryMXBean memPool = ManagementFactory.getMemoryMXBean();
+
+        info.put("heapMemCommitted", new Long(memPool.getHeapMemoryUsage().getCommitted()));
+        info.put("heapMemInit", new Long(memPool.getHeapMemoryUsage().getInit()));
+        info.put("heapMemMax", new Long(memPool.getHeapMemoryUsage().getMax()));
+        info.put("heapMemUsed", new Long(memPool.getHeapMemoryUsage().getUsed()));
+
+        info.put("nonHeapMemCommitted", new Long(memPool.getNonHeapMemoryUsage().getCommitted()));
+        info.put("nonHeapMemInit", new Long(memPool.getNonHeapMemoryUsage().getInit()));
+        info.put("nonHeapMemMax", new Long(memPool.getNonHeapMemoryUsage().getMax()));
+        info.put("nonHeapMemUsed", new Long(memPool.getNonHeapMemoryUsage().getUsed()));
+
+
+        // thread info
+        ThreadMXBean thread = ManagementFactory.getThreadMXBean();
+        info.put("threadCount", new Long(thread.getThreadCount()));
+        info.put("deamonThreadCount", new Long(thread.getDaemonThreadCount()));
+        info.put("peakThreadCount", new Long(thread.getPeakThreadCount()));
+
+        return info;
+    }
+
 }
