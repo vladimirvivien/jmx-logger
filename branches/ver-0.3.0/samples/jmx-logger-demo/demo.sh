@@ -1,0 +1,1 @@
+java -Dcom.sun.management.jmxremote.port=7070 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.access.file=../jmx-access.properties -Dcom.sun.management.jmxremote.password.file=../jmx-password.properties -Dcom.sun.management.jmxremote.authenticate=false -jar dist/jmx-logger-demo.jar
