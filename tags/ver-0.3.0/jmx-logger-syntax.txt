@@ -1,0 +1,25 @@
+#java.util.logging format
+handlers = jmxlogger.integration.logutil.JmxLoggingHander
+jmxlogger.Handler.level=ALL|SEVERE|INFO|FINE|etc
+jmxlogger.Handler.formatter = java.util.logging.XMLFormatter|any standard formatter
+jmxlogger.Handler.objectName=JMX Object Name
+jmxlogger.Handler.mbeanServer="platform"|domain name of server
+jmxlogger.Handler.filterExpression=#{log.level == "INFO" && log.matches(pattern)}
+jmxlogger.Handler.filterScriptFile=/some/local/file.mvl
+jmxlogger.Handler.filter=java.util.logging.Filter
+
+
+#log4j xml format
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+  <appender name="jmxlogger" class="jmxlogger.integration.log4j.JmxLogAppender">
+    <param name="ObjectName" value="jmxlogger:type=logEmitter"/>
+    <param name="MBeanServer" value="platform"/>
+    <param name="FilterExpression" value="#{log.level == "INFO" && log.matches(pattern)}"/>
+    <param name="FilterScriptFile" value="/some/local/file.mvl"/>
+
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+    </layout>
+    <filter class="jmxlogger.integration.log4j.LogFilter"/>
+  </appender>
+</log4j:configuration>
