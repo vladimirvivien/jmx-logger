@@ -165,22 +165,26 @@ public class JmxLogService {
                 if(logFilter.isLogAllowed(Collections.unmodifiableMap(event))){
                     // update LEVEL statistics
                     String level = (String) event.get(ToolBox.KEY_EVENT_LEVEL);
-                    Long levelCount = logStatistics.get(level);
-                    if (levelCount == null) {
-                        logStatistics.put(level, new Long(1));
-                    } else {
-                        long updatedVal = levelCount.longValue() + 1;
-                        logStatistics.put(level, new Long(updatedVal));
+                    if(level != null){
+                        Long levelCount = logStatistics.get(level);
+                        if (levelCount == null) {
+                            logStatistics.put(level, new Long(1));
+                        } else {
+                            long updatedVal = levelCount.longValue() + 1;
+                            logStatistics.put(level, new Long(updatedVal));
+                        }
                     }
 
                     // update logger value
                     String logger = (String)event.get(ToolBox.KEY_EVENT_LOGGER);
+                    if(logger != null){
                     Long loggerCount = logStatistics.get(logger);
-                    if (loggerCount == null) {
-                        logStatistics.put(logger, new Long(1));
-                    } else {
-                        long updatedVal = loggerCount.longValue() + 1;
-                        logStatistics.put(logger, new Long(updatedVal));
+                        if (loggerCount == null) {
+                            logStatistics.put(logger, new Long(1));
+                        } else {
+                            long updatedVal = loggerCount.longValue() + 1;
+                            logStatistics.put(logger, new Long(updatedVal));
+                        }
                     }
 
                     // update filtered Counter

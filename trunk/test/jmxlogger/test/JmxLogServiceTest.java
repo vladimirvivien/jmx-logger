@@ -110,6 +110,7 @@ public class JmxLogServiceTest {
         event.put(ToolBox.KEY_EVENT_LEVEL, "DEBUG");
         event.put(ToolBox.KEY_EVENT_SOURCE, l.getClass().getName());
         event.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, "Hello, this is a logged message.");
+        event.put(ToolBox.KEY_EVENT_LOGGER, this.getClass().getName());
 
         l.log(event);
 
@@ -139,20 +140,23 @@ public class JmxLogServiceTest {
         debug.put(ToolBox.KEY_EVENT_LEVEL, "DEBUG");
         debug.put(ToolBox.KEY_EVENT_SOURCE, l.getClass().getName());
         debug.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, "Debug Message.");
+        debug.put(ToolBox.KEY_EVENT_LOGGER, this.getClass().getName());
         l.log(debug);
 
         Map<String,Object> info = new HashMap<String,Object>();
         info.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(0));
         info.put(ToolBox.KEY_EVENT_LEVEL, "INFO");
         info.put(ToolBox.KEY_EVENT_SOURCE, l.getClass().getName());
-        info.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, "Info message.");        
+        info.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, "Info message.");
+        info.put(ToolBox.KEY_EVENT_LOGGER, this.getClass().getName());
         l.log(info);
         
         info = new HashMap<String,Object>();
         info.put(ToolBox.KEY_EVENT_TIME_STAMP, new Long(1));
         info.put(ToolBox.KEY_EVENT_LEVEL, "INFO");
         info.put(ToolBox.KEY_EVENT_SOURCE, l.getClass().getName());
-        info.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, "Another info message.");        
+        info.put(ToolBox.KEY_EVENT_FORMATTED_MESSAGE, "Another info message.");
+        info.put(ToolBox.KEY_EVENT_LOGGER, this.getClass().getName());
         l.log(info);
 
         // stall for time to ensure thread settled.
@@ -175,6 +179,9 @@ public class JmxLogServiceTest {
 
         assert count == 3;
         assert stat.get(ToolBox.KEY_EVENT_START_TIME) != null : "Start Time statistics not registering";
+
+        long loggerCount = stat.get(this.getClass().getName());
+        assert loggerCount == 3 : "Statistics for logger is not counting properly";
 
         // get statistics from mbean
         Long result = (Long)server.invoke(objName, "getStats", new Object[]{"INFO"}, new String[]{String.class.getName()});

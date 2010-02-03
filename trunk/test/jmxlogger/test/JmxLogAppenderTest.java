@@ -46,7 +46,7 @@ public class JmxLogAppenderTest {
     @Before
     public void setUp() {
         platformServer = ManagementFactory.getPlatformMBeanServer();
-        objectName = ToolBox.buildObjectName("jmxlogger:type=logEmitter");
+        objectName = ToolBox.buildObjectName("jmxlogger:type=LogEmitter");
         lstnr = new LogListener();
     }
 
