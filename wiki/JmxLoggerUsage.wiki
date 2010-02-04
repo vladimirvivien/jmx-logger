@@ -1,3 +1,4 @@
+#labels Featured
 A quick guide on how to use JmxLogger
 
 = Using JmxLogger =
