@@ -6,10 +6,12 @@
 JmxLogger is easy to integrate with your new or existing application.  You simply configure JmxLogger in your logging infrastructure using Log4J or Java Util Logging (JUL).  JmxLogger supports both of those frameworks and aautomatically captures and braodcasts your event logs to any registered JMX client.
 
 == JmxLogger Dependencies ==
-JmxLogger has a small footprint and depends on 
+JmxLogger has a small footprint
+  * jmxlogger-x.x.x.jar
+  * jmxlogger-log4j.jar if using Log4j JmxLogger Appender
   * Mvel2 (mvel2-2.z.z.jar)
-  * Log4J if you are using the log4j appender
-The binary distribution contains both jars.
+  * Log4J's 
+The binary distribution contains all jars.  When using Log4J, ensure that the log4j-x.z.y.jar is on your classpath and make sure to use the appropriate jmxlogger jar as well.
 
 == JmxLogger Settings ==
 When configuring JmxLogger(for either log4j or Java Util Logging), you can configure the logger with several setting values to control how it behaves
@@ -86,6 +88,44 @@ jmxlogger.Handler.server=platform
 }}}
 
 == Remote Logging with JmxLogger ==
+To enable remote logging of a running application, you must do two things:
+  * setup the JmxLogger in your logging configuration (see above)
+  * start your process with JMX remote access enabled
+The second item can be done both programmatically and via command-line VM system properties.  We will show a simple example of the latter as it is beyond (way beyond) the scope of this document to cover JMX Remote accessibility.
+
+Suppose you have a Java application called MyProcess with classpath my:class:path, you can start it with JMX enabled with remote access as follows
+
+{{{
+java -cp your:class:path \
+    -Dcom.sun.management.jmxremote \
+    -Dcom.sun.management.jmxremote.port=7070 \
+    -Dcom.sun.management.jmxremote.authenticate=false \
+your.process.main.MyProcess
+}}}
+
+This command (wrapped for readability), starts MyProcess and enables JMX remote access on port 7070.  It also turns off authenticate (default is true).  If you need to setup user authentication, you can do it as follows 
+
+{{{
+java -cp your:class:path \
+    -Dcom.sun.management.jmxremote.port=7070 \
+    -Dcom.sun.management.jmxremote.authenticate=false
+    -Dcom.sun.management.jmxremote.ssl=false \
+    -Dcom.sun.management.jmxremote.access.file=../access.properties \
+    -Dcom.sun.management.jmxremote.password.file=../password.properties 
+your.process.main.MyProcess
+
+}}}
+
+In this setup we are
+ * enabling remote access on port 7070
+ * enabling security by turning authentication on
+ * ensure we are not using ssl, by setting it to false
+ * provide an access file and a password file that define credentials
+
+NOTE `-Dcom.sun.management.jmxremote` is only required if the process is running under Java 1.5. As of version 1.6, it is not required.
+
+For more on how to use JMX remote connectivity see - [http://java.sun.com/j2se/1.5.0/docs/guide/management/agent.html]
+
 
 == Running the JmxLogger Console ==
 
