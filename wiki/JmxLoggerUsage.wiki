@@ -1,13 +1,5 @@
-#summary One-sentence summary of this page.
+#A quick guide on how to use JmxLogger
 
-= Introduction =
+= Using JmxLogger =
 
-Add your content here.
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+JmxLogger is easy to integrate with your new or existing application.  You simply configure JmxLogger in your logging infrastructure using Log4J or Java Util Logging.  JmxLogger supports both of those frameworks and aautomatically captures and braodcasts your event logs to any registered JMX client.
