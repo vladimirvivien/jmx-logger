@@ -7,8 +7,10 @@ JmxLogger is easy to integrate with your new or existing application.  You simpl
 
 == JmxLogger Dependencies ==
 JmxLogger has a small footprint and depends on 
+
 * Mvel2 (mvel2-2.z.z.jar)
 * Log4J if you are using the log4j appender
+
 The binary distribution contains both jars.
 
 == JmxLogger Settings ==
