@@ -1,5 +1,5 @@
+#summary A quick guide on how to use JmxLogger
 #labels Featured
-#A quick guide on how to use JmxLogger
 
 = Using JmxLogger =
 
