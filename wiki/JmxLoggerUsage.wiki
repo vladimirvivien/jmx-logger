@@ -16,7 +16,7 @@ When configuring JmxLogger(for either log4j or Java Util Logging), you can confi
 
   * *Level* - use this setting to specify the log level for JmxLogger.  If left unspecified, it will default to DEBUG for log4j or FINE for JUL.
   * *Layout/Formatter* - this settings specifies a Layout (log4j) / Formatter (JUL) class used to format the log message.
-  * *Filter Expression* - use this to set a filter expression used to narrow down the type of messages being filtered.  This must be expressed in MVEL and must evaluate to a boolean.  See the "Filtering Your Log" section for more information.
+  * *FilterExpression* - use this to set a filter expression used to narrow down the type of messages being filtered.  This must be expressed in MVEL and must evaluate to a boolean.  See the "Filtering Your Log" section for more information.
   * *ObjectName* - this setting specifies the JMX's MBean name for the JmxLogger object.  This ID is used to identify the JmxLogger component in the MBeanServer.  The name must be a valid JMX ObjectName.  It used by by client applications to connect the logger.
   * *MBeanServer* - use this setting to specify the MBeanServer instance to use.  By default, JmxLogger will use the platform MBeanServer is none is specified or if this property is set to "platform".  Or you can specify the name of the MBeanServer's domain and JmxLogger will attempt to use that.
 
@@ -84,3 +84,9 @@ jmxlogger.Handler.formatter=java.util.logging.SimpleFormatter
 jmxlogger.Handler.objectName=jmxlogger:type=LogEmitter
 jmxlogger.Handler.server=platform
 }}}
+
+== Remote Logging with JmxLogger ==
+
+== Running the JmxLogger Console ==
+
+== Filter Expressions with MVEL ==
