@@ -21,3 +21,64 @@ When configuring JmxLogger(for either log4j or Java Util Logging), you can confi
   * *MBeanServer* - use this setting to specify the MBeanServer instance to use.  By default, JmxLogger will use the platform MBeanServer is none is specified or if this property is set to "platform".  Or you can specify the name of the MBeanServer's domain and JmxLogger will attempt to use that.
 
 === Log4J Example ===
+{{{
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+  <appender name="console" class="org.apache.log4j.ConsoleAppender">
+    <param name="Target" value="System.out"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+    </layout>
+  </appender>
+
+  <appender name="jmxlogger1" class="jmxlogger.integration.log4j.JmxLogAppender">
+    <param name="Threshold" value="INFO"/>
+    <param name="ObjectName" value="jmxlogger:type=LogEmitter1"/>
+    <param name="MBeanServer" value="platform"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+    </layout>
+  </appender>
+
+  <appender name="jmxlogger2" class="jmxlogger.integration.log4j.JmxLogAppender">
+    <param name="FilterExpression" value="rawMessage contains 'trouble'"/>
+    <param name="ObjectName" value="jmxlogger:type=LogEmitter2"/>
+    <param name="MBeanServer" value="platform"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+    </layout>
+  </appender>
+
+  <category name="demo.agent">
+      <priority value="DEBUG"/>
+      <appender-ref ref="jmxlogger2" />
+  </category>
+  
+  <root>
+    <priority value="INFO"/>
+    <appender-ref ref="console" />
+    <appender-ref ref="jmxlogger1" />
+  </root>
+
+</log4j:configuration>
+}}}
+
+=== Java Util Logging Example ===
+# *********************** Java Util Logging ************************
+handlers=jmxlogger.integration.logutil.JmxLogHandler, java.util.logging.ConsoleHandler
+
+# Default global logging level.
+.level=INFO
+
+# Console log handler
+java.util.logging.ConsoleHandler.level = INFO
+java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter
+
+# jmxlogger handler
+jmxlogger.Handler.level=INFO
+jmxlogger.Handler.filterExpression=rawMessage contains 'java util logging'
+jmxlogger.Handler.formatter=java.util.logging.SimpleFormatter
+jmxlogger.Handler.objectName=jmxlogger:type=LogEmitter
+jmxlogger.Handler.server=platform
