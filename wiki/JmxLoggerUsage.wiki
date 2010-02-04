@@ -2,6 +2,23 @@ A quick guide on how to use JmxLogger
 
 = Using JmxLogger =
 
-JmxLogger is easy to integrate with your new or existing application.  You simply configure JmxLogger in your logging infrastructure using Log4J or Java Util Logging.  JmxLogger supports both of those frameworks and aautomatically captures and braodcasts your event logs to any registered JMX client.
+JmxLogger is easy to integrate with your new or existing application.  You simply configure JmxLogger in your logging infrastructure using Log4J or Java Util Logging (JUL).  JmxLogger supports both of those frameworks and aautomatically captures and braodcasts your event logs to any registered JMX client.
 
 == JmxLogger Dependencies ==
+JmxLogger has a small footprint and depends on 
+* Mvel2 (mvel2-2.z.z.jar)
+* Log4J if you are using the log4j appender
+The binary distribution contains both jars.
+
+== JmxLogger Settings ==
+When configuring JmxLogger(for either log4j or Java Util Logging), you can configure the logger with several setting values to control how it behaves
+
+*Level* - use this setting to specify the log level for JmxLogger.  If left unspecified, it will default to DEBUG for log4j or FINE for JUL.
+
+*Layout/Formatter* - this settings specifies a Layout (log4j) / Formatter (JUL) class used to format the log message.
+
+*Filter Expression* - use this to set a filter expression used to narrow down the type of messages being filtered.  This must be expressed in MVEL and must evaluate to a boolean.  See the "Filtering Your Log" section for more information.
+
+*ObjectName* - this setting specifies the JMX's MBean name for the JmxLogger object.  This ID is used to identify the JmxLogger component in the MBeanServer.  The name must be a valid JMX ObjectName.  It used by by client applications to connect the logger.
+
+*MBeanServer*
