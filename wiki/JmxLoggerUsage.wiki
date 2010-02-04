@@ -66,6 +66,7 @@ When configuring JmxLogger(for either log4j or Java Util Logging), you can confi
 }}}
 
 === Java Util Logging Example ===
+{{{
 # *********************** Java Util Logging ************************
 handlers=jmxlogger.integration.logutil.JmxLogHandler, java.util.logging.ConsoleHandler
 
@@ -82,3 +83,4 @@ jmxlogger.Handler.filterExpression=rawMessage contains 'java util logging'
 jmxlogger.Handler.formatter=java.util.logging.SimpleFormatter
 jmxlogger.Handler.objectName=jmxlogger:type=LogEmitter
 jmxlogger.Handler.server=platform
+}}}
