@@ -1,9 +1,9 @@
 #summary A quick guide on how to use !JmxLogger
 #labels Featured
 
-= Using JmxLogger =
+= Using !JmxLogger =
 
-JmxLogger is easy to integrate with your new or existing application.  You simply configure JmxLogger in your logging infrastructure using Log4J or Java Util Logging (JUL).  JmxLogger supports both of those frameworks and aautomatically captures and braodcasts your event logs to any registered JMX client.
+!JmxLogger is easy to integrate with your new or existing application.  You simply configure JmxLogger in your logging infrastructure using Log4J or Java Util Logging (JUL).  JmxLogger supports both of those frameworks and aautomatically captures and braodcasts your event logs to any registered JMX client.
 
 == !JmxLogger Dependencies ==
 !JmxLogger has a small footprint
