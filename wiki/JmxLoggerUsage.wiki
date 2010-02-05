@@ -157,4 +157,4 @@ http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-login.png
 == Using Filter Expressions ==
 JmxLogger lets you specify an expression used to further filter logs as they are gathered from the running application.  Filters are expressed in the MVEL lightweight expression language [http://mvel.codehaus.org/ (see MVEL for detail)].  Each log message logged by the application causes the filter to be evaluated.  If the expression returns true, the message is logged otherwise, JmxLogger will ignore the log.
 
-See [UsingFilterExpression Using Filter Expression] for more detail.
+See [UsingFilterExpressions Using Filter Expressions] for more detail.
