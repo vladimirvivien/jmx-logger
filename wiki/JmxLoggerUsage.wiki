@@ -126,7 +126,11 @@ NOTE `-Dcom.sun.management.jmxremote` is only required if the process is running
 
 For more on how to use JMX remote connectivity see - [http://java.sun.com/j2se/1.5.0/docs/guide/management/agent.html]
 
-
 == Running the JmxLogger Console ==
+JmxLogger comes with its own Swing-based console.  The console is a JMX client that allows users to remotely connect and view logs collected by the configured JmxLogger agent (running as Log4J appender or JUL handler).  To launch the console, do:
+{{{
+java -cp mvel2-mvel2-2.0.14.jar:jmxlogger-0.3.0.jar jmxlogger.tools.console.Main
+}}}
+The console's main class is located in `jmxlogger.tools.console.Main`.  Adjust the classpath accordingly.
 
 == Filter Expressions with MVEL ==
