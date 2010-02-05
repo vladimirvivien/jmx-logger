@@ -1,4 +1,5 @@
 #summary Configuring JBoss Logging for JmxLogger
+#labels Featured
 
 = Configuring JBoss with JmxLogger =
 You can configure JBoss for remote log monitoring using the JmxLogger Log4J appender.  
