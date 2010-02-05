@@ -1,2 +1,3 @@
   * [JmxLoggerUsage Using JmxLogger]
-  * [JmxLoggerAndJBoss Configuring JBoss for JmxLogger]
+  * [JmxLoggerAndJBoss Configuring JBoss with JmxLogger]
+  * [JmxLoggerAndGlassFish Configuring GlassFish with JmxLogger]
