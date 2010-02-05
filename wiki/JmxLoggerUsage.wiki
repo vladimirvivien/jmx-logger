@@ -163,7 +163,7 @@ exceptionName contains "JDBCException"
 }}}
 
 === Context Variables/Parameters ===
-*Logging Variables*
+*Logging Context Variables*
   * `source` - the logging framework's source of the the log.  In this case it is the JmxLogger appender (log4j) or handler (JUL) class.
   * `loggerName` - the name of the class that generated the log.
   * `logLevel` - the level of the log message (i.e 'INFO','WARNING', etc)
@@ -175,9 +175,25 @@ exceptionName contains "JDBCException"
   * `formattedMessage` - the log message with its format rules applied.
   * `rawMessage` - the unformatted version of the log message.
   * `exceptionName` - the name of an attached throwable if any.
-*logStats Variables* - these are stats collected with each log message generated
-  * `logStats.totalLogAttempted` - 
-  * `logStats.totalLogCounted` -
-  * `logStats.startTime` - when JmxLogger started
-  * `logStats.`
-logStats={totalLogAttempted=254, INFO=84, totalLogCounted=236, demo.agent.LoggingUtilAgent=236, SEVERE=68, WARNING=84, startTime=1265331886092}
+*logStats Context Variables* - these are stats collected with each log message generated
+  * `logStats.totalLogAttempted` - total number of attempt logs
+  * `logStats.totalLogCounted` - total number of actual logs (filtered)
+  * `logStats.startTime` - the time since JmxLogger started
+  * `logStats.{LEVEL}` - number of logs for given log level where {LEVEL} can be INFO, DEBUG, WARN, WARNING, FINE, SEVERE, etc.
+  * `logStats.{LOGGER_NAME}` - number of logs for given logger where {LOGGER_NAME} is the class generating the log.
+*systemStats Context Variables* - these are stats collected about the running system.
+  *`systemStats.startTime` - time when entire system started
+  *`systemStats.uptime` - number of elapsed millis since system started
+  *`systemStats.threadCount` - number of threads running
+  *`systemStats.peakThreadCount` - peaked thread count
+  *`systemStats.deamonThreadCount` - number of deamon threads
+  *`systemStats.heapMemInit` - initialized amount of heap memory
+  *`systemStats.heapMemUsed` - heap memory used
+  *`systemStats.heapMemMax` - maximum heap memory
+  *`systemStats.heapMemCommitted` - current heap memory committed
+  *`systemStats.nonHeapMemInit` - initialized amount of non-heap memory
+  *`systemStats.nonHeapMemUsed` - non-heap memory used
+  *`systemStats.nonHeapMemMax` - maximum amount of non-heap mem available
+  *`systemStats.heapMemCommitted` - current non-heap memory committed
+  *`systemStats.loadedClassCount` - number of classes loaded
+  *`systemStats.unloadedClassCount` - number of unloaded classes
