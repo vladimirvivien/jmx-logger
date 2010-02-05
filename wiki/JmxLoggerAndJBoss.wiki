@@ -1,14 +1,13 @@
 #summary Configuring JBoss Logging for JmxLogger
 
 = Configuring JBoss with JmxLogger =
-You can configure JmxLogger to work with the JBoss's Log4J for remote log monitoring.  
+You can configure JBoss for remote log monitoring using the JmxLogger Log4J appender.  
 
 
 == 1. Configure JBoss Start Options ==
   * Shutdown JBoss first
 
-  * Change JBoss startup option
-Update {JBOSS_HOME}/bin/run.conf - change the JBoss startup option to enable JMX remote accessibility.
+  * Change JBoss startup option - update {JBOSS_HOME}/bin/run.conf - change the JBoss startup option to enable JMX remote accessibility.
 {{{
 # Enable the jconsole agent
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote"
@@ -23,7 +22,7 @@ JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.ssl=false"
 }}}
 In this example, we turned off authentication.  However, in a production env, you would need to setup proper JMX secured access either with password files or SSL.
 
-  * Update Log4J file jboss-log4j.xml
+== 2. Update Log4J file jboss-log4j.xml ==
 Locate configuration file {JBOSS_HOME}/{JBOSS_INSTANCE}/conf/jboss-log4j.xml to add the JmxLogger appender.
 {{{
 <log4j:configuration ... />
@@ -44,10 +43,12 @@ Locate configuration file {JBOSS_HOME}/{JBOSS_INSTANCE}/conf/jboss-log4j.xml to 
 </log4j:configuration>
 }}}
 
+== 3. Add Jars ==
   * Update jars - add jmxlogger-log4j-0.3.0.jar and mvel2-2.0.14.jar to {JBOSS_HOME}/{JBOSS_INSTANCE}/lib. 
 
   * Restart JBoss
 
+== 4. Run JmxLogger Consone ==
 At this point, you can start the JmxLogger console and connect to the JmxLogger instance on the JMX connection port specified.
 
 http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-jboss.png
