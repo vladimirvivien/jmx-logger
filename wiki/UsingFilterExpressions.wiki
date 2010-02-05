@@ -4,16 +4,16 @@
 
 JmxLogger lets you specify an expression used to further filter logs as they are gathered from the running application. Filters are expressed in the [http://mvel.codehaus.org/ MVEL] lightweight expression language. Each log message logged by the application causes the filter to be evaluated. If the expression returns true, the message is logged otherwise, JmxLogger? will ignore the log.
 
+
+== Context Variables/Parameters ==
 The JmxLogger expression context exposes numerous variables and parameters which can be used in the filter expression. For instance, if you only want to see errors with the word JDBCException logged, you would write:
 {{{
 exceptionName contains "JDBCException"
 }}}
-
-== Context Variables/Parameters ==
-JmxLogger exposes a vast array of runtime variables and logging parameters which can be used in your logging filter.  
+ 
 
 === Logging ===
-
+These are log-specific context variables and parameters exposed with each log message.
     * source - the logging framework's source of the the log. In this case it is the JmxLogger? appender (log4j) or handler (JUL) class.
     * loggerName - the name of the class that generated the log.
     * logLevel - the level of the log message (i.e 'INFO','WARNING', etc)
@@ -27,7 +27,7 @@ JmxLogger exposes a vast array of runtime variables and logging parameters which
     * exceptionName - the name of an attached throwable if any. 
 
 === Log Stats ===
-*logStats* context variables - these are stats collected with each log message generated
+The `logStats` context variables are stats collected with each log message generated
 
     * logStats.totalLogAttempted - total number of attempt logs
     * logStats.totalLogCounted - total number of actual logs (filtered)
@@ -35,8 +35,8 @@ JmxLogger exposes a vast array of runtime variables and logging parameters which
     * logStats.{LEVEL} - number of logs for given log level where {LEVEL} can be INFO, DEBUG, WARN, WARNING, FINE, SEVERE, etc.
     * logStats.{LOGGER_NAME} - number of logs for given logger where {LOGGER_NAME} is the class generating the log. 
 
-=== System Stats Context ===
-systemStats context variables are stats collected about the running system.
+=== System Stats ===
+The `systemStats` context variables contain information collected about the running system.
 
     * systemStats.startTime - time when entire system started
     * systemStats.uptime - number of elapsed millis since system started
