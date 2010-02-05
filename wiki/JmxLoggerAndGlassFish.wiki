@@ -16,7 +16,7 @@ jmxlogger.Handler.objectName=jmxlogger:type=LogEmitter
 }}}
 
 == 2. Add Jar Files ==
-  * Add files to GlassFish domain lib directory {GLASSFISH_HOME}/{DOAMAIN_HOME}/lib/ext
+  * Add files to GlassFish domain lib directory {GLASSFISH_HOME}/{DOMAIN_HOME}/lib/ext
     * jmxlogger-log4j-0.3.0.jar 
     * mvel2-2.0.14.jar 
 
