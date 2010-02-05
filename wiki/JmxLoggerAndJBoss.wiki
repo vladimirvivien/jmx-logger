@@ -1,0 +1,54 @@
+#summary Configuring JBoss Logging with JmxLogger
+
+= JBoss Logging and JmxLogger =
+You can configure JmxLogger to work with the JBoss's Log4J for remote log monitoring.  
+
+
+== 1. Configure JBoss Start Options ==
+  * Shutdown JBoss first
+
+  * Change JBoss startup option
+Update {JBOSS_HOME}/bin/run.conf - change the JBoss startup option to enable JMX remote accessibility.
+{{{
+# Enable the jconsole agent
+JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote"
+
+# Force JBoss to use the platform MBean server
+#JAVA_OPTS="$JAVA_OPTS -Djboss.platform.mbeanserver"
+
+# Enable remote connectivity on port 7070
+JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.port=7070"
+JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.authenticate=false"
+JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.ssl=false"
+}}}
+In this example, we turned off authentication.  However, in a production env, you would need to setup proper JMX secured access either with password files or SSL.
+
+  * Update Log4J file jboss-log4j.xml
+Locate configuration file {JBOSS_HOME}/{JBOSS_INSTANCE}/conf/jboss-log4j.xml to add the JmxLogger appender.
+{{{
+<log4j:configuration ... />
+<appender name="jmxlogger" class="jmxlogger.integration.log4j.JmxLogAppender">
+    <param name="Threshold" value="INFO"/>
+    <param name="ObjectName" value="jmxlogger:type=LogEmitter"/>
+    <param name="MBeanServer" value="platform"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+    </layout>
+  </appender>
+...
+   <root>
+      <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="FILE"/>
+      <appender-ref ref="jmxlogger"/>    
+   </root>
+</log4j:configuration>
+}}}
+
+  * Update jars - add jmxlogger-log4j-0.3.0.jar and mvel2-2.0.14.jar to {JBOSS_HOME}/{JBOSS_INSTANCE}/lib. 
+
+  * Restart JBoss
+
+At this point, you can start the JmxLogger console and connect to the JmxLogger instance on the JMX connection port specified.
+
+http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-jboss.png
+
