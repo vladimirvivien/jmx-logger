@@ -1,4 +1,4 @@
-#summary A quick guide on how to use !JmxLogger
+#summary A quick guide on how to use JmxLogger
 #labels Featured
 
 = Using !JmxLogger =
