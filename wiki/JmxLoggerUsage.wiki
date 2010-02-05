@@ -137,7 +137,9 @@ http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-start.png
 
 === Console Toolbar ===
 The console provide a toolbar with several buttons to operate it
+
 http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-buttons.png
+
 From right to left
   * Connect - opens the connection dialog
   * Disconnect - ends current connection to remote 
