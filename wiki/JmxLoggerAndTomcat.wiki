@@ -1,0 +1,30 @@
+#summary Configuring Apache Tomcat to work with JmxLogger
+
+= Configuring Apache Tomcat with JmxLogger =
+
+You can configure Apache Tomcat for remote realtime log monitoring using JmxLogger.
+
+== 1. Configure Startup Options ==
+  * Stop server
+  * Change start up options - update file {TOMCAT_HOME}/bin/catalina.sh  - change the JBoss startup option to enable JMX remote accessibility.
+  * The following connects without authentication
+{{{
+set CATALINA_OPTS="-Dcom.sun.management.jmxremote \
+    -Dcom.sun.management.jmxremote.port=7070 \
+    -Dcom.sun.management.jmxremote.ssl=false \
+    -Dcom.sun.management.jmxremote.authenticate=false"
+    
+}}}
+
+  *  If you want to support secured connection you can add
+{{{
+    -Dcom.sun.management.jmxremote.authenticate=true \
+    -Dcom.sun.management.jmxremote.password.file=../conf/jmxremote.password \
+    -Dcom.sun.management.jmxremote.access.file=../conf/jmxremote.access \  
+}}}
+Where jmxremote.password and jmxremote.access are JMX-specific credential files.  For more info, see [http://tomcat.apache.org/tomcat-6.0-doc/monitoring.html Tomcat Monitoring].
+
+== 2. Configure Logging ==
+In Tomcat, you can configure both system-wide logging or war-specific logging using either Log4J or Java Util Logging.
+==== Configure Log4J ====
+  * For Tomcat system logging, 
