@@ -154,6 +154,15 @@ http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-login.png
   * Username / Password - provide user credential to connect to the JmxLogger if authentication was enabled in the command line that started the remote process.  If authentication is set to false, then these values can be left blank.
   * MBean - this is the ObjectName value that was setup for the JmxLogger during logging configuration.  The name is case-sensitive and must match exactly with the configured value.
 
+== Using Filter Expressions ==
+JmxLogger lets you specify an expression used to further filter logs as they are gathered from the running application.  Filters are expressed in the MVEL lightweight expression language [http://mvel.codehaus.org/ (see MVEL for detail)].  Each log message logged by the application causes the filter to be evaluated.  If the expression returns true, the message is logged otherwise, JmxLogger will ignore the log.
 
+The JmxLogger expression context exposes numerous variables and parameters which can be used in the filter expression.  For instance, if you only want to see errors with the word JDBCException logged, you would write:
+{{{
+exceptionName contains "JDBCException"
+}}}
 
-== Filter Expressions with MVEL ==
+=== Context Variables/Parameters ===
+  * `source` - the logging framework's source of the the log.  In this case it is the JmxLogger appender (log4j) or handler (JUL) class.
+  * `loggerName` - the name of the class that generated the log.
+  * 
