@@ -1,4 +1,5 @@
 #summary Configuring Apache Tomcat to work with JmxLogger
+#labels Featured
 
 = Configuring Apache Tomcat with JmxLogger =
 
