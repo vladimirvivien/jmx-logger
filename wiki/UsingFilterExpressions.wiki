@@ -2,15 +2,17 @@
 
 =Using Filter Expressions=
 
-JmxLogger? lets you specify an expression used to further filter logs as they are gathered from the running application. Filters are expressed in the MVEL lightweight expression language (see MVEL for detail). Each log message logged by the application causes the filter to be evaluated. If the expression returns true, the message is logged otherwise, JmxLogger? will ignore the log.
+JmxLogger lets you specify an expression used to further filter logs as they are gathered from the running application. Filters are expressed in the [http://mvel.codehaus.org/ MVEL] lightweight expression language. Each log message logged by the application causes the filter to be evaluated. If the expression returns true, the message is logged otherwise, JmxLogger? will ignore the log.
 
-The JmxLogger? expression context exposes numerous variables and parameters which can be used in the filter expression. For instance, if you only want to see errors with the word JDBCException logged, you would write:
-
+The JmxLogger expression context exposes numerous variables and parameters which can be used in the filter expression. For instance, if you only want to see errors with the word JDBCException logged, you would write:
+{{{
 exceptionName contains "JDBCException"
+}}}
 
-Context Variables/Parameters
+== Context Variables/Parameters ==
+JmxLogger exposes a vast array of runtime variables and logging parameters which can be used in your logging filter.  
 
-Logging Context Variables
+=== Logging ===
 
     * source - the logging framework's source of the the log. In this case it is the JmxLogger? appender (log4j) or handler (JUL) class.
     * loggerName - the name of the class that generated the log.
@@ -24,7 +26,8 @@ Logging Context Variables
     * rawMessage - the unformatted version of the log message.
     * exceptionName - the name of an attached throwable if any. 
 
-logStats Context Variables - these are stats collected with each log message generated
+=== Log Stats ===
+*logStats* context variables - these are stats collected with each log message generated
 
     * logStats.totalLogAttempted - total number of attempt logs
     * logStats.totalLogCounted - total number of actual logs (filtered)
@@ -32,7 +35,8 @@ logStats Context Variables - these are stats collected with each log message gen
     * logStats.{LEVEL} - number of logs for given log level where {LEVEL} can be INFO, DEBUG, WARN, WARNING, FINE, SEVERE, etc.
     * logStats.{LOGGER_NAME} - number of logs for given logger where {LOGGER_NAME} is the class generating the log. 
 
-systemStats Context Variables - these are stats collected about the running system.
+=== System Stats Context ===
+systemStats context variables are stats collected about the running system.
 
     * systemStats.startTime - time when entire system started
     * systemStats.uptime - number of elapsed millis since system started
