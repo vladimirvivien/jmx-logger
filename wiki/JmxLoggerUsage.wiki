@@ -165,4 +165,11 @@ exceptionName contains "JDBCException"
 === Context Variables/Parameters ===
   * `source` - the logging framework's source of the the log.  In this case it is the JmxLogger appender (log4j) or handler (JUL) class.
   * `loggerName` - the name of the class that generated the log.
-  * 
+  * `logLevel` - the level of the log message (i.e 'INFO','WARNING', etc)
+  * `sourceClassName` - the name of the class that reported the log.  Almost always the same as loggerName.
+  * `sourceMethodName` - the name of the method that generated the log.
+  * `sequenceNumber` - an incremental number for each log.
+  * `timestamp` - a time value associated with each log message.
+  * `formattedMessage` - the log message with its format rules applied.
+  * `rawMessage` - the unformatted version of the log message.
+  * ``
