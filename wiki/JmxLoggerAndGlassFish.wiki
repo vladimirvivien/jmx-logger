@@ -1,4 +1,5 @@
 #summary Configuring GlassFish Logging to Work with JmxLogger
+#labels Featured
 
 = Configuring GlassFish with JmxLogger =
 
