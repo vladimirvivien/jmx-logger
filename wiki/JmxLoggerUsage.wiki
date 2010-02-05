@@ -135,6 +135,23 @@ The console's main class is located in `jmxlogger.tools.console.Main`.  Adjust t
  
 http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-start.png
 
+=== Console Toolbar ===
+The console provide a toolbar with several buttons to operate it
+http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-buttons.png
+From right to left
+  * Connect - opens the connection dialog
+  * Disconnect - ends current connection to remote 
+  * Resume - resumes the logging from remote JmxLogger
+  * Pause - pauses logging from remote JmxLogger
+  * Refresh - refreshes the screen with settings from JmxLogger
+
+=== Connecting to a JmxLogger Agent ===
+After you have started your process with JMX remote connectivity enabled, you can connect to it from the console.  Click on the Connect button which will reveal the connection dialog:
+http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-login.png
+  * Address - this is the hostname and port number of the process running with JMX connectivity activated.  The port number must match that setup on your command line that started the process.
+  * Username / Password - provide user credential to connect to the JmxLogger if authentication was enabled in the command line that started the remote process.  If authentication is set to false, then these values can be left blank.
+  * MBean - this is the ObjectName value that was setup for the JmxLogger during logging configuration.  The name is case-sensitive and must match exactly with the configured value.
+
 
 
 == Filter Expressions with MVEL ==
