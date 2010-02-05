@@ -1,6 +1,6 @@
-#summary Configuring JBoss Logging with JmxLogger
+#summary Configuring JBoss Logging for JmxLogger
 
-= JBoss Logging and JmxLogger =
+= Configuring JBoss with JmxLogger =
 You can configure JmxLogger to work with the JBoss's Log4J for remote log monitoring.  
 
 
@@ -51,4 +51,3 @@ Locate configuration file {JBOSS_HOME}/{JBOSS_INSTANCE}/conf/jboss-log4j.xml to 
 At this point, you can start the JmxLogger console and connect to the JmxLogger instance on the JMX connection port specified.
 
 http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-jboss.png
-
