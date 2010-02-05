@@ -53,5 +53,5 @@ systemStats Context Variables - these are stats collected about the running syst
 ==== Example ====
 So, if you want to see logs only errors when ERROR log level is more than 5, you would write:
 {{{
-logStats["ERROR"] > 5 and logLevel = "ERROR"
+logStats["ERROR"] > 5 and logLevel == "ERROR"
 }}}
