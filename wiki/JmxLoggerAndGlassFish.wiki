@@ -25,7 +25,9 @@ jmxlogger.Handler.objectName=jmxlogger:type=LogEmitter
   * In screen Configuration > Logger Settings > Log Levels, ensure that you see the jmxlogger entry as shown beow.  You can override the level there if desired.
   http://jmx-logger.s3.amazonaws.com/glassfish.admin.loglevel.png
 
-  * In screen Configuration > Admin Service > JMX Connector, configure the JMX connector and specify port you want to use JMX client connections.  You will use that port to connect from JmxLogger console.  If you enable security and SSL, you must start the JmxLogger console with the appropriate parameters to connect.
+  * JMX Connectivity - in screen Configuration > Admin Service > JMX Connector, configure the JMX connector and specify port you want to use JMX client connections.  You will use that port to connect from JmxLogger console.  
+    * If you enable secure connection, you have to use the GlassFish Admin credentials when connecting via JMX.
+    * If you enable SSL, you must start the JmxLogger console with the appropriate parameters to connect.
 
   * Start Domain Server
 
