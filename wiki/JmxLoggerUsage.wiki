@@ -182,18 +182,18 @@ exceptionName contains "JDBCException"
   * `logStats.{LEVEL}` - number of logs for given log level where {LEVEL} can be INFO, DEBUG, WARN, WARNING, FINE, SEVERE, etc.
   * `logStats.{LOGGER_NAME}` - number of logs for given logger where {LOGGER_NAME} is the class generating the log.
 *systemStats Context Variables* - these are stats collected about the running system.
-  *`systemStats.startTime` - time when entire system started
-  *`systemStats.uptime` - number of elapsed millis since system started
-  *`systemStats.threadCount` - number of threads running
-  *`systemStats.peakThreadCount` - peaked thread count
-  *`systemStats.deamonThreadCount` - number of deamon threads
-  *`systemStats.heapMemInit` - initialized amount of heap memory
-  *`systemStats.heapMemUsed` - heap memory used
-  *`systemStats.heapMemMax` - maximum heap memory
-  *`systemStats.heapMemCommitted` - current heap memory committed
-  *`systemStats.nonHeapMemInit` - initialized amount of non-heap memory
-  *`systemStats.nonHeapMemUsed` - non-heap memory used
-  *`systemStats.nonHeapMemMax` - maximum amount of non-heap mem available
-  *`systemStats.heapMemCommitted` - current non-heap memory committed
-  *`systemStats.loadedClassCount` - number of classes loaded
-  *`systemStats.unloadedClassCount` - number of unloaded classes
+  * `systemStats.startTime` - time when entire system started
+  * `systemStats.uptime` - number of elapsed millis since system started
+  * `systemStats.threadCount` - number of threads running
+  * `systemStats.peakThreadCount` - peaked thread count
+  * `systemStats.deamonThreadCount` - number of deamon threads
+  * `systemStats.heapMemInit` - initialized amount of heap memory
+  * `systemStats.heapMemUsed` - heap memory used
+  * `systemStats.heapMemMax` - maximum heap memory
+  * `systemStats.heapMemCommitted` - current heap memory committed
+  * `systemStats.nonHeapMemInit` - initialized amount of non-heap memory
+  * `systemStats.nonHeapMemUsed` - non-heap memory used
+  * `systemStats.nonHeapMemMax` - maximum amount of non-heap mem available
+  * `systemStats.heapMemCommitted` - current non-heap memory committed
+  * `systemStats.loadedClassCount` - number of classes loaded
+  * `systemStats.unloadedClassCount` - number of unloaded classes
