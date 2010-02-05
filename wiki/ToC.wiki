@@ -1,4 +1,5 @@
   * [JmxLoggerUsage Using JmxLogger]
   * [JmxLoggerAndJBoss Configuring JBoss with JmxLogger]
   * [JmxLoggerAndGlassFish Configuring GlassFish with JmxLogger]
+  * [JmxLoggerAndTomcat Configuring Tomcat with JmxLogger]
   * [UsingFilterExpressions Using Filter Expressions]
