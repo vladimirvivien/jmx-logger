@@ -1,2 +1,2 @@
   * [JmxLoggerUsage Using JmxLogger]
-  * [JmxLoggerAndJBoss Configuring JmxLogger for JBoss]
+  * [JmxLoggerAndJBoss Configuring JBoss for JmxLogger]
