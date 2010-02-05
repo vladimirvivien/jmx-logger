@@ -131,6 +131,7 @@ JmxLogger comes with its own Swing-based console.  The console is a JMX client t
 {{{
 java -cp mvel2-mvel2-2.0.14.jar:jmxlogger-0.3.0.jar jmxlogger.tools.console.Main
 }}}
-The console's main class is located in `jmxlogger.tools.console.Main`.  Adjust the classpath accordingly.
+The console's main class is located in `jmxlogger.tools.console.Main`.  Adjust the classpath accordingly.  When the logger starts, you will see 
+http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console.png
 
 == Filter Expressions with MVEL ==
