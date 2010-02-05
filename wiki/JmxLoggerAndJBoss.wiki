@@ -49,7 +49,12 @@ Locate configuration file {JBOSS_HOME}/{JBOSS_INSTANCE}/conf/jboss-log4j.xml to 
 
   * Restart JBoss
 
-== 4. Run JmxLogger Consone ==
-At this point, you can start the JmxLogger console and connect to the JmxLogger instance on the JMX connection port specified.
+== 4. Run JmxLogger Console ==
+* At this point, you can start the JmxLogger console and connect to the JmxLogger instance on the JMX connection port specified.
+{{{
+java -cp lib/*:jmxlogger-0.3.0.jar jmxlogger.tools.console.Main (*nix)
+java -cp lib/*;jmxlogger-0.3.0.jar jmxlogger.tools.console.Main (Windows)
+}}}
+Adjust classpath for your use.
 
 http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-jboss.png
