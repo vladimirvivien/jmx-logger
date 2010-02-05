@@ -136,7 +136,7 @@ The console's main class is located in `jmxlogger.tools.console.Main`.  Adjust t
 http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-start.png
 
 === Console Toolbar ===
-The console provide a toolbar with several buttons to operate it
+The console provides a toolbar with several buttons to operate it
 
 http://jmx-logger.s3.amazonaws.com/jmxlogger.tools.console-buttons.png
 
