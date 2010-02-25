@@ -108,7 +108,7 @@ This command (wrapped for readability), starts MyProcess and enables JMX remote 
 {{{
 java -cp your:class:path \
     -Dcom.sun.management.jmxremote.port=7070 \
-    -Dcom.sun.management.jmxremote.authenticate=false
+    -Dcom.sun.management.jmxremote.authenticate=true
     -Dcom.sun.management.jmxremote.ssl=false \
     -Dcom.sun.management.jmxremote.access.file=../access.properties \
     -Dcom.sun.management.jmxremote.password.file=../password.properties 
