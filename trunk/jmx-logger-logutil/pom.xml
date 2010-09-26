@@ -5,11 +5,11 @@
   <parent>
     <artifactId>jmx-logger</artifactId>
     <groupId>jmxlogger</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.3.1</version>
   </parent>
   <groupId>jmxlogger</groupId>
   <artifactId>jmx-logger-logutil</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.3.1</version>
   <name>jmx-logger-logutil</name>
   <url>http://maven.apache.org</url>
     <build>
